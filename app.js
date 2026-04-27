@@ -1,13 +1,11 @@
 let workouts = JSON.parse(localStorage.getItem("hiitWorkouts") || "[]");
 
+// ===== STATE =====
+let cfg, exercises;
 let selected = null;
 let editingIndex = null;
 
-// ===== TIMER STATE =====
-let cfg;
-let exercises = [];
 let state = "idle";
-
 let idx = 0;
 let round = 1;
 
@@ -25,7 +23,7 @@ function speak(text){
 }
 
 // ===== NAV =====
-function go(page){
+function show(page){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(page).classList.add("active");
 
@@ -33,16 +31,69 @@ function go(page){
   if(page==="edit") renderManage();
 }
 
+// ===== INIT =====
+document.addEventListener("DOMContentLoaded", ()=>{
+  bindUI();
+  show("home");
+});
+
+// ===== BIND UI (核心修复点) =====
+function bindUI(){
+
+  // home
+  document.getElementById("btnChoose")
+    .addEventListener("click", ()=>show("select"));
+
+  document.getElementById("btnEdit")
+    .addEventListener("click", ()=>show("edit"));
+
+  // back
+  document.getElementById("btnBackHome1")
+    .addEventListener("click", ()=>show("home"));
+
+  document.getElementById("btnBackHome2")
+    .addEventListener("click", ()=>show("home"));
+
+  // edit
+  document.getElementById("btnNew")
+    .addEventListener("click", newWorkout);
+
+  document.getElementById("btnAddEx")
+    .addEventListener("click", ()=>addExercise());
+
+  document.getElementById("btnSave")
+    .addEventListener("click", save);
+
+  // select
+  document.getElementById("btnStart")
+    .addEventListener("click", startSelected);
+
+  // run controls
+  document.getElementById("btnPause")
+    .addEventListener("click", pause);
+
+  document.getElementById("btnSkip")
+    .addEventListener("click", skip);
+
+  document.getElementById("btnRestart")
+    .addEventListener("click", restartMove);
+}
+
 // ===== LIST =====
 function renderSelect(){
-  const list = document.getElementById("workoutList");
+  const list=document.getElementById("workoutList");
   list.innerHTML="";
 
   workouts.forEach((w,i)=>{
     const div=document.createElement("div");
     div.className="card";
     div.innerText=w.name;
-    div.onclick=()=> selected=i;
+
+    div.addEventListener("click", ()=>{
+      selected=i;
+      div.style.border="2px solid #007aff";
+    });
+
     list.appendChild(div);
   });
 }
@@ -54,39 +105,45 @@ function renderManage(){
   workouts.forEach((w,i)=>{
     const div=document.createElement("div");
     div.className="card";
+
     div.innerHTML=`
       <b>${w.name}</b><br>
-      <button onclick="edit(${i})">Edit</button>
-      <button onclick="del(${i})">Delete</button>
+      <button data-edit="${i}">Edit</button>
+      <button data-del="${i}">Delete</button>
     `;
+
+    div.querySelector("[data-del]").addEventListener("click",()=>{
+      workouts.splice(i,1);
+      saveLS();
+      renderManage();
+    });
+
+    div.querySelector("[data-edit]").addEventListener("click",()=>{
+      edit(i);
+    });
+
     list.appendChild(div);
   });
-}
-
-function del(i){
-  workouts.splice(i,1);
-  saveLS();
-  renderManage();
 }
 
 // ===== FORM =====
 function newWorkout(){
   editingIndex=null;
   clearForm();
-  go("form");
+  show("form");
 }
 
 function edit(i){
   editingIndex=i;
   loadForm(workouts[i]);
-  go("form");
+  show("form");
 }
 
 function addExercise(val=""){
   const div=document.createElement("div");
   div.className="exercise";
   div.innerHTML=`
-    <input value="${val}" placeholder="Exercise name">
+    <input placeholder="Exercise" value="${val}">
     <button onclick="this.parentElement.remove()">x</button>
   `;
   exerciseList.appendChild(div);
@@ -125,44 +182,35 @@ function save(){
     exercises:ex
   };
 
-  if(editingIndex!==null){
-    workouts[editingIndex]=w;
-  }else{
-    workouts.push(w);
-  }
+  if(editingIndex!==null) workouts[editingIndex]=w;
+  else workouts.push(w);
 
   saveLS();
-  go("edit");
+  show("edit");
 }
 
 function saveLS(){
   localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
 }
 
-// ===== START =====
+// ===== TIMER ENGINE =====
 function startSelected(){
-  if(selected==null) return alert("Select workout");
-
-  cfg = workouts[selected];
-  exercises = cfg.exercises;
+  cfg=workouts[selected];
+  exercises=cfg.exercises;
 
   idx=0;
   round=1;
   elapsed=0;
 
-  totalTime =
-    cfg.warmup +
-    cfg.cooldown +
-    cfg.rounds * exercises.length * (cfg.work + cfg.rest) +
-    (cfg.rounds-1)*cfg.water;
+  totalTime=cfg.warmup+cfg.cooldown+
+    cfg.rounds*exercises.length*(cfg.work+cfg.rest);
 
-  go("run");
+  show("run");
 
   setState("warmup", cfg.warmup, "Warm up");
 }
 
-// ===== STATE ENGINE =====
-function setState(s, dur, label){
+function setState(s,dur,label){
   state=s;
   duration=dur;
   t=dur;
@@ -182,9 +230,7 @@ function run(){
 
     updateUI();
 
-    if(t<=0){
-      next();
-    }
+    if(t<=0) next();
   },1000);
 }
 
@@ -200,9 +246,7 @@ function next(){
 
     case "work":
       setState("rest", cfg.rest, "Rest");
-
-      let nextEx = exercises[idx+1] || exercises[0];
-      speak("Next: " + nextEx);
+      speak("Next: " + (exercises[idx+1]||exercises[0]));
       break;
 
     case "rest":
@@ -214,17 +258,10 @@ function next(){
 
         if(round>cfg.rounds){
           setState("cooldown", cfg.cooldown, "Cool down");
-        }else{
-          setState("water", cfg.water, "Water break");
         }
-
       }else{
         setState("work", cfg.work, exercises[idx]);
       }
-      break;
-
-    case "water":
-      setState("work", cfg.work, exercises[idx]);
       break;
 
     case "cooldown":
@@ -235,34 +272,29 @@ function next(){
 }
 
 // ===== CONTROLS =====
-function pause(){
-  clearInterval(timer);
-}
-
-function skip(){
-  next();
-}
-
-function restartMove(){
-  setState(state, duration, "Restart");
-}
+function pause(){ clearInterval(timer); }
+function skip(){ next(); }
+function restartMove(){ setState(state,duration,"Restart"); }
 
 // ===== UI =====
 function updateUI(){
   timerEl.innerText=t;
   phase.innerText=state.toUpperCase();
-
-  current.innerText=exercises[idx] || "";
-
-  nextEl.innerText="Next: " + (exercises[idx+1]||exercises[0]);
-
+  current.innerText=exercises[idx]||"";
+  next.innerText="Next: "+(exercises[idx+1]||exercises[0]);
   meta.innerText=`Round ${round}/${cfg.rounds}`;
 
-  const percent = t/duration;
-  progressCircle.style.strokeDashoffset = 565*(1-percent);
+  const percent=t/duration;
+  progressCircle.style.strokeDashoffset=565*(1-percent);
 
-  totalProgress.style.width = (elapsed/totalTime*100)+"%";
+  totalProgress.style.width=(elapsed/totalTime*100)+"%";
 }
 
-// ===== INIT =====
-renderSelect();
+// DOM refs
+const timerEl=document.getElementById("timer");
+const phase=document.getElementById("phase");
+const current=document.getElementById("current");
+const next=document.getElementById("next");
+const meta=document.getElementById("meta");
+const progressCircle=document.getElementById("progressCircle");
+const totalProgress=document.getElementById("totalProgress");
