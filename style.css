@@ -1,0 +1,40 @@
+body {
+  font-family: -apple-system;
+  text-align: center;
+  background: #111;
+  color: white;
+}
+
+textarea {
+  width: 90%;
+  height: 100px;
+}
+
+input {
+  margin: 5px;
+  padding: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+}
+
+#timer {
+  font-size: 70px;
+  margin: 20px;
+}
+
+#phase {
+  font-size: 24px;
+}
+
+#current {
+  font-size: 20px;
+  color: #aaa;
+}
