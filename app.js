@@ -37,16 +37,14 @@ speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 // =========================
 // INIT
 // =========================
-// BUG FIX: script is at bottom of <body> so DOM is already ready;
-// DOMContentLoaded fires before the script runs — call init() directly.
 function init(){
 workouts = JSON.parse(localStorage.getItem(“hiitWorkouts”) || “[]”);
 bindStaticUI();
 show(“home”);
-console.log(“HIIT READY ✔”);
+console.log(“HIIT READY”);
 }
 
-init(); // was: document.addEventListener(“DOMContentLoaded”, init)
+init();
 
 // =========================
 // NAV
@@ -58,48 +56,33 @@ p.classList.remove(“active”);
 const target = $(page);
 if(target) target.classList.add(“active”);
 if(page === “select”) renderSelect();
-if(page === “edit”) renderManage();
+if(page === “edit”)   renderManage();
 }
 
 // =========================
 // STATIC BUTTONS
 // =========================
 function bindStaticUI(){
-const btnChoose = $(“btnChoose”);
-if(btnChoose) btnChoose.onclick = () => show(“select”);
+$(“btnChoose”).onclick    = () => show(“select”);
+$(“btnEdit”).onclick      = () => show(“edit”);
+$(“btnBackHome1”).onclick = () => show(“home”);
+$(“btnBackHome2”).onclick = () => show(“home”);
+$(“btnStart”).onclick     = startSelected;
+$(“btnNew”).onclick       = newWorkout;
+$(“btnAddEx”).onclick     = addExercise;
+$(“btnSave”).onclick      = save;
+$(“btnPause”).onclick     = togglePause;
+$(“btnSkip”).onclick      = skip;
+$(“btnRestart”).onclick   = restartMove;
+$(“btnHome”).onclick      = goHome;
+$(“btnEndEarly”).onclick  = goHome;
+}
 
-```
-const btnEdit = $("btnEdit");
-if(btnEdit) btnEdit.onclick = () => show("edit");
-
-const btnBack1 = $("btnBackHome1");
-if(btnBack1) btnBack1.onclick = () => show("home");
-
-const btnBack2 = $("btnBackHome2");
-if(btnBack2) btnBack2.onclick = () => show("home");
-
-const btnStart = $("btnStart");
-if(btnStart) btnStart.onclick = startSelected;
-
-const btnNew = $("btnNew");
-if(btnNew) btnNew.onclick = newWorkout;
-
-const btnAdd = $("btnAddEx");
-if(btnAdd) btnAdd.onclick = addExercise;
-
-const btnSave = $("btnSave");
-if(btnSave) btnSave.onclick = save;
-
-const btnPause = $("btnPause");
-if(btnPause) btnPause.onclick = togglePause;
-
-const btnSkip = $("btnSkip");
-if(btnSkip) btnSkip.onclick = skip;
-
-const btnRestart = $("btnRestart");
-if(btnRestart) btnRestart.onclick = restartMove;
-```
-
+function goHome(){
+clearInterval(timer);
+state = “idle”;
+paused = false;
+show(“home”);
 }
 
 // =========================
@@ -139,7 +122,7 @@ workouts.splice(i, 1);
 saveLS();
 renderManage();
 };
-div.querySelector(”.edit”).onclick = () => { edit(i); };
+div.querySelector(”.edit”).onclick = () => edit(i);
 });
 }
 
@@ -158,12 +141,13 @@ loadForm(workouts[i]);
 show(“form”);
 }
 
-function addExercise(val=””){
+function addExercise(val){
 const list = $(“exerciseList”);
 if(!list) return;
 const div = document.createElement(“div”);
 div.className = “exercise”;
-div.innerHTML = `<input placeholder="Exercise" value="${val}"> <button type="button">x</button>`;
+const safeVal = (typeof val === “string”) ? val : “”;
+div.innerHTML = `<input placeholder="Exercise name" value="${safeVal}"> <button type="button">x</button>`;
 div.querySelector(“button”).onclick = () => div.remove();
 list.appendChild(div);
 }
@@ -193,10 +177,10 @@ function save(){
 const list = $(“exerciseList”);
 if(!list) return;
 const ex = […list.querySelectorAll(“input”)]
-.map(i => i.value)
+.map(i => i.value.trim())
 .filter(Boolean);
 const w = {
-name:     $(“name”)?.value    || “Workout”,
+name:     $(“name”)?.value.trim() || “Workout”,
 work:     +$(“work”)?.value   || 20,
 rest:     +$(“rest”)?.value   || 10,
 rounds:   +$(“rounds”)?.value || 3,
@@ -223,31 +207,45 @@ localStorage.setItem(“hiitWorkouts”, JSON.stringify(workouts));
 // =========================
 function startSelected(){
 if(selected == null || !workouts[selected]){
-alert(“Select workout”);
+alert(“Please select a workout first.”);
 return;
 }
 cfg = workouts[selected];
 exercises = cfg.exercises || [];
 if(exercises.length === 0){
-alert(“No exercises”);
+alert(“This workout has no exercises.”);
 return;
 }
 idx = 0;
 round = 1;
 elapsed = 0;
 paused = false;
+
+```
 totalTime =
-cfg.warmup +
-cfg.cooldown +
-cfg.rounds * exercises.length * (cfg.work + cfg.rest);
-show(“run”);
-setState(“warmup”, cfg.warmup, “Warm up”);
+  cfg.warmup +
+  cfg.cooldown +
+  cfg.rounds * exercises.length * (cfg.work + cfg.rest);
+
+// reset run-page UI state
+$("btnPause").textContent  = "Pause";
+$("btnPause").disabled     = false;
+$("btnSkip").disabled      = false;
+$("btnRestart").disabled   = false;
+$("donePanel").style.display = "none";
+
+show("run");
+setState("warmup", cfg.warmup, "Warm up");
+```
+
 }
 
 function setState(s, dur, label){
-state = s;
+state    = s;
 duration = dur;
-t = dur;
+t        = dur;
+paused   = false;
+$(“btnPause”).textContent = “Pause”;
 speak(label);
 updateUI();
 run();
@@ -259,7 +257,7 @@ timer = setInterval(() => {
 if(state === “idle” || paused) return;
 t–;
 elapsed++;
-if(t <= 5 && t > 0) speak(String(t));
+if(t > 0 && t <= 3) speak(String(t));
 updateUI();
 if(t <= 0) next();
 }, 1000);
@@ -274,7 +272,6 @@ break;
 ```
   case "work":
     setState("rest", cfg.rest, "Rest");
-    speak("Next: " + (exercises[idx + 1] || exercises[0]));
     break;
 
   case "rest":
@@ -291,61 +288,81 @@ break;
     break;
 
   case "cooldown":
-    // BUG FIX: clear the interval so the timer stops completely
     clearInterval(timer);
-    speak("Congratulations");
     state = "idle";
+    showDone();
     break;
 }
 ```
 
 }
 
+function showDone(){
+speak(“Congratulations! Workout complete!”);
+elapsed = totalTime; // snap bar to 100%
+updateUI();
+$(“donePanel”).style.display = “block”;
+$(“btnPause”).disabled   = true;
+$(“btnSkip”).disabled    = true;
+$(“btnRestart”).disabled = true;
+}
+
 // =========================
 // CONTROLS
 // =========================
-// BUG FIX: original pause() only stopped the timer with no way to resume.
-// Now toggles between pause and resume.
 function togglePause(){
+if(state === “idle”) return;
 paused = !paused;
-const btn = $(“btnPause”);
-if(btn) btn.textContent = paused ? “Resume” : “Pause”;
-if(paused){
-speechSynthesis.cancel();
-}
+$(“btnPause”).textContent = paused ? “Resume” : “Pause”;
+if(paused) speechSynthesis.cancel();
 }
 
 function skip(){
+if(state === “idle”) return;
+t = 0;
 next();
 }
 
 function restartMove(){
+if(state === “idle”) return;
 paused = false;
-const btn = $(“btnPause”);
-if(btn) btn.textContent = “Pause”;
-setState(state, duration, “Restart”);
+$(“btnPause”).textContent = “Pause”;
+setState(state, duration, state.toUpperCase());
 }
 
 // =========================
 // UI UPDATE
 // =========================
+const CIRC = 2 * Math.PI * 90; // ≈ 565, matches r=“90” in SVG
+
 function updateUI(){
-const timerEl = $(“timer”);
-if(timerEl) timerEl.textContent = t;
+$(“timer”).textContent = t;
+$(“phase”).textContent = state.toUpperCase();
 
 ```
-const phase = $("phase");
-if(phase) phase.textContent = state.toUpperCase();
+// current exercise (only meaningful during "work")
+$("current").textContent = (state === "work") ? (exercises[idx] || "") : "";
 
-const current = $("current");
-if(current) current.textContent = exercises[idx] || "";
+// next hint
+let nextHint = "";
+if(state === "work" && exercises[idx + 1]) nextHint = "Next: " + exercises[idx + 1];
+if(state === "rest" && exercises[idx])      nextHint = "Next: " + exercises[idx];
+$("next").textContent = nextHint;
 
-const nextEl = $("next");
-if(nextEl) nextEl.textContent = exercises[idx + 1] ? "Next: " + exercises[idx + 1] : "";
+// round counter
+$("meta").textContent = cfg ? `Round ${round} / ${cfg.rounds}` : "";
 
-const meta = $("meta");
-if(meta) meta.textContent = `Round ${round}/${cfg?.rounds || 0}`;
+// SVG arc ring — drains as the phase counts down
+const circle = $("progressCircle");
+if(circle && duration > 0){
+  const frac = t / duration;  // 1.0 full → 0.0 empty
+  circle.style.strokeDashoffset = CIRC * (1 - frac);
+  circle.style.stroke = (state === "work") ? "#ff9f0a"
+                      : (state === "rest") ? "#007aff"
+                      : "#34c759";
+}
 
+// total progress bar
 const bar = $("totalProgress");
 if(bar && totalTime > 0){
   bar.style.width = Math.min(100, (elapsed / totalTime) * 100) + "%";
