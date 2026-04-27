@@ -2,71 +2,67 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HIIT Pro</title>
+<title>HIIT</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>HIIT Pro</h2>
-
-<div id="setup">
-  <input id="name" placeholder="Workout Name">
-
-  <textarea id="exercises" placeholder="One exercise per line"></textarea>
-
-  <div class="row">
-    <input id="work" type="number" value="20" placeholder="Work">
-    <input id="rest" type="number" value="10" placeholder="Rest">
-  </div>
-
-  <div class="row">
-    <input id="rounds" type="number" value="3" placeholder="Rounds">
-    <input id="water" type="number" value="30" placeholder="Water Break">
-  </div>
-
-  <div class="row">
-    <input id="warmup" type="number" value="10" placeholder="Warmup">
-    <input id="cooldown" type="number" value="10" placeholder="Cooldown">
-  </div>
-
-  <button onclick="saveWorkout()">Save</button>
-  <select id="savedList"></select>
-  <button onclick="loadWorkout()">Load</button>
-  <button onclick="deleteWorkout()">Delete</button>
-
-  <button onclick="startWorkout()">Start</button>
+<!-- HOME -->
+<div id="home" class="page active">
+  <h1>HIIT</h1>
+  <button class="primary" onclick="go('select')">Choose Workout</button>
+  <button onclick="go('edit')">Edit Workouts</button>
 </div>
 
-<hr>
+<!-- SELECT -->
+<div id="select" class="page">
+  <h2>Choose Workout</h2>
+  <div id="workoutList"></div>
+  <button class="primary" onclick="startSelected()">Start</button>
+  <button onclick="go('home')">Back</button>
+</div>
 
-<div id="run">
+<!-- EDIT -->
+<div id="edit" class="page">
+  <h2>Manage Workouts</h2>
+  <div id="manageList"></div>
+  <button class="primary" onclick="newWorkout()">+ New Workout</button>
+  <button onclick="go('home')">Back</button>
+</div>
 
-  <div id="phase"></div>
+<!-- FORM -->
+<div id="form" class="page">
+  <h2 id="formTitle">New Workout</h2>
 
-  <div class="circle">
-    <svg>
-      <circle cx="100" cy="100" r="90"></circle>
-      <circle id="progressCircle" cx="100" cy="100" r="90"></circle>
-    </svg>
-    <div id="timer">0</div>
-  </div>
+  <label>Name</label>
+  <input id="name">
 
-  <div id="current"></div>
-  <div id="next"></div>
+  <label>Work (sec)</label>
+  <input id="work" type="number">
 
-  <div id="meta"></div>
+  <label>Rest (sec)</label>
+  <input id="rest" type="number">
 
-  <div class="bar">
-    <div id="totalProgress"></div>
-  </div>
+  <label>Rounds</label>
+  <input id="rounds" type="number">
 
-  <div class="controls">
-    <button onclick="pause()">Pause</button>
-    <button onclick="skip()">Skip</button>
-    <button onclick="restartMove()">Restart</button>
-  </div>
+  <label>Water Break (sec)</label>
+  <input id="water" type="number">
 
+  <label>Warmup</label>
+  <input id="warmup" type="number">
+
+  <label>Cooldown</label>
+  <input id="cooldown" type="number">
+
+  <h3>Exercises</h3>
+  <div id="exerciseList"></div>
+
+  <button onclick="addExercise()">+ Add Exercise</button>
+
+  <button class="primary" onclick="save()">Save</button>
+  <button onclick="go('edit')">Back</button>
 </div>
 
 <script src="app.js"></script>
