@@ -167,6 +167,7 @@ bind("btnNew",       newWorkout);
 bind("btnAddEx",     addExercise);
 bind("btnPickEx",    openPicker);
 bind("btnSave",      save);
+bind("btnBackEdit",  () => show("edit"));
 bind("btnPause",     togglePause);
 bind("btnSkip",      skip);
 bind("btnRestart",   restartMove);
