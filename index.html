@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
 <body>
 
 <!-- HOME -->
+
 <div id="home" class="page active">
   <h1>HIIT</h1>
   <button id="btnChoose" class="primary">Choose Workout</button>
@@ -16,6 +18,7 @@
 </div>
 
 <!-- SELECT -->
+
 <div id="select" class="page">
   <h2>Choose Workout</h2>
   <div id="workoutList"></div>
@@ -24,6 +27,7 @@
 </div>
 
 <!-- EDIT -->
+
 <div id="edit" class="page">
   <h2>Manage Workouts</h2>
   <div id="manageList"></div>
@@ -32,44 +36,47 @@
 </div>
 
 <!-- FORM -->
+
 <div id="form" class="page">
   <h2 id="formTitle">Workout</h2>
 
-  <label>Name</label>
-  <input id="name">
+<label>Name</label>
+<input id="name">
 
-  <label>Work</label>
-  <input id="work" type="number">
+<label>Work (sec)</label>
+<input id="work" type="number">
 
-  <label>Rest</label>
-  <input id="rest" type="number">
+<label>Rest (sec)</label>
+<input id="rest" type="number">
 
-  <label>Rounds</label>
-  <input id="rounds" type="number">
+<label>Rounds</label>
+<input id="rounds" type="number">
 
-  <label>Water break</label>
-  <input id="water" type="number">
+<label>Water break (sec)</label>
+<input id="water" type="number">
 
-  <label>Warmup</label>
-  <input id="warmup" type="number">
+<label>Warmup (sec)</label>
+<input id="warmup" type="number">
 
-  <label>Cooldown</label>
-  <input id="cooldown" type="number">
+<label>Cooldown (sec)</label>
+<input id="cooldown" type="number">
 
   <h3>Exercises</h3>
   <div id="exerciseList"></div>
 
-  <button id="btnAddEx">+ Add Exercise</button>
-  <button id="btnSave" class="primary">Save</button>
+<button id="btnAddEx">+ Add Exercise</button>
+<button id="btnSave" class="primary">Save</button>
+
 </div>
 
 <!-- RUN -->
+
 <div id="run" class="page">
 
   <div id="phase"></div>
 
   <div class="circle">
-    <svg>
+    <svg viewBox="0 0 200 200">
       <circle cx="100" cy="100" r="90"></circle>
       <circle id="progressCircle" cx="100" cy="100" r="90"></circle>
     </svg>
@@ -90,8 +97,17 @@
     <button id="btnRestart">Restart</button>
   </div>
 
+  <!-- shown only when workout finishes -->
+
+  <div id="donePanel" style="display:none; margin-top:24px;">
+    <p id="doneMsg" style="font-size:1.4em; font-weight:600;">🎉 Great work!</p>
+    <button id="btnHome" class="primary">Back to Home</button>
+    <button id="btnEndEarly">End &amp; go Home</button>
+  </div>
+
 </div>
 
 <script src="app.js"></script>
+
 </body>
 </html>
