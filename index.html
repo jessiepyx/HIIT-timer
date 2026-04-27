@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIIT Timer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>HIIT Timer</h2>
+
+<div id="setup">
+  <input id="name" placeholder="Workout Name">
+
+  <textarea id="exercises" placeholder="One exercise per line"></textarea>
+
+  <div class="row">
+    <input id="work" type="number" placeholder="Work (sec)" value="20">
+    <input id="rest" type="number" placeholder="Rest (sec)" value="10">
+  </div>
+
+  <div class="row">
+    <input id="rounds" type="number" placeholder="Rounds" value="3">
+  </div>
+
+  <button onclick="saveWorkout()">Save</button>
+
+  <select id="savedList" onchange="loadWorkout()"></select>
+
+  <button onclick="startWorkout()">Start</button>
+</div>
+
+<hr>
+
+<div id="run">
+  <div id="phase"></div>
+  <div id="timer"></div>
+  <div id="current"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
