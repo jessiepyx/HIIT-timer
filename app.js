@@ -1,186 +1,122 @@
 let workouts = JSON.parse(localStorage.getItem("hiitWorkouts") || "[]");
+let selected = null;
+let editingIndex = null;
 
-let state = "idle"; 
-let timer;
-let t = 0;
-let duration = 0;
+function go(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
 
-let cfg, exercises;
-let idx = 0, round = 1;
-
-let totalTime = 0;
-let elapsed = 0;
-
-function speak(text){
-  speechSynthesis.cancel();
-  speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  if(page==="select") renderSelect();
+  if(page==="edit") renderManage();
 }
 
-function saveWorkout(){
-  const w = getConfig();
-  workouts.push(w);
-  localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
-  renderList();
-}
+function renderSelect(){
+  const list = document.getElementById("workoutList");
+  list.innerHTML = "";
 
-function deleteWorkout(){
-  const i = document.getElementById("savedList").value;
-  workouts.splice(i,1);
-  localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
-  renderList();
-}
-
-function renderList(){
-  const list = document.getElementById("savedList");
-  list.innerHTML="";
   workouts.forEach((w,i)=>{
-    const o=document.createElement("option");
-    o.value=i;
-    o.text=w.name;
-    list.appendChild(o);
+    const div = document.createElement("div");
+    div.className="card";
+    div.innerText = w.name;
+    div.onclick = ()=> selected = i;
+    list.appendChild(div);
   });
 }
 
-function loadWorkout(){
-  const w = workouts[document.getElementById("savedList").value];
-  if(!w)return;
-  Object.keys(w).forEach(k=>{
-    if(document.getElementById(k))
-      document.getElementById(k).value = w[k];
+function renderManage(){
+  const list = document.getElementById("manageList");
+  list.innerHTML="";
+
+  workouts.forEach((w,i)=>{
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML = `
+      ${w.name}
+      <button onclick="edit(${i})">Edit</button>
+      <button onclick="del(${i})">Delete</button>
+    `;
+    list.appendChild(div);
   });
 }
 
-function getConfig(){
-  return {
-    name: name.value,
-    exercises: exercisesEl.value.split("\n").filter(e=>e),
+function del(i){
+  workouts.splice(i,1);
+  saveLS();
+  renderManage();
+}
+
+function newWorkout(){
+  editingIndex=null;
+  clearForm();
+  go("form");
+}
+
+function edit(i){
+  editingIndex=i;
+  loadForm(workouts[i]);
+  go("form");
+}
+
+function addExercise(val=""){
+  const div=document.createElement("div");
+  div.className="exercise";
+  div.innerHTML=`
+    <input value="${val}">
+    <button onclick="this.parentElement.remove()">x</button>
+  `;
+  exerciseList.appendChild(div);
+}
+
+function clearForm(){
+  document.querySelectorAll("#form input").forEach(i=>i.value="");
+  exerciseList.innerHTML="";
+}
+
+function loadForm(w){
+  name.value=w.name;
+  work.value=w.work;
+  rest.value=w.rest;
+  rounds.value=w.rounds;
+  water.value=w.water;
+  warmup.value=w.warmup;
+  cooldown.value=w.cooldown;
+
+  exerciseList.innerHTML="";
+  w.exercises.forEach(e=>addExercise(e));
+}
+
+function save(){
+  const ex = [...document.querySelectorAll("#exerciseList input")]
+    .map(i=>i.value).filter(v=>v);
+
+  const w = {
+    name:name.value,
     work:+work.value,
     rest:+rest.value,
     rounds:+rounds.value,
     water:+water.value,
     warmup:+warmup.value,
-    cooldown:+cooldown.value
+    cooldown:+cooldown.value,
+    exercises:ex
   };
-}
 
-function startWorkout(){
-  cfg = getConfig();
-  exercises = cfg.exercises;
-  idx=0; round=1;
-  elapsed=0;
-
-  totalTime =
-    cfg.warmup +
-    cfg.rounds * (
-      exercises.length * (cfg.work + cfg.rest)
-    ) +
-    (cfg.rounds-1)*cfg.water +
-    cfg.cooldown;
-
-  setState("warmup", cfg.warmup, "Warm up");
-}
-
-function setState(s, dur, label){
-  state = s;
-  duration = dur;
-  t = dur;
-
-  speak(label);
-  updateUI();
-  run();
-}
-
-function run(){
-  clearInterval(timer);
-  timer = setInterval(()=>{
-    t--; elapsed++;
-
-    if(t<=5 && t>0) speak(t.toString());
-
-    updateUI();
-
-    if(t<=0){
-      next();
-    }
-  },1000);
-}
-
-function next(){
-  clearInterval(timer);
-
-  switch(state){
-    case "warmup":
-      speak(exercises[0]);
-      setState("work", cfg.work, "Start");
-      break;
-
-    case "work":
-      setState("rest", cfg.rest, "Rest");
-      speak("Next "+ (exercises[idx+1]||exercises[0]));
-      break;
-
-    case "rest":
-      idx++;
-      if(idx>=exercises.length){
-        idx=0;
-        round++;
-        if(round>cfg.rounds){
-          setState("cooldown", cfg.cooldown, "Cool down");
-        } else {
-          setState("water", cfg.water, "Water break");
-        }
-      } else {
-        setState("work", cfg.work, exercises[idx]);
-      }
-      break;
-
-    case "water":
-      setState("work", cfg.work, exercises[idx]);
-      break;
-
-    case "cooldown":
-      speak("Congratulations");
-      state="done";
-      break;
+  if(editingIndex!==null){
+    workouts[editingIndex]=w;
+  } else {
+    workouts.push(w);
   }
+
+  saveLS();
+  go("edit");
 }
 
-function pause(){
-  clearInterval(timer);
+function saveLS(){
+  localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
 }
 
-function skip(){
-  next();
+function startSelected(){
+  if(selected==null) return alert("Select one");
+  alert("这里接你之前的计时器逻辑");
 }
 
-function restartMove(){
-  setState(state, duration, "Restart");
-}
-
-function updateUI(){
-  timerEl.innerText = t;
-  phase.innerText = state.toUpperCase();
-  current.innerText = exercises[idx]||"";
-
-  nextEl.innerText = "Next: " + (exercises[idx+1]||exercises[0]);
-
-  meta.innerText = `Round ${round}/${cfg?.rounds || 0}`;
-
-  // circle
-  const percent = t/duration;
-  progressCircle.style.strokeDashoffset = 565*(1-percent);
-
-  // total progress
-  totalProgress.style.width = (elapsed/totalTime*100)+"%";
-}
-
-const exercisesEl = document.getElementById("exercises");
-const timerEl = document.getElementById("timer");
-const phase = document.getElementById("phase");
-const current = document.getElementById("current");
-const nextEl = document.getElementById("next");
-const meta = document.getElementById("meta");
-const progressCircle = document.getElementById("progressCircle");
-const totalProgress = document.getElementById("totalProgress");
-
-renderList();
+go("home");
