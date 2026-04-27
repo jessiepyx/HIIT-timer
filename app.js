@@ -22,23 +22,19 @@
   let totalTime = 0;
 
   // =========================
-  // SAFE DOM HELPER
+  // UTIL
   // =========================
   const $ = (id) => document.getElementById(id);
 
-  function safe(el, fn){
-    if(!el) return;
-    try { fn(el); } catch(e){ console.log("safe error:", e); }
-  }
-
-  // =========================
-  // SPEECH
-  // =========================
   function speak(text){
     try{
       speechSynthesis.cancel();
       speechSynthesis.speak(new SpeechSynthesisUtterance(text));
     }catch(e){}
+  }
+
+  function safe(fn){
+    try{ fn(); }catch(e){ console.log(e); }
   }
 
   // =========================
@@ -48,19 +44,19 @@
 
   function init(){
 
-    // load data
     workouts = JSON.parse(localStorage.getItem("hiitWorkouts") || "[]");
 
-    bindUI();
+    bindStaticUI();
     show("home");
 
-    console.log("HIIT APP READY ✔");
+    console.log("HIIT READY ✔");
   }
 
   // =========================
-  // UI NAV
+  // NAV
   // =========================
   function show(page){
+
     document.querySelectorAll(".page").forEach(p=>{
       p.classList.remove("active");
     });
@@ -73,72 +69,106 @@
   }
 
   // =========================
-  // UI BINDING (SAFE)
+  // STATIC BUTTONS
   // =========================
-  function bindUI(){
+  function bindStaticUI(){
 
-    safe($("btnChoose"), el => el.onclick = () => show("select"));
-    safe($("btnEdit"), el => el.onclick = () => show("edit"));
+    const btnChoose = $("btnChoose");
+    if(btnChoose) btnChoose.onclick = () => show("select");
 
-    safe($("btnBackHome1"), el => el.onclick = () => show("home"));
-    safe($("btnBackHome2"), el => el.onclick = () => show("home"));
+    const btnEdit = $("btnEdit");
+    if(btnEdit) btnEdit.onclick = () => show("edit");
 
-    safe($("btnStart"), el => el.onclick = startSelected);
+    const btnBack1 = $("btnBackHome1");
+    if(btnBack1) btnBack1.onclick = () => show("home");
 
-    safe($("btnNew"), el => el.onclick = newWorkout);
-    safe($("btnAddEx"), el => el.onclick = addExercise);
-    safe($("btnSave"), el => el.onclick = save);
+    const btnBack2 = $("btnBackHome2");
+    if(btnBack2) btnBack2.onclick = () => show("home");
 
-    safe($("btnPause"), el => el.onclick = pause);
-    safe($("btnSkip"), el => el.onclick = skip);
-    safe($("btnRestart"), el => el.onclick = restartMove);
+    const btnStart = $("btnStart");
+    if(btnStart) btnStart.onclick = startSelected;
+
+    const btnNew = $("btnNew");
+    if(btnNew) btnNew.onclick = newWorkout;
+
+    const btnAdd = $("btnAddEx");
+    if(btnAdd) btnAdd.onclick = addExercise;
+
+    const btnSave = $("btnSave");
+    if(btnSave) btnSave.onclick = save;
+
+    const btnPause = $("btnPause");
+    if(btnPause) btnPause.onclick = pause;
+
+    const btnSkip = $("btnSkip");
+    if(btnSkip) btnSkip.onclick = skip;
+
+    const btnRestart = $("btnRestart");
+    if(btnRestart) btnRestart.onclick = restartMove;
   }
 
   // =========================
-  // RENDER LIST
+  // SELECT PAGE
   // =========================
   function renderSelect(){
+
     const list = $("workoutList");
     if(!list) return;
 
     list.innerHTML = "";
 
     workouts.forEach((w,i)=>{
+
       const div = document.createElement("div");
       div.className = "card";
       div.textContent = w.name;
 
-      div.onclick = () => selected = i;
+      div.addEventListener("click", () => {
+        selected = i;
+
+        [...list.children].forEach(c=>{
+          c.style.border = "none";
+        });
+
+        div.style.border = "2px solid #007aff";
+      });
 
       list.appendChild(div);
     });
   }
 
+  // =========================
+  // EDIT PAGE
+  // =========================
   function renderManage(){
+
     const list = $("manageList");
     if(!list) return;
 
     list.innerHTML = "";
 
     workouts.forEach((w,i)=>{
+
       const div = document.createElement("div");
       div.className = "card";
 
       div.innerHTML = `
         <b>${w.name}</b><br>
-        <button id="e${i}">Edit</button>
-        <button id="d${i}">Delete</button>
+        <button class="edit">Edit</button>
+        <button class="del">Delete</button>
       `;
 
       list.appendChild(div);
 
-      safe($("d"+i), el => el.onclick = () => {
+      div.querySelector(".del").onclick = () => {
         workouts.splice(i,1);
         saveLS();
         renderManage();
-      });
+      };
 
-      safe($("e"+i), el => el.onclick = () => edit(i));
+      div.querySelector(".edit").onclick = () => {
+        edit(i);
+      };
     });
   }
 
@@ -175,8 +205,9 @@
   }
 
   function clearForm(){
+
     ["name","work","rest","rounds","water","warmup","cooldown"]
-      .forEach(id => {
+      .forEach(id=>{
         const el = $(id);
         if(el) el.value = "";
       });
@@ -186,10 +217,11 @@
   }
 
   function loadForm(w){
+
     if(!w) return;
 
     ["name","work","rest","rounds","water","warmup","cooldown"]
-      .forEach(id => {
+      .forEach(id=>{
         const el = $(id);
         if(el) el.value = w[id] ?? "";
       });
@@ -202,6 +234,7 @@
   }
 
   function save(){
+
     const list = $("exerciseList");
     if(!list) return;
 
@@ -235,12 +268,12 @@
   }
 
   // =========================
-  // TIMER ENGINE (SAFE)
+  // TIMER ENGINE
   // =========================
   function startSelected(){
 
     if(selected == null || !workouts[selected]){
-      alert("Please select workout");
+      alert("Select workout");
       return;
     }
 
@@ -267,6 +300,7 @@
   }
 
   function setState(s, dur, label){
+
     state = s;
     duration = dur;
     t = dur;
@@ -277,9 +311,11 @@
   }
 
   function run(){
+
     clearInterval(timer);
 
     timer = setInterval(() => {
+
       if(state === "idle") return;
 
       t--;
@@ -290,6 +326,7 @@
       updateUI();
 
       if(t <= 0) next();
+
     }, 1000);
   }
 
@@ -308,6 +345,7 @@
         break;
 
       case "rest":
+
         idx++;
 
         if(idx >= exercises.length){
@@ -346,16 +384,24 @@
   }
 
   // =========================
-  // UI UPDATE (SAFE)
+  // UI UPDATE
   // =========================
   function updateUI(){
 
-    safe($("timer"), el => el.textContent = t);
-    safe($("phase"), el => el.textContent = state.toUpperCase());
-    safe($("current"), el => el.textContent = exercises[idx] || "");
-    safe($("next"), el => el.textContent = "Next: " + (exercises[idx+1] || ""));
-    safe($("meta"), el => el.textContent = `Round ${round}/${cfg?.rounds || 0}`);
+    const timerEl = $("timer");
+    if(timerEl) timerEl.textContent = t;
 
+    const phase = $("phase");
+    if(phase) phase.textContent = state.toUpperCase();
+
+    const current = $("current");
+    if(current) current.textContent = exercises[idx] || "";
+
+    const nextEl = $("next");
+    if(nextEl) nextEl.textContent = "Next: " + (exercises[idx+1] || "");
+
+    const meta = $("meta");
+    if(meta) meta.textContent = `Round ${round}/${cfg?.rounds || 0}`;
   }
 
 })();
