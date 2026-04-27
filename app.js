@@ -234,7 +234,7 @@ pickerSelected = new Set();
 const list = $(“pickerList”);
 list.innerHTML = “”;
 
-```
+
 Object.entries(EXERCISE_LIBRARY).forEach(([category, exArr]) => {
   const cat = document.createElement("div");
   cat.className = "picker-category";
@@ -261,7 +261,6 @@ Object.entries(EXERCISE_LIBRARY).forEach(([category, exArr]) => {
 });
 
 $("pickerOverlay").style.display = "flex";
-```
 
 }
 
@@ -377,7 +376,6 @@ return;
 }
 idx = 0; round = 1; elapsed = 0; paused = false; halfSpoken = false;
 
-```
 totalTime =
   cfg.warmup +
   cfg.cooldown +
@@ -397,7 +395,6 @@ const delay = Math.min(speechSecs, 12); // cap at 12s
 setTimeout(() => {
   setState("warmup", cfg.warmup, null); // null = no speak, briefing already going
 }, delay * 1000);
-```
 
 }
 
@@ -423,7 +420,7 @@ if(state === “idle” || paused) return;
 t–;
 elapsed++;
 
-```
+
 // encouragement
 checkEncouragement();
 
@@ -432,14 +429,14 @@ if(t === 5) beepCountdown();
 
 updateUI();
 if(t <= 0) next();
-```
+
 
 }
 
 function checkEncouragement(){
 if(!cfg) return;
 
-```
+
 // "halfway there" when total elapsed hits 50%
 if(!halfSpoken && elapsed >= totalTime * 0.5){
   halfSpoken = true;
@@ -457,14 +454,14 @@ if(state === "work" && t === Math.floor(duration * 0.33)){
   ];
   speakQueue(lines[Math.floor(Math.random() * lines.length)], 0);
 }
-```
+
 
 }
 
 function next(){
 switch(state){
 
-```
+
   case "warmup":
     // announce first exercise, beep into it
     announceAndStart(exercises[0]);
@@ -504,7 +501,7 @@ switch(state){
     showDone();
     break;
 }
-```
+
 
 }
 
@@ -567,7 +564,7 @@ function updateUI(){
 const timerEl = $(“timer”);
 if(timerEl) timerEl.textContent = t;
 
-```
+
 // phase label
 const phase = $("phase");
 if(phase){
@@ -615,7 +612,6 @@ if(bar && totalTime > 0){
   const label = $("barLabel");
   if(label) label.textContent = Math.round(pct) + "% complete";
 }
-```
 
 }
 
