@@ -50,6 +50,7 @@ let totalTime = 0;
 
 // encouragement tracking
 let halfSpoken = false;
+let announced = false;
 
 // =========================
 // UTIL
@@ -170,7 +171,7 @@ bind("btnPause",     togglePause);
 bind("btnSkip",      skip);
 bind("btnRestart",   restartMove);
 bind("btnHome",      goHome);
-bind("btnEndEarly",  goHome);
+bind("btnEndEarly",  endEarly);
 bind("btnPickerDone",   pickerDone);
 bind("btnPickerCancel", () => { $("pickerOverlay").style.display = "none"; });
 }
@@ -181,6 +182,12 @@ speechSynthesis.cancel();
 state = "idle";
 paused = false;
 show("home");
+}
+
+function endEarly(){
+if(confirm("End workout early?")){
+  goHome();
+}
 }
 
 // =========================
@@ -367,6 +374,10 @@ if(selected == null || !workouts[selected]){
 alert("Please select a workout first.");
 return;
 }
+// unlock AudioContext on user gesture (required by Safari)
+const ctx = getAudioCtx();
+if(ctx.state === "suspended") ctx.resume();
+
 cfg = workouts[selected];
 exercises = cfg.exercises || [];
 if(exercises.length === 0){
@@ -402,8 +413,11 @@ state    = s;
 duration = dur;
 t        = dur;
 paused   = false;
+announced = false;
 const bp = $("btnPause");
 if(bp) bp.textContent = "Pause";
+const be = $("btnEndEarly");
+if(be) be.style.display = "none";
 if(label) speak(label);
 updateUI();
 run();
@@ -414,6 +428,15 @@ clearInterval(timer);
 timer = setInterval(tick, 1000);
 }
 
+function getUpcomingExercise(){
+if(state === "warmup") return exercises[0];
+if(state === "rest"){
+  if(idx + 1 < exercises.length) return exercises[idx + 1];
+  if(round + 1 <= cfg.rounds) return exercises[0];
+}
+return null;
+}
+
 function tick(){
 if(state === "idle" || paused) return;
 t--;
@@ -421,6 +444,13 @@ elapsed++;
 
 // encouragement
 checkEncouragement();
+
+// announce upcoming exercise near end of warmup/rest
+if(!announced && (state === "warmup" || state === "rest") && t <= 3 && t > 0){
+  announced = true;
+  const upcoming = getUpcomingExercise();
+  if(upcoming) speak(`Get ready for ${upcoming}.`);
+}
 
 // beep countdown for last 5 seconds
 if(t === 5) beepCountdown();
@@ -457,8 +487,9 @@ function next(){
 switch(state){
 
   case "warmup":
-    // announce first exercise, beep into it
-    announceAndStart(exercises[0]);
+    beepGo();
+    setState("work", cfg.work, null);
+    setTimeout(() => speak(exercises[idx]), 300);
     break;
 
   case "work":
@@ -486,7 +517,9 @@ switch(state){
         return;
       }
     }
-    announceAndStart(exercises[idx]);
+    beepGo();
+    setState("work", cfg.work, null);
+    setTimeout(() => speak(exercises[idx]), 300);
     break;
 
   case "cooldown":
@@ -496,19 +529,6 @@ switch(state){
     break;
 }
 
-}
-
-// announce next exercise during rest/warmup, then beep into work
-function announceAndStart(exerciseName){
-// speak the exercise name now
-speak(`Get ready for ${exerciseName}.`);
-// after ~2s, play a go beep and start the work phase
-setTimeout(() => {
-beepGo();
-setState("work", cfg.work, null);
-// speak exercise name again right as it starts
-setTimeout(() => speak(exerciseName), 300);
-}, 2000);
 }
 
 function showDone(){
@@ -529,6 +549,8 @@ if(state === "idle") return;
 paused = !paused;
 const bp = $("btnPause");
 if(bp) bp.textContent = paused ? "Resume" : "Pause";
+const be = $("btnEndEarly");
+if(be) be.style.display = paused ? "inline-block" : "none";
 if(paused) speechSynthesis.cancel();
 }
 
@@ -574,20 +596,41 @@ if(cur) cur.textContent = (state === "work") ? (exercises[idx] || "") : "";
 // next hint
 let nextHint = "";
 if(state === "work" && exercises[idx + 1]) nextHint = "Next: " + exercises[idx + 1];
-if(state === "rest" && exercises[idx])      nextHint = "Next: " + exercises[idx];
+if(state === "rest"){
+  const nextIdx = idx + 1;
+  if(nextIdx < exercises.length) nextHint = "Next: " + exercises[nextIdx];
+  else if(round + 1 <= cfg.rounds) nextHint = "Next: " + exercises[0];
+}
 const nextEl = $("next");
 if(nextEl) nextEl.textContent = nextHint;
 
 // round counter
-const meta = $("meta");
-if(meta) meta.textContent = (cfg && state !== "warmup" && state !== "cooldown" && state !== "idle")
-  ? `Round ${round} / ${cfg.rounds}`
-  : "";
+const statRound = $("statRound");
+if(statRound) statRound.textContent = (cfg && state !== "idle")
+  ? `${round} / ${cfg.rounds}`
+  : "--";
+
+// elapsed time
+const statElapsed = $("statElapsed");
+if(statElapsed){
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  statElapsed.textContent = m + ":" + String(s).padStart(2, "0");
+}
+
+// remaining time
+const statRemaining = $("statRemaining");
+if(statRemaining){
+  const rem = Math.max(0, totalTime - elapsed);
+  const m = Math.floor(rem / 60);
+  const s = rem % 60;
+  statRemaining.textContent = m + ":" + String(s).padStart(2, "0");
+}
 
 // SVG ring -- fills as phase counts DOWN (starts full, drains to empty)
 const circle = $("progressCircle");
 if(circle && duration > 0){
-  const frac = t / duration; // 1→0
+  const frac = t / duration;
   circle.style.strokeDashoffset = CIRC * (1 - frac);
   circle.style.stroke =
     state === "work"     ? "#ff9f0a" :
