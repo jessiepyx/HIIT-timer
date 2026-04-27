@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HIIT</title>
+<title>HIIT Pro</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,43 +11,43 @@
 <!-- HOME -->
 <div id="home" class="page active">
   <h1>HIIT</h1>
-  <button class="primary" onclick="go('select')">Choose Workout</button>
-  <button onclick="go('edit')">Edit Workouts</button>
+  <button id="btnChoose" class="primary">Choose Workout</button>
+  <button id="btnEdit">Edit Workouts</button>
 </div>
 
 <!-- SELECT -->
 <div id="select" class="page">
   <h2>Choose Workout</h2>
   <div id="workoutList"></div>
-  <button class="primary" onclick="startSelected()">Start</button>
-  <button onclick="go('home')">Back</button>
+  <button id="btnStart" class="primary">Start</button>
+  <button id="btnBackHome1">Back</button>
 </div>
 
 <!-- EDIT -->
 <div id="edit" class="page">
   <h2>Manage Workouts</h2>
   <div id="manageList"></div>
-  <button class="primary" onclick="newWorkout()">+ New Workout</button>
-  <button onclick="go('home')">Back</button>
+  <button id="btnNew" class="primary">+ New Workout</button>
+  <button id="btnBackHome2">Back</button>
 </div>
 
 <!-- FORM -->
 <div id="form" class="page">
-  <h2 id="formTitle">New Workout</h2>
+  <h2 id="formTitle">Workout</h2>
 
   <label>Name</label>
   <input id="name">
 
-  <label>Work (sec)</label>
+  <label>Work</label>
   <input id="work" type="number">
 
-  <label>Rest (sec)</label>
+  <label>Rest</label>
   <input id="rest" type="number">
 
   <label>Rounds</label>
   <input id="rounds" type="number">
 
-  <label>Water Break (sec)</label>
+  <label>Water break</label>
   <input id="water" type="number">
 
   <label>Warmup</label>
@@ -59,10 +59,37 @@
   <h3>Exercises</h3>
   <div id="exerciseList"></div>
 
-  <button onclick="addExercise()">+ Add Exercise</button>
+  <button id="btnAddEx">+ Add Exercise</button>
+  <button id="btnSave" class="primary">Save</button>
+</div>
 
-  <button class="primary" onclick="save()">Save</button>
-  <button onclick="go('edit')">Back</button>
+<!-- RUN -->
+<div id="run" class="page">
+
+  <div id="phase"></div>
+
+  <div class="circle">
+    <svg>
+      <circle cx="100" cy="100" r="90"></circle>
+      <circle id="progressCircle" cx="100" cy="100" r="90"></circle>
+    </svg>
+    <div id="timer">0</div>
+  </div>
+
+  <div id="current"></div>
+  <div id="next"></div>
+  <div id="meta"></div>
+
+  <div class="bar">
+    <div id="totalProgress"></div>
+  </div>
+
+  <div class="controls">
+    <button id="btnPause">Pause</button>
+    <button id="btnSkip">Skip</button>
+    <button id="btnRestart">Restart</button>
+  </div>
+
 </div>
 
 <script src="app.js"></script>
