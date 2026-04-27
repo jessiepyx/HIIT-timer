@@ -1,46 +1,32 @@
 body {
-  font-family: -apple-system;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   background: #f5f5f7;
   margin: 0;
   text-align: center;
 }
 
-.page { display:none; padding:20px; }
-.active { display:block; }
+.page { display: none; padding: 20px; }
+.active { display: block; }
 
-h1,h2 { margin-bottom:20px; }
+h1, h2 { margin-bottom: 20px; }
 
 button {
-  padding:12px 16px;
-  margin:8px;
-  border:none;
-  border-radius:10px;
-  background:#e5e5ea;
+  padding: 12px 16px;
+  margin: 8px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e5ea;
+  font-size: 1em;
+  cursor: pointer;
 }
 
 .primary {
-  background:#007aff;
-  color:white;
+  background: #007aff;
+  color: white;
 }
 
 input {
-  width:90%;
-  padding:10px;
-  margin:5px 0 15px;
-  border:1px solid #ccc;
-  border-radius:8px;
-}
-
-.card {
-  background:white;
-  padding:12px;
-  margin:8px;
-  border-radius:12px;
-  text-align:left;
-}
-
-.exercise {
-  display:flex;
-  gap:8px;
-  margin:5px 0;
-}
+  display: block;
+  width: 90%;
+  padding: 10px;
+  margin: 5px auto​​​​​​​​​​​​​​​​
