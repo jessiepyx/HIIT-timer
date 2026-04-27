@@ -1,40 +1,66 @@
 body {
-  font-family: -apple-system;
-  text-align: center;
-  background: #111;
+  background: #000;
   color: white;
+  text-align: center;
+  font-family: -apple-system;
 }
 
-textarea {
-  width: 90%;
-  height: 100px;
-}
-
-input {
+textarea, input {
   margin: 5px;
   padding: 8px;
 }
 
-.row {
-  display: flex;
-  justify-content: center;
+button {
+  padding: 10px 15px;
+  margin: 5px;
 }
 
-button {
-  padding: 10px 20px;
-  margin: 10px;
+.circle {
+  position: relative;
+  width: 200px;
+  margin: auto;
+}
+
+svg {
+  width: 200px;
+  height: 200px;
+  transform: rotate(-90deg);
+}
+
+circle {
+  fill: none;
+  stroke-width: 10;
+  stroke: #333;
+}
+
+#progressCircle {
+  stroke: #0a84ff;
+  stroke-dasharray: 565;
+  stroke-dashoffset: 565;
+  transition: stroke-dashoffset 1s linear;
 }
 
 #timer {
-  font-size: 70px;
-  margin: 20px;
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  font-size: 40px;
 }
 
-#phase {
-  font-size: 24px;
+.bar {
+  width: 90%;
+  height: 10px;
+  background: #222;
+  margin: 20px auto;
 }
 
-#current {
-  font-size: 20px;
-  color: #aaa;
+#totalProgress {
+  height: 10px;
+  width: 0%;
+  background: #0a84ff;
+}
+
+.controls {
+  margin-top: 10px;
 }
