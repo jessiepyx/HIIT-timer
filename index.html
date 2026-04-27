@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HIIT Timer</title>
-  <link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIIT Pro</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>HIIT Timer</h2>
+<h2>HIIT Pro</h2>
 
 <div id="setup">
   <input id="name" placeholder="Workout Name">
@@ -16,17 +16,24 @@
   <textarea id="exercises" placeholder="One exercise per line"></textarea>
 
   <div class="row">
-    <input id="work" type="number" placeholder="Work (sec)" value="20">
-    <input id="rest" type="number" placeholder="Rest (sec)" value="10">
+    <input id="work" type="number" value="20" placeholder="Work">
+    <input id="rest" type="number" value="10" placeholder="Rest">
   </div>
 
   <div class="row">
-    <input id="rounds" type="number" placeholder="Rounds" value="3">
+    <input id="rounds" type="number" value="3" placeholder="Rounds">
+    <input id="water" type="number" value="30" placeholder="Water Break">
+  </div>
+
+  <div class="row">
+    <input id="warmup" type="number" value="10" placeholder="Warmup">
+    <input id="cooldown" type="number" value="10" placeholder="Cooldown">
   </div>
 
   <button onclick="saveWorkout()">Save</button>
-
-  <select id="savedList" onchange="loadWorkout()"></select>
+  <select id="savedList"></select>
+  <button onclick="loadWorkout()">Load</button>
+  <button onclick="deleteWorkout()">Delete</button>
 
   <button onclick="startWorkout()">Start</button>
 </div>
@@ -34,9 +41,32 @@
 <hr>
 
 <div id="run">
+
   <div id="phase"></div>
-  <div id="timer"></div>
+
+  <div class="circle">
+    <svg>
+      <circle cx="100" cy="100" r="90"></circle>
+      <circle id="progressCircle" cx="100" cy="100" r="90"></circle>
+    </svg>
+    <div id="timer">0</div>
+  </div>
+
   <div id="current"></div>
+  <div id="next"></div>
+
+  <div id="meta"></div>
+
+  <div class="bar">
+    <div id="totalProgress"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="pause()">Pause</button>
+    <button onclick="skip()">Skip</button>
+    <button onclick="restartMove()">Restart</button>
+  </div>
+
 </div>
 
 <script src="app.js"></script>
