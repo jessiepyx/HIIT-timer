@@ -28,7 +28,7 @@ const EXERCISE_LIBRARY = {
 "Wrist Curls", "Zottman Curls"
 ],
 "Abs": [
-"Ab Wheel Rollout", "Bicycle Crunches", "Crunches", "Dead Bug",
+"Bicycle Crunches", "Crunches", "Dead Bug",
 "Flutter Kicks", "Hanging Knee Raise", "Heel Touches",
 "Hollow Body Hold", "Leg Raises", "Mountain Climbers", "Plank",
 "Plank Jacks", "Reverse Crunch", "Russian Twists",
