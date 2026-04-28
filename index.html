@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>HIIT Pro</title>
-<link rel="stylesheet" href="style.css">
+<script>document.write('<link rel="stylesheet" href="style.css?' + Date.now() + '">');</script>
 </head>
 
 <body>
@@ -170,8 +170,11 @@
 
 </div>
 
-<script src="music.js"></script>
-<script src="app.js"></script>
+<script>
+var t = Date.now();
+document.write('<script src="music.js?' + t + '"><\/script>');
+document.write('<script src="app.js?' + t + '"><\/script>');
+</script>
 
 </body>
 </html>
