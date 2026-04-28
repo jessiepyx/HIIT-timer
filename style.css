@@ -342,6 +342,43 @@ label {
   color: white;
 }
 
+/* ── SMART WORKOUT ── */
+
+.option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 16px;
+}
+
+.option-row button,
+.body-part-grid button {
+  padding: 10px 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  font-size: 0.9em;
+  cursor: pointer;
+  color: #333;
+}
+
+.option-row button.selected,
+.body-part-grid button.selected {
+  border-color: #007aff;
+  background: #d6eaff;
+  color: #007aff;
+  font-weight: 600;
+}
+
+.body-part-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0;
+}
+
 /* ── EXERCISE FORM CATEGORY ── */
 
 .exercise select {
