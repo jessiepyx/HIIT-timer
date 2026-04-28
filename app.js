@@ -204,9 +204,6 @@ function init(){
   bindStaticUI();
   updateMusicUI();
   show("main");
-  if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("sw.js").catch(function(){});
-  }
 }
 
 init();
