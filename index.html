@@ -3,8 +3,9 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>HIIT Pro</title>
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -91,15 +92,12 @@
 <div id="run" class="page">
 
   <!-- phase badge -->
-
   <div id="phase"></div>
 
   <!-- exercise name -->
-
   <div id="current"></div>
 
   <!-- circle timer -->
-
   <div class="circle">
     <svg viewBox="0 0 220 220">
       <circle cx="110" cy="110" r="96"></circle>
@@ -112,15 +110,18 @@
   </div>
 
   <!-- next up -->
-
   <div id="next"></div>
 
   <!-- stats row -->
-
   <div class="stats-row">
     <div class="stat">
-      <div class="stat-val" id="statRound">—</div>
+      <div class="stat-val" id="statRound">--</div>
       <div class="stat-label">Round</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="statExercise">--</div>
+      <div class="stat-label">Exercise</div>
     </div>
     <div class="stat-divider"></div>
     <div class="stat">
@@ -129,13 +130,12 @@
     </div>
     <div class="stat-divider"></div>
     <div class="stat">
-      <div class="stat-val" id="statRemaining">—</div>
+      <div class="stat-val" id="statRemaining">--</div>
       <div class="stat-label">Left</div>
     </div>
   </div>
 
   <!-- total progress bar -->
-
   <div class="bar">
     <div id="totalProgress"></div>
   </div>
@@ -149,13 +149,16 @@
   </div>
 
   <div id="donePanel" style="display:none; margin-top:24px;">
-    <p id="doneMsg">🎉 Workout complete!</p>
+    <p id="doneMsg">&#x1F389; Workout complete!</p>
+    <div id="summary"></div>
     <button id="btnHome" class="primary">Back to Home</button>
   </div>
 
+  <div id="workoutInfo" class="workout-info" style="display:none;"></div>
+
 </div>
 
-<script src="app.js?v=7"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
