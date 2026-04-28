@@ -204,6 +204,9 @@ function init(){
   bindStaticUI();
   updateMusicUI();
   show("main");
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
 }
 
 init();
@@ -979,6 +982,11 @@ function updateUI(){
 
   const cur = $("current");
   if(cur) cur.textContent = (state === "work") ? (exercises[idx]?.name || "") : "";
+
+  if(typeof showExerciseDemo === "function"){
+    if(state === "work" && exercises[idx]) showExerciseDemo(exercises[idx].name);
+    else hideExerciseDemo();
+  }
 
   let nextHint = "";
   if(state === "work" && exercises[idx + 1]) nextHint = "Next: " + exercises[idx + 1].name;
