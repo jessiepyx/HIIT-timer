@@ -212,9 +212,9 @@ init();
 // NAV
 // =========================
 function show(page){
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
   const target = $(page);
-  if(target) target.classList.add("active");
+  if(target) target.style.display = "block";
   if(page === "main")    renderManage();
   if(page === "suggest") renderSuggest();
 }
