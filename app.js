@@ -104,6 +104,7 @@ let nearEndSpoken = false;
 let announced = false;
 let briefingDone = false;
 let beepTimeouts = [];
+let progressOffset = 0;
 
 // =========================
 // UTIL
@@ -447,8 +448,20 @@ function saveLS(){
 function briefing(cfg, exercises, onDone){
   const totalMin = Math.round(totalTime / 60);
   const exList = exercises.map(e => e.name).join(", ");
+
+  const intros = [
+    `Alright, let's get started!`,
+    `Let's do this!`,
+    `Time to work! Let's go!`,
+    `Ready to crush it? Here we go!`,
+    `Let's get after it!`,
+    `OK, game time!`,
+    `Here we go, let's make it count!`
+  ];
+  const intro = intros[Math.floor(Math.random() * intros.length)];
+
   const msg =
-    `Alright, let's get started! Today's workout is ${cfg.name}. ` +
+    `${intro} Today's workout is ${cfg.name}. ` +
     `You'll do ${cfg.rounds} round${cfg.rounds > 1 ? "s" : ""} of ${exercises.length} exercise${exercises.length > 1 ? "s" : ""}. ` +
     `Each exercise is ${cfg.work} seconds, with ${cfg.rest} seconds rest in between. ` +
     `The total workout time is about ${totalMin} minute${totalMin !== 1 ? "s" : ""}. ` +
@@ -497,13 +510,14 @@ function startSelected(){
     return;
   }
   idx = 0; round = 1; elapsed = 0; paused = false; halfSpoken = false;
-  briefingDone = false;
+  briefingDone = false; progressOffset = 0;
 
+  const waterBreaks = cfg.water > 0 ? Math.max(0, cfg.rounds - 1) : 0;
   totalTime =
     cfg.warmup +
     cfg.cooldown +
     cfg.rounds * exercises.length * (cfg.work + cfg.rest) +
-    Math.max(0, cfg.rounds - 1) * (cfg.water || 0);
+    waterBreaks * (cfg.water - cfg.rest);
 
   state = "briefing";
   t = cfg.warmup;
@@ -625,14 +639,25 @@ function next(){
 
     case "work":
       {
-        const upcoming = exercises[idx + 1] !== undefined
-          ? exercises[idx + 1]
-          : (round < cfg.rounds ? exercises[0] : null);
-        let restMsg = "Rest.";
-        if(upcoming) restMsg += ` Next up: ${upcoming.name}.`;
-        else if(round >= cfg.rounds) restMsg += " Last set done! Cool down coming up.";
-        speak(restMsg);
-        setState("rest", cfg.rest, null);
+        const isLastInRound = (idx + 1 >= exercises.length);
+        const hasWaterBreak = cfg.water > 0;
+        const hasMoreRounds = round < cfg.rounds;
+
+        if(isLastInRound && hasMoreRounds && hasWaterBreak){
+          idx = 0;
+          round++;
+          speak(`Round ${round - 1} complete! Take a water break.`);
+          setState("water", cfg.water, null);
+        } else {
+          const upcoming = exercises[idx + 1] !== undefined
+            ? exercises[idx + 1]
+            : (round < cfg.rounds ? exercises[0] : null);
+          let restMsg = "Rest.";
+          if(upcoming) restMsg += ` Next up: ${upcoming.name}.`;
+          else if(round >= cfg.rounds) restMsg += " Last set done! Cool down coming up.";
+          speak(restMsg);
+          setState("rest", cfg.rest, null);
+        }
       }
       break;
 
@@ -644,11 +669,6 @@ function next(){
         if(round > cfg.rounds){
           speak("Great job! Now let's cool down.");
           setState("cooldown", cfg.cooldown, null);
-          return;
-        }
-        if(cfg.water > 0){
-          speak(`Round ${round - 1} complete! Take a water break.`);
-          setState("water", cfg.water, null);
           return;
         }
       }
@@ -777,6 +797,7 @@ function skip(){
   }
 
   speak("Skipped");
+  progressOffset += t;
   t = 0;
   setTimeout(() => next(), 400);
 }
@@ -785,6 +806,7 @@ function restartMove(){
   if(state === "idle" || state === "briefing") return;
   clearBeeps();
   speechSynthesis.cancel();
+  progressOffset -= (duration - t);
   paused = false;
   speak("Restarting");
   setState(state, duration, null);
@@ -838,7 +860,7 @@ function updateUI(){
   if(statElapsed) statElapsed.textContent = formatTime(elapsed);
 
   const statRemaining = $("statRemaining");
-  if(statRemaining) statRemaining.textContent = formatTime(Math.max(0, totalTime - elapsed));
+  if(statRemaining) statRemaining.textContent = formatTime(Math.max(0, totalTime - elapsed - progressOffset));
 
   const circle = $("progressCircle");
   if(circle && duration > 0){
@@ -854,7 +876,7 @@ function updateUI(){
 
   const bar = $("totalProgress");
   if(bar && totalTime > 0){
-    const pct = Math.min(100, (elapsed / totalTime) * 100);
+    const pct = Math.min(100, ((elapsed + progressOffset) / totalTime) * 100);
     bar.style.width = pct + "%";
     const label = $("barLabel");
     if(label) label.textContent = Math.round(pct) + "% complete";
