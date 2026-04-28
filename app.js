@@ -1,61 +1,70 @@
 (() => {
 
 const EXERCISE_LIBRARY = {
-"Upper Body": [
-"Arm Circles", "Arnold Press (no weight)", "Bear Crawl Shoulder Taps",
-"Bench Dips", "Burpee to Push-up", "Close-Grip Push-ups",
-"Commando Plank", "Decline Push-ups", "Diamond Push-ups",
-"Dive Bomber Push-ups", "Fingertip Push-ups", "Hand Release Push-ups",
-"Handstand Hold", "Hindu Push-ups", "Inchworm",
-"Isometric Towel Curl", "Pike Push-ups", "Plank Shoulder Taps",
-"Plank Up-Downs", "Push-ups", "Shoulder Taps",
-"Superman Pull", "Tricep Dips", "Wide Push-ups", "YTW Raises"
+"Chest": [
+"Bench Press", "Chest Dips", "Chest Flyes", "Close-Grip Bench Press",
+"Decline Push-ups", "Dumbbell Pullover", "Incline Bench Press",
+"Incline Dumbbell Press", "Push-ups", "Svend Press", "Wide Push-ups"
 ],
-"Core": [
-"Ab Rollout (towel)", "Bear Crawl", "Bicycle Crunches",
-"Bird Dog", "Butterfly Sit-ups", "Crunches",
-"Dead Bug", "Dragon Flag (eccentric)", "Flutter Kicks",
-"Hanging Knee Raise", "Heel Touches", "Hollow Body Hold",
-"L-Sit Hold", "Leg Raises", "Mountain Climbers",
-"Pallof Press (band)", "Plank", "Plank Jacks",
-"Reverse Crunch", "Russian Twists", "Scissor Kicks",
+"Shoulders": [
+"Arnold Press", "Bus Drivers", "Face Pulls", "Front Raises",
+"Handstand Hold", "Lateral Raises", "Overhead Press", "Pike Push-ups",
+"Rear Delt Flyes", "Shoulder Shrugs", "Upright Rows", "Y-T-W Raises"
+],
+"Upper Back": [
+"Band Pull-Aparts", "Bent-Over Rows", "Chin-ups", "Dumbbell Rows",
+"Inverted Rows", "Lat Pulldowns", "Pull-ups", "Renegade Rows",
+"Reverse Flyes", "Seated Cable Rows", "Straight-Arm Pulldowns", "T-Bar Rows"
+],
+"Lower Back": [
+"Back Extensions", "Bird Dog", "Deadlifts", "Good Mornings",
+"Jefferson Curls", "Kettlebell Swings", "Reverse Hyperextension",
+"Romanian Deadlifts", "Superman Hold"
+],
+"Arms": [
+"Bicep Curls", "Close-Grip Push-ups", "Concentration Curls",
+"Diamond Push-ups", "Hammer Curls", "Overhead Tricep Extension",
+"Preacher Curls", "Reverse Curls", "Skull Crushers",
+"Tricep Dips", "Tricep Kickbacks", "Tricep Pushdowns",
+"Wrist Curls", "Zottman Curls"
+],
+"Abs": [
+"Ab Wheel Rollout", "Bicycle Crunches", "Crunches", "Dead Bug",
+"Flutter Kicks", "Hanging Knee Raise", "Heel Touches",
+"Hollow Body Hold", "Leg Raises", "Mountain Climbers", "Plank",
+"Plank Jacks", "Reverse Crunch", "Russian Twists",
 "Side Plank Left", "Side Plank Right", "Sit-ups",
 "Toe Touches", "V-ups", "Windshield Wipers"
 ],
-"Lower Body": [
-"Box Jumps", "Bulgarian Split Squats", "Calf Raises",
-"Cossack Squats", "Curtsy Lunges", "Donkey Kicks",
-"Fire Hydrants", "Frog Squats", "Glute Bridges",
-"Goblet Squats (no weight)", "Hip Thrusts", "Jump Lunges",
-"Jump Squats", "Lateral Lunges", "Lunges",
-"Pistol Squats", "Reverse Lunges", "Romanian Deadlift (single leg)",
-"Side-Lying Leg Raises", "Single-Leg Calf Raises", "Single-Leg Glute Bridge",
-"Squats", "Step-ups", "Sumo Squats",
-"Wall Sit"
+"Glutes": [
+"Banded Walks", "Cable Kickbacks", "Clamshells", "Curtsy Lunges",
+"Donkey Kicks", "Fire Hydrants", "Frog Pumps", "Glute Bridges",
+"Hip Thrusts", "Single-Leg Glute Bridge", "Sumo Deadlifts"
+],
+"Legs": [
+"Box Jumps", "Bulgarian Split Squats", "Calf Raises", "Cossack Squats",
+"Front Squats", "Goblet Squats", "Jump Squats", "Lateral Lunges",
+"Leg Curls", "Leg Extensions", "Leg Press", "Lunges",
+"Nordic Hamstring Curls", "Pistol Squats", "Reverse Lunges",
+"Single-Leg Calf Raises", "Split Squats", "Squats",
+"Step-ups", "Sumo Squats", "Walking Lunges", "Wall Sit"
 ],
 "Cardio": [
-"Bicycle Sprints", "Box Jumps", "Broad Jumps",
-"Burpees", "Butt Kicks", "Fast Feet",
-"Frog Jumps", "High Knees", "Ice Skaters",
-"Invisible Jump Rope", "Jumping Jacks", "Jumping Lunges",
-"Lateral Hops", "Mountain Climbers (fast)", "Plank Jacks",
-"Power Skips", "Running in Place", "Seal Jacks",
-"Shuttle Run", "Skaters", "Speed Step-ups",
-"Split Jumps", "Squat Jacks", "Star Jumps",
-"Tuck Jumps"
+"Broad Jumps", "Burpees", "Butt Kicks", "Fast Feet",
+"Frog Jumps", "High Knees", "Ice Skaters", "Jumping Jacks",
+"Jumping Lunges", "Jump Rope", "Lateral Hops", "Power Skips",
+"Running in Place", "Seal Jacks", "Shuttle Run", "Skaters",
+"Speed Step-ups", "Split Jumps", "Star Jumps", "Tuck Jumps"
 ],
 "Full Body": [
-"Bear Crawl", "Burpees", "Clean and Press (no weight)",
-"Devil Press (no weight)", "Inchworm to Push-up", "Man Makers (no weight)",
-"Mountain Climber Twist", "Plank to Squat", "Sprawls",
-"Squat to Press", "Thrusters (no weight)", "Turkish Get-up",
-"Walkout to Push-up"
+"Bear Crawl", "Clean and Press", "Devil Press", "Inchworm",
+"Man Makers", "Plank to Squat", "Sprawls", "Thrusters",
+"Turkish Get-up", "Walkout to Push-up"
 ],
 "Flexibility": [
-"Cat-Cow Stretch", "Child's Pose", "Cobra Stretch",
-"Downward Dog", "Figure Four Stretch", "Hamstring Stretch",
-"Hip Circles", "Hip Flexor Stretch", "IT Band Stretch",
-"Lizard Pose", "Pigeon Pose", "Quad Stretch",
+"Cat-Cow Stretch", "Child's Pose", "Cobra Stretch", "Downward Dog",
+"Figure Four Stretch", "Hamstring Stretch", "Hip Circles",
+"Hip Flexor Stretch", "Lizard Pose", "Pigeon Pose", "Quad Stretch",
 "Scorpion Stretch", "Seated Forward Fold", "Spinal Twist",
 "Standing Side Bend", "World's Greatest Stretch"
 ]
@@ -91,6 +100,7 @@ let elapsed = 0;
 let totalTime = 0;
 
 let halfSpoken = false;
+let nearEndSpoken = false;
 let announced = false;
 let briefingDone = false;
 let beepTimeouts = [];
@@ -248,9 +258,18 @@ function endEarly(){
     clearBeeps();
     speechSynthesis.cancel();
     speak("Workout ended");
+    const savedState = state;
     state = "idle";
     paused = false;
-    setTimeout(() => show("home"), 600);
+    renderSummary(true, savedState);
+    updateUI();
+    const dp = $("donePanel"); if(dp) dp.style.display = "block";
+    const dm = $("doneMsg"); if(dm) dm.textContent = "Workout ended early";
+    const wi = $("workoutInfo"); if(wi) wi.style.display = "none";
+    const bp = $("btnPause");  if(bp) bp.disabled = true;
+    const bs = $("btnSkip");   if(bs) bs.disabled = true;
+    const br = $("btnRestart");if(br) br.disabled = true;
+    const be = $("btnEndEarly"); if(be) be.style.display = "none";
   }
 }
 
@@ -483,7 +502,8 @@ function startSelected(){
   totalTime =
     cfg.warmup +
     cfg.cooldown +
-    cfg.rounds * exercises.length * (cfg.work + cfg.rest);
+    cfg.rounds * exercises.length * (cfg.work + cfg.rest) +
+    Math.max(0, cfg.rounds - 1) * (cfg.water || 0);
 
   state = "briefing";
   t = cfg.warmup;
@@ -526,6 +546,7 @@ function setState(s, dur, label){
   paused   = false;
   announced = false;
   halfSpoken = false;
+  nearEndSpoken = false;
   const bp = $("btnPause");
   if(bp) bp.textContent = "Pause";
   const be = $("btnEndEarly");
@@ -542,6 +563,7 @@ function run(){
 
 function getUpcomingExercise(){
   if(state === "warmup") return exercises[0];
+  if(state === "water") return exercises[0];
   if(state === "rest"){
     if(idx + 1 < exercises.length) return exercises[idx + 1];
     if(round + 1 <= cfg.rounds) return exercises[0];
@@ -557,13 +579,13 @@ function tick(){
   checkEncouragement();
 
   const announceAt = Math.min(8, Math.max(1, duration - 1));
-  if(!announced && (state === "warmup" || state === "rest") && t <= announceAt && t > 0){
+  if(!announced && (state === "warmup" || state === "rest" || state === "water") && t <= announceAt && t > 0){
     announced = true;
     const upcoming = getUpcomingExercise();
     if(upcoming) speak(`Get ready for ${upcoming.name}.`);
   }
 
-  if(t === 5 && (state === "work" || state === "cooldown")) beepCountdown();
+  if(t === 5) beepCountdown();
 
   updateUI();
   if(t <= 0) next();
@@ -571,9 +593,24 @@ function tick(){
 
 function checkEncouragement(){
   if(!cfg || state !== "work") return;
+
+  const halfwayMsgs = [
+    "Halfway there!", "Half done, keep going!", "Halfway! You've got this!",
+    "Halfway point, stay strong!", "That's half! Push through!"
+  ];
+  const nearEndMsgs = [
+    "Almost done!", "Final push!", "You're almost there!",
+    "Just a few more seconds!", "Finish strong!", "Don't stop now!",
+    "Great work, keep pushing!", "Looking good, keep going!"
+  ];
+
   if(!halfSpoken && t <= Math.floor(duration / 2)){
     halfSpoken = true;
-    speakQueue("Halfway there!", 0.5);
+    speakQueue(halfwayMsgs[Math.floor(Math.random() * halfwayMsgs.length)], 0.3);
+  }
+  if(!nearEndSpoken && duration >= 10 && t <= Math.floor(duration * 0.2)){
+    nearEndSpoken = true;
+    speakQueue(nearEndMsgs[Math.floor(Math.random() * nearEndMsgs.length)], 0.3);
   }
 }
 
@@ -609,7 +646,18 @@ function next(){
           setState("cooldown", cfg.cooldown, null);
           return;
         }
+        if(cfg.water > 0){
+          speak(`Round ${round - 1} complete! Take a water break.`);
+          setState("water", cfg.water, null);
+          return;
+        }
       }
+      beepGo();
+      setState("work", cfg.work, null);
+      setTimeout(() => speak(exercises[idx].name), 600);
+      break;
+
+    case "water":
       beepGo();
       setState("work", cfg.work, null);
       setTimeout(() => speak(exercises[idx].name), 600);
@@ -627,8 +675,9 @@ function showDone(){
   speak("Congratulations! Workout complete! You crushed it!");
   elapsed = totalTime;
   updateUI();
-  renderSummary();
+  renderSummary(false, "idle");
   const dp = $("donePanel"); if(dp) dp.style.display = "block";
+  const dm = $("doneMsg"); if(dm) dm.innerHTML = "&#x1F389; Workout complete!";
   const wi = $("workoutInfo"); if(wi) wi.style.display = "none";
   const bp = $("btnPause");  if(bp) bp.disabled = true;
   const bs = $("btnSkip");   if(bs) bs.disabled = true;
@@ -636,7 +685,7 @@ function showDone(){
   const be = $("btnEndEarly"); if(be) be.style.display = "none";
 }
 
-function renderSummary(){
+function renderSummary(early, prevState){
   const el = $("summary");
   if(!el) return;
 
@@ -644,29 +693,52 @@ function renderSummary(){
   const totalSec = elapsed % 60;
 
   const catCount = {};
-  const total = exercises.length * cfg.rounds;
-  exercises.forEach(ex => {
-    catCount[ex.category] = (catCount[ex.category] || 0) + cfg.rounds;
-  });
+  let totalExDone = 0;
+  let roundsDisplay = "";
+
+  if(!early){
+    exercises.forEach(ex => {
+      catCount[ex.category] = (catCount[ex.category] || 0) + cfg.rounds;
+    });
+    totalExDone = exercises.length * cfg.rounds;
+    roundsDisplay = `${cfg.rounds} &times; ${exercises.length} exercises`;
+  } else {
+    const fullRounds = Math.max(0, round - 1);
+    exercises.forEach(ex => {
+      catCount[ex.category] = (catCount[ex.category] || 0) + fullRounds;
+    });
+    let doneInRound = 0;
+    if(prevState === "rest") doneInRound = idx + 1;
+    else if(prevState === "work") doneInRound = idx;
+    else if(prevState === "cooldown") doneInRound = exercises.length;
+    else if(prevState === "water") doneInRound = exercises.length;
+    for(let i = 0; i < doneInRound; i++){
+      catCount[exercises[i].category] = (catCount[exercises[i].category] || 0) + 1;
+    }
+    totalExDone = fullRounds * exercises.length + doneInRound;
+    const roundsDone = fullRounds + (doneInRound > 0 ? 1 : 0);
+    roundsDisplay = `${roundsDone}/${cfg.rounds} rounds, ${totalExDone} exercises done`;
+  }
 
   let breakdown = "";
-  Object.entries(catCount)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([cat, count]) => {
-      const pct = Math.round((count / total) * 100);
-      breakdown +=
-        `<div class="summary-cat">` +
-        `<span class="cat-name">${cat}</span>` +
-        `<div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%"></div></div>` +
-        `<span class="cat-pct">${pct}%</span>` +
-        `</div>`;
-    });
+  if(totalExDone > 0){
+    Object.entries(catCount)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([cat, count]) => {
+        const pct = Math.round((count / totalExDone) * 100);
+        breakdown +=
+          `<div class="summary-cat">` +
+          `<span class="cat-name">${cat}</span>` +
+          `<div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%"></div></div>` +
+          `<span class="cat-pct">${pct}%</span>` +
+          `</div>`;
+      });
+  }
 
   el.innerHTML =
     `<div class="summary-stat">Duration: ${totalMin}m ${String(totalSec).padStart(2, "0")}s</div>` +
-    `<div class="summary-stat">Rounds: ${cfg.rounds} &times; ${exercises.length} exercises</div>` +
-    `<div class="summary-heading">Body Parts Worked</div>` +
-    breakdown;
+    `<div class="summary-stat">${roundsDisplay}</div>` +
+    (totalExDone > 0 ? `<div class="summary-heading">Body Parts Worked</div>` + breakdown : "");
 }
 
 // =========================
@@ -705,7 +777,6 @@ function skip(){
   }
 
   speak("Skipped");
-  elapsed += t;
   t = 0;
   setTimeout(() => next(), 400);
 }
@@ -714,8 +785,6 @@ function restartMove(){
   if(state === "idle" || state === "briefing") return;
   clearBeeps();
   speechSynthesis.cancel();
-  const spent = duration - t;
-  elapsed = Math.max(0, elapsed - spent);
   paused = false;
   speak("Restarting");
   setState(state, duration, null);
@@ -734,7 +803,7 @@ function updateUI(){
   if(phase){
     const labels = {
       briefing: "GET READY", warmup: "WARM UP", work: "WORK", rest: "REST",
-      cooldown: "COOL DOWN", idle: "DONE"
+      water: "WATER BREAK", cooldown: "COOL DOWN", idle: "DONE"
     };
     phase.textContent = labels[state] || state.toUpperCase();
   }
@@ -754,7 +823,7 @@ function updateUI(){
 
   const statRound = $("statRound");
   if(statRound) statRound.textContent = (cfg && state !== "idle")
-    ? `${round}/${cfg.rounds}` : "--";
+    ? `${Math.min(round, cfg.rounds)}/${cfg.rounds}` : "--";
 
   const statExercise = $("statExercise");
   if(statExercise && cfg){
@@ -778,6 +847,7 @@ function updateUI(){
     circle.style.stroke =
       state === "work"     ? "#ff9f0a" :
       state === "rest"     ? "#007aff" :
+      state === "water"    ? "#5ac8fa" :
       state === "warmup"   ? "#34c759" :
       state === "cooldown" ? "#34c759" : "#aaa";
   }
