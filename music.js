@@ -222,18 +222,16 @@ function playMLead(time, freq, dur, vel, wave){
 }
 
 function startMusic(){
-  if(!musicEnabled){ console.log("music: disabled"); return; }
+  if(!musicEnabled) return;
   try {
     const ctx = getAudioCtx();
-    console.log("music: starting, ctx.state=" + ctx.state);
     if(ctx.state === "suspended") ctx.resume();
     musicStep = 0;
     musicBar = 0;
     nextMusicTime = ctx.currentTime + 0.05;
     if(musicTimer) clearInterval(musicTimer);
     musicTimer = setInterval(musicScheduler, 25);
-    console.log("music: scheduler running");
-  } catch(e){ console.error("startMusic:", e); }
+  } catch(e){}
 }
 
 function stopMusic(){
@@ -244,16 +242,13 @@ function stopMusic(){
 function musicScheduler(){
   if(!musicEnabled) return;
   const ctx = getAudioCtx();
-  let scheduled = 0;
   while(nextMusicTime < ctx.currentTime + 0.1){
     scheduleMusicBeat(musicStep, nextMusicTime);
     const sty = MUSIC_STYLES[musicStyleIdx];
     nextMusicTime += 60.0 / sty.bpm / 4;
     musicStep++;
-    scheduled++;
     if(musicStep >= 16){ musicStep = 0; musicBar++; }
   }
-  if(musicBar === 0 && scheduled > 0) console.log("music: scheduled " + scheduled + " beats");
 }
 
 function scheduleMusicBeat(step, time){
@@ -315,7 +310,6 @@ function scheduleMusicBeat(step, time){
 
 function toggleMusic(){
   musicEnabled = !musicEnabled;
-  console.log("music: toggled to " + musicEnabled);
   localStorage.setItem("hiitMusic", musicEnabled ? "1" : "0");
   if(musicEnabled && state !== "idle"){
     const ctx = getAudioCtx();
