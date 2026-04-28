@@ -81,7 +81,6 @@ Object.entries(EXERCISE_LIBRARY).forEach(([cat, arr]) => {
 // STATE
 // =========================
 let workouts = [];
-let selected = null;
 let editingIndex = null;
 
 let cfg = null;
@@ -105,6 +104,16 @@ let announced = false;
 let briefingDone = false;
 let beepTimeouts = [];
 let progressOffset = 0;
+
+// music state
+let musicEnabled = localStorage.getItem("hiitMusic") === "1";
+let musicStyleIdx = +(localStorage.getItem("hiitMusicStyle") || 0);
+let musicTimer = null;
+let musicStep = 0;
+let musicBar = 0;
+let nextMusicTime = 0;
+let noiseBuffer = null;
+let musicMasterGain = null;
 
 // =========================
 // UTIL
@@ -178,6 +187,242 @@ function beepGo(){
 }
 
 // =========================
+// MUSIC ENGINE
+// =========================
+const MUSIC_STYLES = [
+  {
+    name: "Electronic", bpm: 128,
+    kick:  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+    snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+    bass:  [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,0],
+    bassNotes: [65.4, 65.4, 87.3, 77.8],
+    hasArp: true, arpProb: 0.6,
+    arpScale: [261.6, 293.7, 311.1, 349.2, 392.0, 415.3, 466.2],
+    arpSteps: [1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0],
+    synthType: "sawtooth"
+  },
+  {
+    name: "Hip Hop", bpm: 90,
+    kick:  [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,0],
+    snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,1],
+    bass:  [1,0,0,0, 0,0,1,0, 0,0,1,0, 0,0,0,0],
+    bassNotes: [55.0, 55.0, 73.4, 65.4],
+    hasArp: false, arpProb: 0, arpScale: [], arpSteps: [],
+    synthType: "sawtooth"
+  },
+  {
+    name: "Trap", bpm: 140,
+    kick:  [1,0,0,0, 0,0,0,0, 0,0,1,0, 0,0,0,0],
+    snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    hihat: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    bass:  [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,1],
+    bassNotes: [55.0, 55.0, 61.7, 49.0],
+    hasArp: false, arpProb: 0, arpScale: [], arpSteps: [],
+    synthType: "square"
+  },
+  {
+    name: "Drum & Bass", bpm: 174,
+    kick:  [1,0,0,0, 0,0,1,0, 0,0,1,0, 0,0,0,0],
+    snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,1],
+    hihat: [1,0,1,1, 0,0,1,0, 1,0,1,1, 0,0,1,0],
+    bass:  [1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0],
+    bassNotes: [65.4, 73.4, 77.8, 65.4],
+    hasArp: true, arpProb: 0.5,
+    arpScale: [261.6, 311.1, 392.0, 466.2, 523.3],
+    arpSteps: [1,0,1,0, 0,0,1,0, 1,0,1,0, 0,0,1,0],
+    synthType: "square"
+  }
+];
+
+function getMusicDest(){
+  const ctx = getAudioCtx();
+  if(!musicMasterGain){
+    musicMasterGain = ctx.createGain();
+    musicMasterGain.gain.value = 0.35;
+    musicMasterGain.connect(ctx.destination);
+  }
+  return musicMasterGain;
+}
+
+function getNoiseBuffer(){
+  if(!noiseBuffer){
+    const ctx = getAudioCtx();
+    const len = ctx.sampleRate / 5;
+    noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = noiseBuffer.getChannelData(0);
+    for(let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return noiseBuffer;
+}
+
+function playMKick(time, vel){
+  const ctx = getAudioCtx(); const dest = getMusicDest();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.connect(g); g.connect(dest);
+  osc.frequency.setValueAtTime(150, time);
+  osc.frequency.exponentialRampToValueAtTime(40, time + 0.08);
+  g.gain.setValueAtTime(0.7 * vel, time);
+  g.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+  osc.start(time); osc.stop(time + 0.31);
+}
+
+function playMSnare(time, vel){
+  const ctx = getAudioCtx(); const dest = getMusicDest();
+  const ns = ctx.createBufferSource();
+  ns.buffer = getNoiseBuffer();
+  const nf = ctx.createBiquadFilter();
+  nf.type = "bandpass"; nf.frequency.value = 3000; nf.Q.value = 0.8;
+  const ng = ctx.createGain();
+  ns.connect(nf); nf.connect(ng); ng.connect(dest);
+  ng.gain.setValueAtTime(0.4 * vel, time);
+  ng.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+  ns.start(time); ns.stop(time + 0.13);
+
+  const osc = ctx.createOscillator();
+  const og = ctx.createGain();
+  osc.connect(og); og.connect(dest);
+  osc.frequency.setValueAtTime(200, time);
+  og.gain.setValueAtTime(0.25 * vel, time);
+  og.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+  osc.start(time); osc.stop(time + 0.09);
+}
+
+function playMHat(time, vel, open){
+  const ctx = getAudioCtx(); const dest = getMusicDest();
+  const dur = open ? 0.12 : 0.04;
+  const ns = ctx.createBufferSource();
+  ns.buffer = getNoiseBuffer();
+  const f = ctx.createBiquadFilter();
+  f.type = "highpass"; f.frequency.value = 9000;
+  const g = ctx.createGain();
+  ns.connect(f); f.connect(g); g.connect(dest);
+  g.gain.setValueAtTime(0.18 * vel, time);
+  g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  ns.start(time); ns.stop(time + dur + 0.01);
+}
+
+function playMBass(time, freq, dur, vel){
+  const ctx = getAudioCtx(); const dest = getMusicDest();
+  const osc = ctx.createOscillator();
+  const f = ctx.createBiquadFilter();
+  const g = ctx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(freq, time);
+  f.type = "lowpass"; f.frequency.setValueAtTime(250, time); f.Q.value = 4;
+  osc.connect(f); f.connect(g); g.connect(dest);
+  g.gain.setValueAtTime(0.35 * vel, time);
+  g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.01);
+}
+
+function playMArp(time, freq, dur, vel, wave){
+  const ctx = getAudioCtx(); const dest = getMusicDest();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = wave || "square";
+  osc.frequency.setValueAtTime(freq, time);
+  osc.connect(g); g.connect(dest);
+  g.gain.setValueAtTime(0.08 * vel, time);
+  g.gain.setValueAtTime(0.08 * vel, time + dur * 0.7);
+  g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time); osc.stop(time + dur + 0.01);
+}
+
+function startMusic(){
+  if(!musicEnabled) return;
+  const ctx = getAudioCtx();
+  if(ctx.state === "suspended") ctx.resume();
+  musicStep = 0;
+  musicBar = 0;
+  nextMusicTime = ctx.currentTime + 0.05;
+  if(musicTimer) clearInterval(musicTimer);
+  musicTimer = setInterval(musicScheduler, 25);
+}
+
+function stopMusic(){
+  if(musicTimer) clearInterval(musicTimer);
+  musicTimer = null;
+}
+
+function musicScheduler(){
+  if(!musicEnabled) return;
+  const ctx = getAudioCtx();
+  while(nextMusicTime < ctx.currentTime + 0.1){
+    scheduleMusicBeat(musicStep, nextMusicTime);
+    const sty = MUSIC_STYLES[musicStyleIdx];
+    const stepDur = 60.0 / sty.bpm / 4;
+    nextMusicTime += stepDur;
+    musicStep++;
+    if(musicStep >= 16){ musicStep = 0; musicBar++; }
+  }
+}
+
+function scheduleMusicBeat(step, time){
+  const sty = MUSIC_STYLES[musicStyleIdx];
+  const vel = 0.8 + Math.random() * 0.4;
+  const stepDur = 60.0 / sty.bpm / 4;
+  const isFill = (musicBar > 0 && musicBar % 16 === 15 && step >= 12);
+
+  if(isFill){
+    if(step % 2 === 0) playMKick(time, vel);
+    if(step % 2 === 1) playMSnare(time, vel * 0.9);
+    playMHat(time, vel * 0.5, false);
+    return;
+  }
+
+  if(sty.kick[step]) playMKick(time, vel);
+  if(sty.snare[step]) playMSnare(time, vel);
+
+  if(sty.hihat[step]){
+    const hatVel = (sty.name === "Trap" && step % 2 !== 0) ? vel * 0.35 : vel;
+    const open = (step === 6 && Math.random() < 0.15);
+    playMHat(time, hatVel, open);
+  } else if(Math.random() < 0.15){
+    playMHat(time, vel * 0.25, false);
+  }
+
+  if(sty.bass[step]){
+    const noteIdx = musicBar % sty.bassNotes.length;
+    playMBass(time, sty.bassNotes[noteIdx], stepDur * 2, vel);
+  }
+
+  if(sty.hasArp && sty.arpSteps[step] && Math.random() < sty.arpProb){
+    const note = sty.arpScale[Math.floor(Math.random() * sty.arpScale.length)];
+    playMArp(time, note, stepDur * 0.9, vel, sty.synthType);
+  }
+}
+
+function toggleMusic(){
+  musicEnabled = !musicEnabled;
+  localStorage.setItem("hiitMusic", musicEnabled ? "1" : "0");
+  if(musicEnabled && state !== "idle"){
+    startMusic();
+  } else {
+    stopMusic();
+  }
+  updateMusicUI();
+}
+
+function cycleMusic(){
+  musicStyleIdx = (musicStyleIdx + 1) % MUSIC_STYLES.length;
+  localStorage.setItem("hiitMusicStyle", musicStyleIdx);
+  updateMusicUI();
+}
+
+function updateMusicUI(){
+  const tb = $("btnMusicToggle");
+  if(tb){
+    tb.textContent = musicEnabled ? "Music: On" : "Music: Off";
+    tb.classList.toggle("music-on", musicEnabled);
+  }
+  const sb = $("btnMusicStyle");
+  if(sb) sb.textContent = MUSIC_STYLES[musicStyleIdx].name;
+}
+
+// =========================
 // SPEECH
 // =========================
 function speak(text){
@@ -205,7 +450,8 @@ function speakQueue(text, delay){
 function init(){
   workouts = JSON.parse(localStorage.getItem("hiitWorkouts") || "[]");
   bindStaticUI();
-  show("home");
+  updateMusicUI();
+  show("main");
 }
 
 init();
@@ -217,8 +463,7 @@ function show(page){
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   const target = $(page);
   if(target) target.classList.add("active");
-  if(page === "select") renderSelect();
-  if(page === "edit")   renderManage();
+  if(page === "main")    renderManage();
   if(page === "suggest") renderSuggest();
 }
 
@@ -226,18 +471,13 @@ function show(page){
 // STATIC BUTTONS
 // =========================
 function bindStaticUI(){
-  bind("btnChoose",    () => show("select"));
-  bind("btnEdit",      () => show("edit"));
   bind("btnSuggest",   () => show("suggest"));
-  bind("btnBackHome1", () => show("home"));
-  bind("btnBackHome2", () => show("home"));
-  bind("btnStart",     startSelected);
   bind("btnNew",       newWorkout);
   bind("btnAddEx",     () => addExercise());
   bind("btnPickEx",    openPicker);
   bind("btnSave",      save);
-  bind("btnBackEdit",  () => show("edit"));
-  bind("btnBackSuggest", () => show("home"));
+  bind("btnBackEdit",  () => show("main"));
+  bind("btnBackSuggest", () => show("main"));
   bind("btnGenerate",  generateWorkout);
   bind("btnSelectAll", () => toggleAllParts(true));
   bind("btnDeselectAll", () => toggleAllParts(false));
@@ -246,6 +486,8 @@ function bindStaticUI(){
   bind("btnRestart",   restartMove);
   bind("btnHome",      goHome);
   bind("btnEndEarly",  endEarly);
+  bind("btnMusicToggle", toggleMusic);
+  bind("btnMusicStyle",  cycleMusic);
   bind("btnPickerDone",   pickerDone);
   bind("btnPickerCancel", () => { $("pickerOverlay").style.display = "none"; });
 }
@@ -253,16 +495,18 @@ function bindStaticUI(){
 function goHome(){
   clearInterval(timer);
   clearBeeps();
+  stopMusic();
   speechSynthesis.cancel();
   state = "idle";
   paused = false;
-  show("home");
+  show("main");
 }
 
 function endEarly(){
   if(confirm("End workout early?")){
     clearInterval(timer);
     clearBeeps();
+    stopMusic();
     speechSynthesis.cancel();
     speak("Workout ended");
     const savedState = state;
@@ -281,43 +525,29 @@ function endEarly(){
 }
 
 // =========================
-// SELECT PAGE
-// =========================
-function renderSelect(){
-  const list = $("workoutList");
-  if(!list) return;
-  list.innerHTML = "";
-  workouts.forEach((w, i) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.textContent = w.name;
-    div.addEventListener("click", () => {
-      selected = i;
-      [...list.children].forEach(c => { c.style.border = "none"; });
-      div.style.border = "2px solid #007aff";
-    });
-    list.appendChild(div);
-  });
-}
-
-// =========================
-// EDIT PAGE
+// MAIN PAGE (workout list)
 // =========================
 function renderManage(){
   const list = $("manageList");
   if(!list) return;
   list.innerHTML = "";
+  if(workouts.length === 0){
+    list.innerHTML = '<p style="color:#888;margin:20px 0;">No workouts yet. Create one below!</p>';
+    return;
+  }
   workouts.forEach((w, i) => {
+    const exCount = (w.exercises || []).length;
     const div = document.createElement("div");
     div.className = "card";
-    div.innerHTML = `<b>${w.name}</b><br> <button class="edit">Edit</button> <button class="del">Delete</button>`;
+    div.innerHTML =
+      `<div class="card-info"><b>${w.name}</b><span>${w.rounds} rounds &middot; ${exCount} exercises &middot; ${w.work}s/${w.rest}s</span></div>` +
+      `<div class="card-actions"><button class="start primary">Start</button><button class="edit">Edit</button><button class="del">Delete</button></div>`;
     list.appendChild(div);
-    div.querySelector(".del").onclick = () => {
-      workouts.splice(i, 1);
-      saveLS();
-      renderManage();
-    };
+    div.querySelector(".start").onclick = () => startWorkout(i);
     div.querySelector(".edit").onclick = () => edit(i);
+    div.querySelector(".del").onclick = () => {
+      if(confirm("Delete this workout?")){ workouts.splice(i, 1); saveLS(); renderManage(); }
+    };
   });
 }
 
@@ -441,7 +671,7 @@ function save(){
   if(editingIndex != null){ workouts[editingIndex] = w; }
   else { workouts.push(w); }
   saveLS();
-  show("edit");
+  show("main");
 }
 
 function saveLS(){
@@ -655,15 +885,15 @@ function briefing(cfg, exercises, onDone){
 // =========================
 // TIMER ENGINE
 // =========================
-function startSelected(){
-  if(selected == null || !workouts[selected]){
-    alert("Please select a workout first.");
+function startWorkout(i){
+  if(!workouts[i]){
+    alert("Workout not found.");
     return;
   }
   const ctx = getAudioCtx();
   if(ctx.state === "suspended") ctx.resume();
 
-  cfg = workouts[selected];
+  cfg = workouts[i];
   exercises = normalizeExercises(cfg.exercises);
   if(exercises.length === 0){
     alert("This workout has no exercises.");
@@ -692,7 +922,9 @@ function startSelected(){
 
   renderWorkoutInfo();
   show("run");
+  updateMusicUI();
   updateUI();
+  startMusic();
 
   briefing(cfg, exercises, startWarmup);
 }
@@ -852,6 +1084,7 @@ function next(){
 }
 
 function showDone(){
+  stopMusic();
   speak("Congratulations! Workout complete! You crushed it!");
   elapsed = totalTime;
   updateUI();
@@ -934,11 +1167,13 @@ function togglePause(){
 
   if(paused){
     clearBeeps();
+    stopMusic();
     speechSynthesis.cancel();
     if(state === "briefing") briefingDone = true;
     speak("Paused");
   } else {
     speak("Resumed");
+    if(musicEnabled) startMusic();
     if(state === "briefing" && briefingDone) startWarmup();
   }
 }
