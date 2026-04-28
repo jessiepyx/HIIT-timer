@@ -219,6 +219,7 @@ function show(page){
   if(target) target.classList.add("active");
   if(page === "select") renderSelect();
   if(page === "edit")   renderManage();
+  if(page === "suggest") renderSuggest();
 }
 
 // =========================
@@ -227,6 +228,7 @@ function show(page){
 function bindStaticUI(){
   bind("btnChoose",    () => show("select"));
   bind("btnEdit",      () => show("edit"));
+  bind("btnSuggest",   () => show("suggest"));
   bind("btnBackHome1", () => show("home"));
   bind("btnBackHome2", () => show("home"));
   bind("btnStart",     startSelected);
@@ -235,6 +237,10 @@ function bindStaticUI(){
   bind("btnPickEx",    openPicker);
   bind("btnSave",      save);
   bind("btnBackEdit",  () => show("edit"));
+  bind("btnBackSuggest", () => show("home"));
+  bind("btnGenerate",  generateWorkout);
+  bind("btnSelectAll", () => toggleAllParts(true));
+  bind("btnDeselectAll", () => toggleAllParts(false));
   bind("btnPause",     togglePause);
   bind("btnSkip",      skip);
   bind("btnRestart",   restartMove);
@@ -440,6 +446,160 @@ function save(){
 
 function saveLS(){
   localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
+}
+
+// =========================
+// SMART WORKOUT GENERATOR
+// =========================
+let suggestTime = 30;
+let suggestIntensity = "moderate";
+let suggestParts = new Set();
+
+const INTENSITY_PRESETS = {
+  easy:     { work: 30, rest: 30, warmup: 60, cooldown: 60, water: 60 },
+  moderate: { work: 45, rest: 20, warmup: 60, cooldown: 60, water: 45 },
+  intense:  { work: 60, rest: 15, warmup: 60, cooldown: 60, water: 30 }
+};
+
+const BODY_PARTS = Object.keys(EXERCISE_LIBRARY).filter(c => c !== "Flexibility");
+
+function renderSuggest(){
+  renderOptionRow("timeOptions", [20, 30, 45, 60], suggestTime, v => {
+    suggestTime = v;
+    renderSuggest();
+  }, v => v + " min");
+
+  renderOptionRow("intensityOptions", ["easy", "moderate", "intense"], suggestIntensity, v => {
+    suggestIntensity = v;
+    renderSuggest();
+  }, v => v.charAt(0).toUpperCase() + v.slice(1));
+
+  const grid = $("bodyPartOptions");
+  if(!grid) return;
+  grid.innerHTML = "";
+  BODY_PARTS.forEach(part => {
+    const btn = document.createElement("button");
+    btn.textContent = part;
+    if(suggestParts.has(part)) btn.classList.add("selected");
+    btn.onclick = () => {
+      if(suggestParts.has(part)) suggestParts.delete(part);
+      else suggestParts.add(part);
+      renderSuggest();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function renderOptionRow(id, values, current, onSelect, label){
+  const row = $(id);
+  if(!row) return;
+  row.innerHTML = "";
+  values.forEach(v => {
+    const btn = document.createElement("button");
+    btn.textContent = label(v);
+    if(v === current) btn.classList.add("selected");
+    btn.onclick = () => onSelect(v);
+    row.appendChild(btn);
+  });
+}
+
+function toggleAllParts(on){
+  if(on) BODY_PARTS.forEach(p => suggestParts.add(p));
+  else suggestParts.clear();
+  renderSuggest();
+}
+
+function generateWorkout(){
+  if(suggestParts.size === 0){
+    alert("Select at least one body part.");
+    return;
+  }
+
+  const p = INTENSITY_PRESETS[suggestIntensity];
+  const totalSecs = suggestTime * 60;
+  const available = totalSecs - p.warmup - p.cooldown;
+  const cycleTime = p.work + p.rest;
+
+  let best = null;
+  for(let r = 2; r <= 5; r++){
+    const net = available - (r - 1) * Math.max(0, p.water - p.rest);
+    const n = Math.floor(net / (r * cycleTime));
+    if(n < 4 || n > 20) continue;
+    const dist = Math.abs(n - 10);
+    if(!best || dist < best.dist || (dist === best.dist && r > best.rounds)){
+      best = { rounds: r, numEx: n, dist };
+    }
+  }
+  if(!best){
+    const net = available - Math.max(0, p.water - p.rest);
+    best = { rounds: 2, numEx: Math.max(4, Math.floor(net / (2 * cycleTime))) };
+  }
+
+  const parts = orderPartsForAlternation([...suggestParts]);
+  const ex = pickExercises(parts, best.numEx);
+
+  const w = {
+    name: suggestTime + "min " + suggestIntensity.charAt(0).toUpperCase() + suggestIntensity.slice(1),
+    work: p.work,
+    rest: p.rest,
+    rounds: best.rounds,
+    water: p.water,
+    warmup: p.warmup,
+    cooldown: p.cooldown,
+    exercises: ex
+  };
+
+  editingIndex = null;
+  loadForm(w);
+  show("form");
+}
+
+function orderPartsForAlternation(parts){
+  const upper = ["Chest", "Shoulders", "Upper Back", "Arms"];
+  const lower = ["Legs", "Glutes"];
+  const core = ["Abs", "Lower Back"];
+  const other = ["Cardio", "Full Body"];
+
+  const groups = [
+    parts.filter(p => upper.includes(p)),
+    parts.filter(p => lower.includes(p)),
+    parts.filter(p => core.includes(p)),
+    parts.filter(p => other.includes(p))
+  ].filter(g => g.length > 0);
+
+  const result = [];
+  const maxLen = Math.max(...groups.map(g => g.length));
+  for(let i = 0; i < maxLen; i++){
+    groups.forEach(g => {
+      if(i < g.length) result.push(g[i]);
+    });
+  }
+  return result;
+}
+
+function pickExercises(orderedParts, count){
+  const pools = {};
+  orderedParts.forEach(part => {
+    const available = [...(EXERCISE_LIBRARY[part] || [])];
+    for(let i = available.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [available[i], available[j]] = [available[j], available[i]];
+    }
+    pools[part] = available;
+  });
+
+  const result = [];
+  let pi = 0;
+  while(result.length < count){
+    const part = orderedParts[pi % orderedParts.length];
+    const pool = pools[part];
+    if(pool && pool.length > 0){
+      result.push({ name: pool.shift(), category: part });
+    }
+    pi++;
+    if(Object.values(pools).every(p => p.length === 0)) break;
+  }
+  return result;
 }
 
 // =========================
