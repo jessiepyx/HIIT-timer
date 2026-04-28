@@ -101,6 +101,119 @@
   <!-- phase badge -->
   <div id="phase"></div>
 
+  <!-- exercise demo -->
+  <div id="exerciseDemo" style="display:none;">
+    <img src="" alt="">
+  </div>
+
+  <!-- exercise name -->
+  <div id="current"></div>
+
+  <!-- circle timer -->
+  <div class="circle">
+    <svg viewBox="0 0 220 220">
+      <circle cx="110" cy="110" r="96"></circle>
+      <circle id="progressCircle" cx="110" cy="110" r="96"></circle>
+    </svg>
+    <div class="circle-inner">
+      <div id="timer">0</div>
+      <div id="timerSub">sec</div>
+    </div>
+  </div>
+
+  <!-- next up -->
+  <div id="next"></div>
+
+  <!-- stats row -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="statRound">--</div>
+      <div class="stat-label">Round</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="statExercise">--</div>
+      <div class="stat-label">Exercise</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="statElapsed">0:00</div>
+      <div class="stat-label">Elapsed</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="statRemaining">--</div>
+      <div class="stat-label">Left</div>
+    </div>
+  </div>
+
+  <!-- total progress bar -->
+  <div class="bar">
+    <div id="totalProgress"></div>
+  </div>
+  <div id="barLabel"></div>
+
+  <div class="music-bar">
+    <button id="btnMusicToggle">Music: Off</button>
+    <button id="btnMusicStyle">Electronic</button>
+  </div>
+
+  <div class="controls">
+    <button id="btnPause">Pause</button>
+    <button id="btnSkip">Skip</button>
+    <button id="btnRestart">Restart</button>
+    <button id="btnEndEarly" style="display:none">End Workout</button>
+  </div>
+
+  <div id="donePanel" style="display:none; margin-top:24px;">
+    <p id="doneMsg">&#x1F389; Workout complete!</p>
+    <div id="summary"></div>
+    <button id="btnHome" class="primary">Back to Home</button>
+  </div>
+
+  <div id="workoutInfo" class="workout-info" style="display:none;"></div>
+
+</div>
+
+<script>
+var _cb = Date.now();
+document.write('<script src="demo.js?' + _cb + '"><\/script>');
+document.write('<script src="music.js?' + _cb + '"><\/script>');
+document.write('<script src="app.js?' + _cb + '"><\/script>');
+</script>
+
+</body>
+</html>
+
+  <div class="form-btns">
+    <button id="btnAddEx">+ Custom</button>
+    <button id="btnPickEx" class="primary">+ Pick Exercise</button>
+  </div>
+  <button id="btnSave" class="primary" style="width:90%;margin-top:8px;">Save Workout</button>
+  <button id="btnBackEdit" style="width:90%;margin-top:4px;">Back</button>
+</div>
+
+<!-- EXERCISE PICKER MODAL -->
+
+<div id="pickerOverlay" class="overlay" style="display:none;">
+  <div class="picker-box">
+    <h3>Pick Exercises</h3>
+    <p class="picker-hint">Tap to select, tap again to deselect</p>
+    <div id="pickerList"></div>
+    <div style="margin-top:12px;">
+      <button id="btnPickerDone" class="primary">Add Selected</button>
+      <button id="btnPickerCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RUN -->
+
+<div id="run" class="page">
+
+  <!-- phase badge -->
+  <div id="phase"></div>
+
   <!-- exercise name -->
   <div id="current"></div>
 
