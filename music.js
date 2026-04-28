@@ -223,13 +223,15 @@ function playMLead(time, freq, dur, vel, wave){
 
 function startMusic(){
   if(!musicEnabled) return;
-  const ctx = getAudioCtx();
-  if(ctx.state === "suspended") ctx.resume();
-  musicStep = 0;
-  musicBar = 0;
-  nextMusicTime = ctx.currentTime + 0.05;
-  if(musicTimer) clearInterval(musicTimer);
-  musicTimer = setInterval(musicScheduler, 25);
+  try {
+    const ctx = getAudioCtx();
+    if(ctx.state === "suspended") ctx.resume();
+    musicStep = 0;
+    musicBar = 0;
+    nextMusicTime = ctx.currentTime + 0.05;
+    if(musicTimer) clearInterval(musicTimer);
+    musicTimer = setInterval(musicScheduler, 25);
+  } catch(e){ console.error("startMusic:", e); }
 }
 
 function stopMusic(){
@@ -310,6 +312,8 @@ function toggleMusic(){
   musicEnabled = !musicEnabled;
   localStorage.setItem("hiitMusic", musicEnabled ? "1" : "0");
   if(musicEnabled && state !== "idle"){
+    const ctx = getAudioCtx();
+    if(ctx.state === "suspended") ctx.resume();
     startMusic();
   } else {
     stopMusic();
