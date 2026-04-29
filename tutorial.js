@@ -49,7 +49,7 @@ var DEFAULT_VIDEOS = {
   "Deadlifts": "",
   "Good Mornings": "",
   "Jefferson Curls": "",
-  "Kettlebell Swings": "",
+  "Kettlebell Swings": "BV1qs411G7ER",
   "Reverse Hyperextension": "",
   "Romanian Deadlifts": "",
   "Superman Hold": "",
@@ -124,7 +124,7 @@ var DEFAULT_VIDEOS = {
   "Wall Sit": "",
   // Cardio
   "Broad Jumps": "",
-  "Burpees": "",
+  "Burpees": "BV1YW411c71b",
   "Butt Kicks": "",
   "Fast Feet": "",
   "Frog Jumps": "",
