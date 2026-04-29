@@ -441,7 +441,8 @@ function renderPicker(){
       const eqLabel = getEquipmentLabel(name);
       const item = document.createElement("div");
       item.className = "picker-item" + (pickerSelected.has(name) ? " selected" : "");
-      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}</span><span class="picker-eq-label">${eqLabel}</span>`;
+      var tutBtn = (typeof getTutorialHtml === "function") ? getTutorialHtml(name) : "";
+      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}</span><span class="picker-eq-label">${eqLabel}</span>${tutBtn}`;
       item.addEventListener("click", () => {
         if(pickerSelected.has(name)){
           pickerSelected.delete(name);
@@ -494,7 +495,8 @@ function addExercise(name, category){
   ).join("");
   const eqLabel = safeName ? getEquipmentLabel(safeName) : "";
   const eqHtml = eqLabel ? `<span class="eq-label">${eqLabel}</span>` : "";
-  div.innerHTML = `<input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}<button type="button">\u2715</button>`;
+  var tutHtml = (typeof getFormTutorialHtml === "function") ? getFormTutorialHtml(safeName) : "";
+  div.innerHTML = `<input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
   div.querySelector("button").onclick = () => div.remove();
   list.appendChild(div);
 }
@@ -1127,6 +1129,21 @@ function updateUI(){
   if(typeof showExerciseDemo === "function"){
     if(state === "work" && exercises[idx]) showExerciseDemo(exercises[idx].name);
     else hideExerciseDemo();
+  }
+
+  // Tutorial: show during rest/water/pause for next exercise
+  if(typeof showWorkoutTutorial === "function"){
+    var showTut = (state === "rest" || state === "water") || (paused && state !== "idle");
+    if(showTut){
+      var tutName = null;
+      if(state === "rest" || state === "water"){
+        var ni = idx + 1;
+        if(ni < exercises.length) tutName = exercises[ni].name;
+        else if(round + 1 <= cfg.rounds) tutName = exercises[0].name;
+      } else if(exercises[idx]) tutName = exercises[idx].name;
+      if(tutName) showWorkoutTutorial(tutName);
+      else hideWorkoutTutorial();
+    } else { hideWorkoutTutorial(); }
   }
 
   let nextName = "";
