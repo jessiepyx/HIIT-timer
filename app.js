@@ -1066,10 +1066,12 @@ function togglePause(){
     speechSynthesis.cancel();
     if(state === "briefing") briefingDone = true;
     speak("Paused");
+    updateUI();
   } else {
     speak("Resumed");
     if(musicEnabled) startMusic();
     if(state === "briefing" && briefingDone) startWarmup();
+    updateUI();
   }
 }
 
