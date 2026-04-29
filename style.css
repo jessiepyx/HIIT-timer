@@ -74,11 +74,21 @@ label {
   font-size: 0.85em;
 }
 
+.main-section-title {
+  font-size: 0.78em;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 20px 0 6px;
+  padding-top: 16px;
+  border-top: 1px solid #ddd;
+}
+
 .main-btns {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin: 16px 0;
+  margin: 8px 0 20px;
 }
 
 .exercise {
