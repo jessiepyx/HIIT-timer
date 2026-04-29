@@ -83,9 +83,33 @@ label {
 
 .exercise {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin: 5px 8px;
   align-items: center;
+}
+
+.drag-handle {
+  cursor: grab;
+  font-size: 1.2em;
+  color: #aaa;
+  padding: 4px;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.exercise.dragging {
+  opacity: 0.8;
+  background: #e8f0fe;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.drag-placeholder {
+  background: #d6eaff;
+  border: 2px dashed #007aff;
+  border-radius: 8px;
+  margin: 5px 8px;
 }
 
 .exercise input {
@@ -548,6 +572,24 @@ label {
   cursor: pointer;
 }
 
+.tutorial-btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.tutorial-remove-btn {
+  padding: 8px 14px;
+  border: 1px solid rgba(255,69,58,0.3);
+  border-radius: 8px;
+  background: rgba(255,69,58,0.08);
+  color: #ff3b30;
+  font-size: 0.82em;
+  cursor: pointer;
+}
+
 /* tutorial overlay (picker/form) */
 #tutorialOverlay {
   z-index: 200;
@@ -846,6 +888,19 @@ label {
   color: #888;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.cn-name {
+  font-size: 0.82em;
+  color: #999;
+}
+
+.cn-name-lg {
+  display: block;
+  font-size: 0.5em;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 /* ── WORKOUT INFO ── */
