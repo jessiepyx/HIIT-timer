@@ -263,11 +263,11 @@ function showTutorialOverlay(name){
   tutorialOverlayName = name;
   var vid = getVideoId(name);
   var isUserSaved = !!userVideos[name];
-  var content = '<div class="tutorial-modal">';
+  var content = '<div class="tutorial-modal" onclick="event.stopPropagation()">';
   content += '<h3>' + name + '</h3>';
   if(vid){
     content += '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-    if(isUserSaved) content += '<button class="tutorial-change-btn" onclick="removeTutorialVideo()">Remove saved video</button>';
+    if(isUserSaved) content += '<button class="tutorial-change-btn" onclick="removeTutorialVideo()">Remove my video (use default)</button>';
   }
   content += '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(name) + '" target="_blank">Search on YouTube</a>';
   content += '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to save"><button class="tutorial-save-btn" onclick="saveTutorialOverlay()">Save</button></div>';
