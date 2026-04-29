@@ -277,9 +277,11 @@ function showWorkoutTutorial(exerciseName){
   if(!area) return;
   var vid = getVideoId(exerciseName);
   var isUserSaved = !!userVideos[exerciseName];
+  var cnTut = getChineseName(exerciseName);
+  var cnTutHtml = cnTut ? ' <span class="cn-name">' + cnTut + '</span>' : '';
   if(vid){
     area.innerHTML =
-      '<div class="tutorial-header">Tutorial: ' + exerciseName + (isUserSaved ? ' <span style="font-size:0.8em;color:#34c759;">(saved)</span>' : '') + '</div>' +
+      '<div class="tutorial-header">Tutorial: ' + exerciseName + cnTutHtml + (isUserSaved ? ' <span style="font-size:0.8em;color:#34c759;">(saved)</span>' : '') + '</div>' +
       '<iframe class="tutorial-frame" src="' + embedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
       '<div class="tutorial-actions">' +
       '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">YouTube</a> ' +
@@ -288,7 +290,7 @@ function showWorkoutTutorial(exerciseName){
       '</div>';
   } else {
     area.innerHTML =
-      '<div class="tutorial-header">Tutorial: ' + exerciseName + '</div>' +
+      '<div class="tutorial-header">Tutorial: ' + exerciseName + cnTutHtml + '</div>' +
       '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">YouTube</a> ' +
       '<a class="tutorial-search-btn" href="' + bilibiliSearchUrl(exerciseName) + '" target="_blank">Bilibili</a>' +
       '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube or Bilibili URL"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>';
@@ -336,7 +338,8 @@ function showTutorialOverlay(name){
   var isUserSaved = !!userVideos[name];
   var content = '<div class="tutorial-modal" onclick="event.stopPropagation()">';
   content += '<div class="picker-handle"></div>';
-  content += '<h3>' + name + '</h3>';
+  var cnOv = getChineseName(name);
+  content += '<h3>' + name + (cnOv ? ' <span class="cn-name">' + cnOv + '</span>' : '') + '</h3>';
   if(vid){
     content += '<iframe class="tutorial-frame" src="' + embedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
   }
