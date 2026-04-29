@@ -1,10 +1,191 @@
 // =========================
 // TUTORIAL VIDEO SYSTEM
 // =========================
-var exerciseVideos = JSON.parse(localStorage.getItem("hiitVideos") || "{}");
 
-function saveVideos(){
-  localStorage.setItem("hiitVideos", JSON.stringify(exerciseVideos));
+// Hardcoded default videos (fallback). User-saved videos in localStorage override these.
+// Format: "Exercise Name": "YouTubeVideoId"
+var DEFAULT_VIDEOS = {
+  // Chest
+  "Bench Press": "",
+  "Chest Dips": "",
+  "Chest Flyes": "",
+  "Close-Grip Bench Press": "",
+  "Decline Push-ups": "",
+  "Dumbbell Pullover": "",
+  "Incline Bench Press": "",
+  "Incline Dumbbell Press": "",
+  "Push-ups": "",
+  "Svend Press": "",
+  "Wide Push-ups": "",
+  // Shoulders
+  "Arnold Press": "",
+  "Bus Drivers": "",
+  "Face Pulls": "",
+  "Front Raises": "",
+  "Handstand Hold": "",
+  "Lateral Raises": "",
+  "Overhead Press": "",
+  "Pike Push-ups": "",
+  "Rear Delt Flyes": "",
+  "Shoulder Shrugs": "",
+  "Upright Rows": "",
+  "Y-T-W Raises": "",
+  // Upper Back
+  "Band Pull-Aparts": "",
+  "Bent-Over Rows": "",
+  "Chin-ups": "",
+  "Dumbbell Rows": "",
+  "Inverted Rows": "",
+  "Lat Pulldowns": "",
+  "Pull-ups": "",
+  "Renegade Rows": "",
+  "Reverse Flyes": "",
+  "Seated Cable Rows": "",
+  "Straight-Arm Pulldowns": "",
+  "T-Bar Rows": "",
+  // Lower Back
+  "Back Extensions": "",
+  "Bird Dog": "",
+  "Deadlifts": "",
+  "Good Mornings": "",
+  "Jefferson Curls": "",
+  "Kettlebell Swings": "",
+  "Reverse Hyperextension": "",
+  "Romanian Deadlifts": "",
+  "Superman Hold": "",
+  // Arms
+  "Bicep Curls": "",
+  "Close-Grip Push-ups": "",
+  "Concentration Curls": "",
+  "Diamond Push-ups": "",
+  "Hammer Curls": "",
+  "Overhead Tricep Extension": "",
+  "Preacher Curls": "",
+  "Reverse Curls": "",
+  "Skull Crushers": "",
+  "Tricep Dips": "",
+  "Tricep Kickbacks": "",
+  "Tricep Pushdowns": "",
+  "Wrist Curls": "",
+  "Zottman Curls": "",
+  // Abs
+  "Bicycle Crunches": "",
+  "Crunches": "",
+  "Dead Bug": "",
+  "Flutter Kicks": "",
+  "Hanging Knee Raise": "",
+  "Heel Touches": "",
+  "Hollow Body Hold": "",
+  "Leg Raises": "",
+  "Mountain Climbers": "",
+  "Plank": "",
+  "Plank Jacks": "",
+  "Reverse Crunch": "",
+  "Russian Twists": "",
+  "Side Plank Left": "",
+  "Side Plank Right": "",
+  "Sit-ups": "",
+  "Toe Touches": "",
+  "V-ups": "",
+  "Windshield Wipers": "",
+  // Glutes
+  "Banded Walks": "",
+  "Cable Kickbacks": "",
+  "Clamshells": "",
+  "Curtsy Lunges": "",
+  "Donkey Kicks": "",
+  "Fire Hydrants": "",
+  "Frog Pumps": "",
+  "Glute Bridges": "",
+  "Hip Thrusts": "",
+  "Single-Leg Glute Bridge": "",
+  "Sumo Deadlifts": "",
+  // Legs
+  "Box Jumps": "",
+  "Bulgarian Split Squats": "",
+  "Calf Raises": "",
+  "Cossack Squats": "",
+  "Front Squats": "",
+  "Goblet Squats": "",
+  "Jump Squats": "",
+  "Lateral Lunges": "",
+  "Leg Curls": "",
+  "Leg Extensions": "",
+  "Leg Press": "",
+  "Lunges": "",
+  "Nordic Hamstring Curls": "",
+  "Pistol Squats": "",
+  "Reverse Lunges": "",
+  "Single-Leg Calf Raises": "",
+  "Split Squats": "",
+  "Squats": "",
+  "Step-ups": "",
+  "Sumo Squats": "",
+  "Walking Lunges": "",
+  "Wall Sit": "",
+  // Cardio
+  "Broad Jumps": "",
+  "Burpees": "",
+  "Butt Kicks": "",
+  "Fast Feet": "",
+  "Frog Jumps": "",
+  "High Knees": "",
+  "Ice Skaters": "",
+  "Jumping Jacks": "",
+  "Jumping Lunges": "",
+  "Jump Rope": "",
+  "Lateral Hops": "",
+  "Power Skips": "",
+  "Running in Place": "",
+  "Seal Jacks": "",
+  "Shuttle Run": "",
+  "Skaters": "",
+  "Speed Step-ups": "",
+  "Split Jumps": "",
+  "Star Jumps": "",
+  "Tuck Jumps": "",
+  // Full Body
+  "Bear Crawl": "",
+  "Clean and Press": "",
+  "Devil Press": "",
+  "Inchworm": "",
+  "Man Makers": "",
+  "Plank to Squat": "",
+  "Sprawls": "",
+  "Thrusters": "",
+  "Turkish Get-up": "",
+  "Walkout to Push-up": "",
+  // Flexibility
+  "Cat-Cow Stretch": "",
+  "Child's Pose": "",
+  "Cobra Stretch": "",
+  "Downward Dog": "",
+  "Figure Four Stretch": "",
+  "Hamstring Stretch": "",
+  "Hip Circles": "",
+  "Hip Flexor Stretch": "",
+  "Lizard Pose": "",
+  "Pigeon Pose": "",
+  "Quad Stretch": "",
+  "Scorpion Stretch": "",
+  "Seated Forward Fold": "",
+  "Spinal Twist": "",
+  "Standing Side Bend": "",
+  "World's Greatest Stretch": ""
+};
+
+// User-saved overrides (localStorage)
+var userVideos = JSON.parse(localStorage.getItem("hiitVideos") || "{}");
+
+function saveUserVideos(){
+  localStorage.setItem("hiitVideos", JSON.stringify(userVideos));
+}
+
+// Lookup: user-saved > hardcoded default > null
+function getVideoId(name){
+  if(userVideos[name]) return userVideos[name];
+  if(DEFAULT_VIDEOS[name]) return DEFAULT_VIDEOS[name];
+  return null;
 }
 
 function extractVideoId(url){
@@ -25,11 +206,16 @@ function youtubeEmbedUrl(videoId){
 function showWorkoutTutorial(exerciseName){
   var area = $("tutorialArea");
   if(!area) return;
-  var vid = exerciseVideos[exerciseName];
+  var vid = getVideoId(exerciseName);
+  var isUserSaved = !!userVideos[exerciseName];
   if(vid){
     area.innerHTML =
-      '<div class="tutorial-header">Tutorial: ' + exerciseName + '</div>' +
-      '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      '<div class="tutorial-header">Tutorial: ' + exerciseName + (isUserSaved ? ' <span style="font-size:0.8em;color:#34c759;">(saved)</span>' : '') + '</div>' +
+      '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+      '<div class="tutorial-actions">' +
+      '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">Find different</a>' +
+      '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to replace"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>' +
+      '</div>';
   } else {
     area.innerHTML =
       '<div class="tutorial-header">Tutorial: ' + exerciseName + '</div>' +
@@ -52,45 +238,39 @@ function saveTutorialFromInput(name){
   if(!input) return;
   var vid = extractVideoId(input.value);
   if(!vid){ alert("Could not parse YouTube URL"); return; }
-  exerciseVideos[name] = vid;
-  saveVideos();
+  userVideos[name] = vid;
+  saveUserVideos();
   showWorkoutTutorial(name);
 }
 
-// Tutorial button for picker items
+// Tutorial button for picker items — opens overlay
 function getTutorialHtml(name){
-  var vid = exerciseVideos[name];
-  if(vid){
-    return '<a class="picker-tutorial" href="' + youtubeEmbedUrl(vid) + '" target="_blank" onclick="event.stopPropagation()">&#9654;</a>';
-  }
-  return '<a class="picker-tutorial" href="' + youtubeSearchUrl(name) + '" target="_blank" onclick="event.stopPropagation()">&#9654;</a>';
+  return '<span class="picker-tutorial" onclick="event.stopPropagation();showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">&#9654;</span>';
 }
 
-// Tutorial link for form exercise rows
+// Tutorial link for form exercise rows — opens overlay
 function getFormTutorialHtml(name){
   if(!name) return '';
-  var vid = exerciseVideos[name];
-  var url = vid ? youtubeEmbedUrl(vid) : youtubeSearchUrl(name);
-  return '<a class="eq-tutorial" href="' + url + '" target="_blank">&#9654;</a>';
+  return '<span class="eq-tutorial" onclick="showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">&#9654;</span>';
 }
 
-// Inline tutorial viewer for picker/form (shows embedded video in a modal-like overlay)
+// Tutorial overlay (used in picker and form)
 var tutorialOverlayName = null;
 
 function showTutorialOverlay(name){
   var overlay = $("tutorialOverlay");
   if(!overlay) return;
   tutorialOverlayName = name;
-  var vid = exerciseVideos[name];
+  var vid = getVideoId(name);
+  var isUserSaved = !!userVideos[name];
   var content = '<div class="tutorial-modal">';
   content += '<h3>' + name + '</h3>';
   if(vid){
     content += '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-    content += '<button class="tutorial-change-btn" onclick="removeTutorialVideo()">Remove saved video</button>';
-  } else {
-    content += '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(name) + '" target="_blank">Search on YouTube</a>';
-    content += '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to save"><button class="tutorial-save-btn" onclick="saveTutorialOverlay()">Save</button></div>';
+    if(isUserSaved) content += '<button class="tutorial-change-btn" onclick="removeTutorialVideo()">Remove saved video</button>';
   }
+  content += '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(name) + '" target="_blank">Search on YouTube</a>';
+  content += '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to save"><button class="tutorial-save-btn" onclick="saveTutorialOverlay()">Save</button></div>';
   content += '<button class="tutorial-close-btn" onclick="closeTutorialOverlay()">Close</button>';
   content += '</div>';
   overlay.innerHTML = content;
@@ -105,18 +285,18 @@ function closeTutorialOverlay(){
 
 function saveTutorialOverlay(){
   if(!tutorialOverlayName) return;
-  var input = document.querySelector(".tutorial-url-input");
+  var input = document.querySelector("#tutorialOverlay .tutorial-url-input");
   if(!input) return;
   var vid = extractVideoId(input.value);
   if(!vid){ alert("Could not parse YouTube URL"); return; }
-  exerciseVideos[tutorialOverlayName] = vid;
-  saveVideos();
+  userVideos[tutorialOverlayName] = vid;
+  saveUserVideos();
   showTutorialOverlay(tutorialOverlayName);
 }
 
 function removeTutorialVideo(){
   if(!tutorialOverlayName) return;
-  delete exerciseVideos[tutorialOverlayName];
-  saveVideos();
+  delete userVideos[tutorialOverlayName];
+  saveUserVideos();
   showTutorialOverlay(tutorialOverlayName);
 }
