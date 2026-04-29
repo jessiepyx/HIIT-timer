@@ -389,21 +389,59 @@ function renderManage(){
 // =========================
 let pickerSelected = new Set();
 
+let pickerEquip = new Set(EQUIPMENT_TAGS);
+
 function openPicker(){
   pickerSelected = new Set();
+  renderPicker();
+  $("pickerOverlay").style.display = "flex";
+}
+
+function renderPicker(){
+  const eqRow = $("pickerEquip");
+  if(eqRow){
+    eqRow.innerHTML = "";
+    var selBtn = document.createElement("button");
+    selBtn.textContent = "Select All";
+    selBtn.className = "picker-eq-btn";
+    selBtn.onclick = () => { EQUIPMENT_TAGS.forEach(t => pickerEquip.add(t)); renderPicker(); };
+    eqRow.appendChild(selBtn);
+    var deselBtn = document.createElement("button");
+    deselBtn.textContent = "Deselect All";
+    deselBtn.className = "picker-eq-btn";
+    deselBtn.onclick = () => { pickerEquip.clear(); renderPicker(); };
+    eqRow.appendChild(deselBtn);
+    EQUIPMENT_TAGS.forEach(tag => {
+      const btn = document.createElement("button");
+      btn.textContent = tag;
+      btn.className = "picker-eq-btn" + (pickerEquip.has(tag) ? " selected" : "");
+      btn.onclick = () => {
+        if(pickerEquip.has(tag)) pickerEquip.delete(tag);
+        else pickerEquip.add(tag);
+        renderPicker();
+      };
+      eqRow.appendChild(btn);
+    });
+  }
+
   const list = $("pickerList");
+  if(!list) return;
   list.innerHTML = "";
 
   Object.entries(EXERCISE_LIBRARY).forEach(([category, exArr]) => {
+    const filtered = exArr.filter(name => canDoExercise(name, pickerEquip));
+    if(filtered.length === 0) return;
+
     const cat = document.createElement("div");
     cat.className = "picker-category";
-    cat.textContent = category;
+    cat.textContent = category + " (" + filtered.length + ")";
     list.appendChild(cat);
 
-    exArr.forEach(name => {
+    filtered.forEach(name => {
+      const eqLabel = getEquipmentLabel(name);
       const item = document.createElement("div");
-      item.className = "picker-item";
-      item.innerHTML = `<span class="check">\u25CB</span><span>${name}</span>`;
+      item.className = "picker-item" + (pickerSelected.has(name) ? " selected" : "");
+      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}</span><span class="picker-eq-label">${eqLabel}</span>`;
       item.addEventListener("click", () => {
         if(pickerSelected.has(name)){
           pickerSelected.delete(name);
@@ -418,8 +456,6 @@ function openPicker(){
       list.appendChild(item);
     });
   });
-
-  $("pickerOverlay").style.display = "flex";
 }
 
 function pickerDone(){
@@ -788,7 +824,7 @@ function startWarmup(){
 function renderWorkoutInfo(){
   const info = $("workoutInfo");
   if(!info) return;
-  const exLines = exercises.map((e, i) => `${i + 1}. ${e.name}`).join("<br>");
+  const exLines = exercises.map((e, i) => `${i + 1}. ${e.name} <span class="info-equip">${getEquipmentLabel(e.name)}</span>`).join("<br>");
   info.innerHTML =
     `<div class="info-title">${cfg.name}</div>` +
     `<div class="info-detail">${cfg.rounds} rounds &middot; ${cfg.work}s work &middot; ${cfg.rest}s rest</div>` +
@@ -1087,15 +1123,22 @@ function updateUI(){
     else hideExerciseDemo();
   }
 
-  let nextHint = "";
-  if(state === "work" && exercises[idx + 1]) nextHint = "Next: " + exercises[idx + 1].name;
+  let nextName = "";
+  if(state === "work" && exercises[idx + 1]) nextName = exercises[idx + 1].name;
   if(state === "rest"){
     const nextIdx = idx + 1;
-    if(nextIdx < exercises.length) nextHint = "Next: " + exercises[nextIdx].name;
-    else if(round + 1 <= cfg.rounds) nextHint = "Next: " + exercises[0].name;
+    if(nextIdx < exercises.length) nextName = exercises[nextIdx].name;
+    else if(round + 1 <= cfg.rounds) nextName = exercises[0].name;
   }
   const nextEl = $("next");
-  if(nextEl) nextEl.textContent = nextHint;
+  if(nextEl){
+    if(nextName){
+      const eqLabel = getEquipmentLabel(nextName);
+      nextEl.innerHTML = "Next: <strong>" + nextName + "</strong> <span class='next-equip'>" + eqLabel + "</span>";
+    } else {
+      nextEl.innerHTML = "";
+    }
+  }
 
   const statRound = $("statRound");
   if(statRound) statRound.textContent = (cfg && state !== "idle")
