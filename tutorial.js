@@ -6,15 +6,15 @@
 // Format: "Exercise Name": "YouTubeVideoId"
 var DEFAULT_VIDEOS = {
   // Chest
-  "Bench Press": "",
-  "Chest Dips": "",
+  "Bench Press": "BV18W411F7jR",
+  "Chest Dips": "BV1iW411F7Wf",
   "Chest Flyes": "",
   "Close-Grip Bench Press": "",
   "Decline Push-ups": "",
   "Dumbbell Pullover": "",
   "Incline Bench Press": "",
   "Incline Dumbbell Press": "",
-  "Push-ups": "",
+  "Push-ups": "BV1Rs411n74M",
   "Svend Press": "",
   "Wide Push-ups": "",
   // Shoulders
@@ -37,7 +37,7 @@ var DEFAULT_VIDEOS = {
   "Dumbbell Rows": "",
   "Inverted Rows": "",
   "Lat Pulldowns": "",
-  "Pull-ups": "",
+  "Pull-ups": "BV1os411p7Yd",
   "Renegade Rows": "",
   "Reverse Flyes": "",
   "Seated Cable Rows": "",
@@ -113,7 +113,7 @@ var DEFAULT_VIDEOS = {
   "Leg Press": "",
   "Lunges": "",
   "Nordic Hamstring Curls": "",
-  "Pistol Squats": "",
+  "Pistol Squats": "BV1Cs411p79v",
   "Reverse Lunges": "",
   "Single-Leg Calf Raises": "",
   "Split Squats": "",
