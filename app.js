@@ -801,7 +801,7 @@ function startWorkout(i){
   duration = cfg.warmup;
 
   const bp = $("btnPause");
-  if(bp){ bp.textContent = "Pause"; bp.disabled = false; }
+  if(bp){ bp.textContent = "Pause"; bp.disabled = false; bp.classList.add("control-highlight"); }
   const bs = $("btnSkip"); if(bs) bs.disabled = false;
   const br = $("btnRestart"); if(br) br.disabled = false;
   const dp = $("donePanel"); if(dp) dp.style.display = "none";
@@ -1048,9 +1048,15 @@ function togglePause(){
   if(state === "idle") return;
   paused = !paused;
   const bp = $("btnPause");
-  if(bp) bp.textContent = paused ? "Resume" : "Pause";
+  if(bp){
+    bp.textContent = paused ? "Resume" : "Pause";
+    bp.classList.toggle("control-highlight", true);
+  }
   const be = $("btnEndEarly");
-  if(be) be.style.display = paused ? "inline-block" : "none";
+  if(be){
+    be.style.display = paused ? "inline-block" : "none";
+    be.classList.add("control-danger");
+  }
 
   if(paused){
     clearBeeps();
