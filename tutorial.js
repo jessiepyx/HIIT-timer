@@ -190,16 +190,29 @@ function getVideoId(name){
 
 function extractVideoId(url){
   if(!url) return null;
-  var m = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
+  // Bilibili: BV id
+  var bv = url.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/);
+  if(bv) return bv[1];
+  // YouTube
+  var yt = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return yt ? yt[1] : null;
+}
+
+function isBilibili(vid){
+  return vid && vid.startsWith("BV");
 }
 
 function youtubeSearchUrl(name){
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " exercise tutorial proper form");
 }
 
-function youtubeEmbedUrl(videoId){
-  return "https://www.youtube.com/embed/" + videoId + "?rel=0&modestbranding=1";
+function bilibiliSearchUrl(name){
+  return "https://search.bilibili.com/all?keyword=" + encodeURIComponent(name + " exercise tutorial");
+}
+
+function embedUrl(vid){
+  if(isBilibili(vid)) return "https://player.bilibili.com/player.html?bvid=" + vid + "&high_quality=1";
+  return "https://www.youtube.com/embed/" + vid + "?rel=0&modestbranding=1";
 }
 
 // Show tutorial during workout (rest/water/pause)
@@ -211,16 +224,18 @@ function showWorkoutTutorial(exerciseName){
   if(vid){
     area.innerHTML =
       '<div class="tutorial-header">Tutorial: ' + exerciseName + (isUserSaved ? ' <span style="font-size:0.8em;color:#34c759;">(saved)</span>' : '') + '</div>' +
-      '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+      '<iframe class="tutorial-frame" src="' + embedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
       '<div class="tutorial-actions">' +
-      '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">Find different</a>' +
-      '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to replace"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>' +
+      '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">YouTube</a> ' +
+      '<a class="tutorial-search-btn" href="' + bilibiliSearchUrl(exerciseName) + '" target="_blank">Bilibili</a>' +
+      '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube or Bilibili URL"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>' +
       '</div>';
   } else {
     area.innerHTML =
       '<div class="tutorial-header">Tutorial: ' + exerciseName + '</div>' +
-      '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">Search on YouTube</a>' +
-      '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to save"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>';
+      '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(exerciseName) + '" target="_blank">YouTube</a> ' +
+      '<a class="tutorial-search-btn" href="' + bilibiliSearchUrl(exerciseName) + '" target="_blank">Bilibili</a>' +
+      '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube or Bilibili URL"><button class="tutorial-save-btn" onclick="saveTutorialFromInput(\'' + exerciseName.replace(/'/g, "\\'") + '\')">Save</button></div>';
   }
   area.style.display = "block";
 }
@@ -264,13 +279,15 @@ function showTutorialOverlay(name){
   var vid = getVideoId(name);
   var isUserSaved = !!userVideos[name];
   var content = '<div class="tutorial-modal" onclick="event.stopPropagation()">';
+  content += '<div class="picker-handle"></div>';
   content += '<h3>' + name + '</h3>';
   if(vid){
-    content += '<iframe class="tutorial-frame" src="' + youtubeEmbedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    content += '<iframe class="tutorial-frame" src="' + embedUrl(vid) + '" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
     if(isUserSaved) content += '<button class="tutorial-change-btn" onclick="removeTutorialVideo()">Remove my video (use default)</button>';
   }
-  content += '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(name) + '" target="_blank">Search on YouTube</a>';
-  content += '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube URL to save"><button class="tutorial-save-btn" onclick="saveTutorialOverlay()">Save</button></div>';
+  content += '<a class="tutorial-search-btn" href="' + youtubeSearchUrl(name) + '" target="_blank">YouTube</a> ';
+  content += '<a class="tutorial-search-btn" href="' + bilibiliSearchUrl(name) + '" target="_blank">Bilibili</a>';
+  content += '<div class="tutorial-save"><input class="tutorial-url-input" placeholder="Paste YouTube or Bilibili URL"><button class="tutorial-save-btn" onclick="saveTutorialOverlay()">Save</button></div>';
   content += '<button class="tutorial-close-btn" onclick="closeTutorialOverlay()">Close</button>';
   content += '</div>';
   overlay.innerHTML = content;
@@ -300,3 +317,36 @@ function removeTutorialVideo(){
   saveUserVideos();
   showTutorialOverlay(tutorialOverlayName);
 }
+
+// Pull-down-to-dismiss for tutorial overlay
+(function(){
+  var startY = 0;
+  document.addEventListener("touchstart", function(e){
+    var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
+    if(!modal || modal.scrollTop > 0) { startY = 0; return; }
+    if(modal.contains(e.target)) startY = e.touches[0].clientY;
+    else startY = 0;
+  });
+  document.addEventListener("touchmove", function(e){
+    if(!startY) return;
+    var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
+    if(!modal || modal.scrollTop > 0) { startY = 0; return; }
+    var diff = e.touches[0].clientY - startY;
+    if(diff > 0){
+      modal.style.transform = "translateY(" + diff + "px)";
+      modal.style.transition = "none";
+      e.preventDefault();
+    }
+  }, {passive: false});
+  document.addEventListener("touchend", function(e){
+    if(!startY) return;
+    var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
+    if(modal){
+      var diff = e.changedTouches[0].clientY - startY;
+      modal.style.transition = "transform 0.2s";
+      modal.style.transform = "";
+      if(diff > 80) closeTutorialOverlay();
+    }
+    startY = 0;
+  });
+})();
