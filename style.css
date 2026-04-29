@@ -126,7 +126,39 @@ label {
 .picker-hint {
   color: #888;
   font-size: 0.85em;
+  margin: 0 0 8px;
+}
+
+.picker-eq-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
   margin: 0 0 12px;
+}
+
+.picker-eq-btn {
+  padding: 5px 10px;
+  margin: 0;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.75em;
+  cursor: pointer;
+  color: #555;
+}
+
+.picker-eq-btn.selected {
+  border-color: #007aff;
+  background: #d6eaff;
+  color: #007aff;
+  font-weight: 600;
+}
+
+.picker-eq-label {
+  font-size: 0.72em;
+  color: #aaa;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .picker-item {
@@ -300,10 +332,20 @@ label {
 
 /* next hint */
 #next {
-  font-size: 0.95em;
-  color: rgba(255,255,255,0.5);
+  font-size: 1.1em;
+  color: rgba(255,255,255,0.6);
   margin-bottom: 16px;
-  min-height: 1.2em;
+  min-height: 1.4em;
+}
+
+#next strong {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+
+.next-equip {
+  font-size: 0.7em;
+  color: rgba(255,255,255,0.3);
 }
 
 /* stats row */
@@ -518,7 +560,13 @@ label {
 .info-exercises {
   font-size: 0.9em;
   color: rgba(255,255,255,0.6);
-  line-height: 1.6;
+  line-height: 1.8;
+}
+
+.info-equip {
+  font-size: 0.75em;
+  color: rgba(255,255,255,0.3);
+  margin-left: 4px;
 }
 
 /* ── SUMMARY ── */
