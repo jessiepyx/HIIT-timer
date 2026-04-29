@@ -132,9 +132,15 @@ var selectedVoiceName = localStorage.getItem("hiitVoice") || "";
 var voices = [];
 var isCN = false;
 
+var VOICE_ALLOW = ["Samantha","Daniel","Karen","Moira","Tessa","Fiona","Aaron","Nicky","Rishi","Tingting","Meijia","Mei-Jia"];
+
+var VOICE_DISPLAY = {
+  "Tingting":"婷婷 Tingting","Meijia":"美佳 Meijia","Mei-Jia":"美佳 Mei-Jia"
+};
+
 function loadVoices(){
   voices = speechSynthesis.getVoices().filter(function(v){
-    return v.lang.startsWith("en") || v.lang.startsWith("zh");
+    return VOICE_ALLOW.indexOf(v.name) >= 0;
   });
   updateVoiceState();
 }
@@ -154,27 +160,57 @@ function getSelectedVoice(){
   return null;
 }
 
-function cycleVoice(){
+function voiceDisplayName(v){
+  if(!v) return "Default Voice";
+  return VOICE_DISPLAY[v.name] || v.name;
+}
+
+function openVoicePicker(){
   if(voices.length === 0) loadVoices();
-  if(voices.length === 0) return;
-  var idx = -1;
+  var overlay = $("voiceOverlay");
+  if(!overlay) return;
+  var content = '<div class="tutorial-modal" onclick="event.stopPropagation()">';
+  content += '<div class="picker-handle"></div>';
+  content += '<h3>Select Voice</h3>';
+  content += '<div class="voice-list">';
+  // Default voice option
+  content += '<div class="voice-item' + (!selectedVoiceName ? ' voice-selected' : '') + '" onclick="selectVoice(\'\')">';
+  content += '<span>Default Voice</span><span class="voice-lang">System</span></div>';
   for(var i = 0; i < voices.length; i++){
-    if(voices[i].name === selectedVoiceName){ idx = i; break; }
+    var v = voices[i];
+    var display = voiceDisplayName(v);
+    var isSelected = v.name === selectedVoiceName;
+    var langLabel = v.lang.startsWith("zh") ? "中文" : v.lang;
+    content += '<div class="voice-item' + (isSelected ? ' voice-selected' : '') + '" onclick="selectVoice(\'' + v.name.replace(/'/g, "\\'") + '\')">';
+    content += '<span>' + display + '</span><span class="voice-lang">' + langLabel + '</span></div>';
   }
-  idx = (idx + 1) % voices.length;
-  selectedVoiceName = voices[idx].name;
+  content += '</div>';
+  content += '<button class="tutorial-close-btn" onclick="closeVoicePicker()">Close</button>';
+  content += '</div>';
+  overlay.innerHTML = content;
+  overlay.style.display = "flex";
+}
+
+function selectVoice(name){
+  selectedVoiceName = name;
   localStorage.setItem("hiitVoice", selectedVoiceName);
   updateVoiceState();
   updateVoiceUI();
-  speak(isCN ? "你好，我是" + voices[idx].name : "Hello, I am " + voices[idx].name);
+  closeVoicePicker();
+  if(name){
+    var v = getSelectedVoice();
+    speak(isCN ? "你好，我是" + voiceDisplayName(v) : "Hello, I am " + v.name);
+  }
+}
+
+function closeVoicePicker(){
+  var overlay = $("voiceOverlay");
+  if(overlay){ overlay.style.display = "none"; overlay.innerHTML = ""; }
 }
 
 function updateVoiceUI(){
   var btn = $("btnVoice");
-  if(btn){
-    var v = getSelectedVoice();
-    btn.textContent = v ? v.name : "Default Voice";
-  }
+  if(btn) btn.textContent = voiceDisplayName(getSelectedVoice());
 }
 
 // Translation helper
@@ -271,7 +307,7 @@ function bindStaticUI(){
   bind("btnEndEarly",  endEarly);
   bind("btnMusicToggle", toggleMusic);
   bind("btnMusicStyle",  cycleMusic);
-  bind("btnVoice",       cycleVoice);
+  bind("btnVoice",       openVoicePicker);
   bind("btnPickerDone",   pickerDone);
   bind("btnPickerCancel", closePicker);
 
