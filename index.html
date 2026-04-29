@@ -138,10 +138,15 @@
     <button id="btnHome" class="primary">Back to Home</button>
   </div>
   <div id="workoutInfo" class="workout-info" style="display:none;"></div>
+  <div id="tutorialArea" class="tutorial-area" style="display:none;"></div>
 </div>
+
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorialOverlay" class="overlay" style="display:none;"></div>
 
 <script>
 var _cb = Date.now();
+document.write('<script src="tutorial.js?' + _cb + '"><\/script>');
 document.write('<script src="demo.js?' + _cb + '"><\/script>');
 document.write('<script src="music.js?' + _cb + '"><\/script>');
 document.write('<script src="app.js?' + _cb + '"><\/script>');
