@@ -69,6 +69,85 @@ const EXERCISE_LIBRARY = {
 ]
 };
 
+// Equipment requirements: each exercise -> array of requirement groups
+// Each group is OR alternatives; all groups must be satisfied (AND)
+// Empty array = bodyweight
+const EXERCISE_EQUIPMENT = {
+  "Bench Press":[["Bench"],["Dumbbells","Barbell"]],"Chest Dips":[["Dip Station"]],"Chest Flyes":[["Bench"],["Dumbbells"]],
+  "Close-Grip Bench Press":[["Bench"],["Dumbbells","Barbell"]],"Decline Push-ups":[["Box","Bench"]],
+  "Dumbbell Pullover":[["Bench"],["Dumbbell"]],"Incline Bench Press":[["Incline Bench"],["Dumbbells","Barbell"]],
+  "Incline Dumbbell Press":[["Incline Bench"],["Dumbbells"]],"Svend Press":[["Dumbbell","Weight Plate"]],
+  "Arnold Press":[["Dumbbells"]],"Bus Drivers":[["Dumbbell","Weight Plate"]],
+  "Face Pulls":[["Cable Machine","Resistance Band"]],"Front Raises":[["Dumbbells"]],"Handstand Hold":[["Wall"]],
+  "Lateral Raises":[["Dumbbells"]],"Overhead Press":[["Dumbbells","Barbell"]],"Rear Delt Flyes":[["Dumbbells"]],
+  "Shoulder Shrugs":[["Dumbbells","Barbell"]],"Upright Rows":[["Dumbbells","Barbell"]],"Y-T-W Raises":[["Dumbbells"]],
+  "Band Pull-Aparts":[["Resistance Band"]],"Bent-Over Rows":[["Dumbbells","Barbell"]],"Chin-ups":[["Pull-up Bar"]],
+  "Dumbbell Rows":[["Dumbbell"],["Bench"]],"Inverted Rows":[["Pull-up Bar","TRX"]],"Lat Pulldowns":[["Cable Machine"]],
+  "Pull-ups":[["Pull-up Bar"]],"Renegade Rows":[["Dumbbells"]],"Reverse Flyes":[["Dumbbells"]],
+  "Seated Cable Rows":[["Cable Machine"]],"Straight-Arm Pulldowns":[["Cable Machine","Resistance Band"]],
+  "T-Bar Rows":[["Barbell"]],"Back Extensions":[["Hyperextension Bench"]],"Bird Dog":[["Mat"]],
+  "Deadlifts":[["Dumbbells","Barbell"]],"Good Mornings":[["Dumbbells","Barbell"]],
+  "Jefferson Curls":[["Dumbbell","Barbell"]],"Kettlebell Swings":[["Kettlebell","Dumbbell"]],
+  "Reverse Hyperextension":[["Hyperextension Bench"]],"Romanian Deadlifts":[["Dumbbells","Barbell"]],
+  "Superman Hold":[["Mat"]],"Bicep Curls":[["Dumbbells","Barbell","EZ Bar"]],
+  "Concentration Curls":[["Dumbbell"]],"Hammer Curls":[["Dumbbells"]],
+  "Overhead Tricep Extension":[["Dumbbell","EZ Bar"]],
+  "Preacher Curls":[["Dumbbell","EZ Bar"],["Preacher Bench","Incline Bench"]],
+  "Reverse Curls":[["Dumbbells","Barbell","EZ Bar"]],
+  "Skull Crushers":[["Bench"],["Dumbbells","Barbell","EZ Bar"]],"Tricep Dips":[["Bench"]],
+  "Tricep Kickbacks":[["Dumbbells"]],"Tricep Pushdowns":[["Cable Machine","Resistance Band"]],
+  "Wrist Curls":[["Dumbbells","Barbell"]],"Zottman Curls":[["Dumbbells"]],
+  "Bicycle Crunches":[["Mat"]],"Crunches":[["Mat"]],"Dead Bug":[["Mat"]],"Flutter Kicks":[["Mat"]],
+  "Hanging Knee Raise":[["Pull-up Bar"]],"Heel Touches":[["Mat"]],"Hollow Body Hold":[["Mat"]],
+  "Leg Raises":[["Mat"]],"Plank":[["Mat"]],"Reverse Crunch":[["Mat"]],"Russian Twists":[["Mat"]],
+  "Side Plank Left":[["Mat"]],"Side Plank Right":[["Mat"]],"Sit-ups":[["Mat"]],"Toe Touches":[["Mat"]],
+  "V-ups":[["Mat"]],"Windshield Wipers":[["Mat"]],
+  "Banded Walks":[["Resistance Band"]],"Cable Kickbacks":[["Cable Machine"]],"Clamshells":[["Mat"]],
+  "Donkey Kicks":[["Mat"]],"Fire Hydrants":[["Mat"]],"Frog Pumps":[["Mat"]],"Glute Bridges":[["Mat"]],
+  "Hip Thrusts":[["Bench"]],"Single-Leg Glute Bridge":[["Mat"]],
+  "Sumo Deadlifts":[["Dumbbells","Barbell","Kettlebell"]],
+  "Box Jumps":[["Box"]],"Bulgarian Split Squats":[["Bench","Box"]],
+  "Front Squats":[["Dumbbells","Barbell","Kettlebell"]],"Goblet Squats":[["Dumbbell","Kettlebell"]],
+  "Leg Curls":[["Leg Curl Machine"]],"Leg Extensions":[["Leg Extension Machine"]],
+  "Leg Press":[["Leg Press Machine"]],"Nordic Hamstring Curls":[["Anchor"]],
+  "Step-ups":[["Box","Bench"]],"Speed Step-ups":[["Box","Step"]],"Jump Rope":[["Jump Rope"]],
+  "Clean and Press":[["Dumbbells","Barbell","Kettlebell"]],"Devil Press":[["Dumbbells"]],
+  "Man Makers":[["Dumbbells"]],"Thrusters":[["Dumbbells","Barbell","Kettlebell"]],
+  "Turkish Get-up":[["Dumbbell","Kettlebell"]],
+  "Cat-Cow Stretch":[["Mat"]],"Child's Pose":[["Mat"]],"Cobra Stretch":[["Mat"]],"Downward Dog":[["Mat"]],
+  "Figure Four Stretch":[["Mat"]],"Hamstring Stretch":[["Mat"]],"Hip Flexor Stretch":[["Mat"]],
+  "Lizard Pose":[["Mat"]],"Pigeon Pose":[["Mat"]],"Scorpion Stretch":[["Mat"]],
+  "Seated Forward Fold":[["Mat"]],"Spinal Twist":[["Mat"]],"World's Greatest Stretch":[["Mat"]]
+};
+
+// Equipment tag system for filtering
+const EQUIPMENT_TAGS = ["Mat","Dumbbells","Barbell","Bench","Pull-up Bar","Cable Machine","Kettlebell","Resistance Band","Box/Step","Machines","Other"];
+
+const EQUIP_TO_TAG = {
+  "Dumbbells":"Dumbbells","Dumbbell":"Dumbbells","Barbell":"Barbell","EZ Bar":"Barbell",
+  "Bench":"Bench","Incline Bench":"Bench","Preacher Bench":"Bench",
+  "Pull-up Bar":"Pull-up Bar","TRX":"Pull-up Bar","Cable Machine":"Cable Machine",
+  "Kettlebell":"Kettlebell","Resistance Band":"Resistance Band",
+  "Box":"Box/Step","Step":"Box/Step","Mat":"Mat",
+  "Leg Press Machine":"Machines","Leg Curl Machine":"Machines","Leg Extension Machine":"Machines",
+  "Hyperextension Bench":"Machines","Dip Station":"Machines",
+  "Wall":"Other","Weight Plate":"Other","Anchor":"Other","Jump Rope":"Other"
+};
+
+function canDoExercise(name, selectedTags){
+  const reqs = EXERCISE_EQUIPMENT[name] || [];
+  if(reqs.length === 0) return true;
+  return reqs.every(function(group){
+    return group.some(function(eq){ return selectedTags.has(EQUIP_TO_TAG[eq]); });
+  });
+}
+
+function getEquipmentLabel(name){
+  const reqs = EXERCISE_EQUIPMENT[name] || [];
+  if(reqs.length === 0) return "Bodyweight";
+  return reqs.map(function(g){ return g.map(function(e){ return EQUIP_TO_TAG[e]||e; }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join("/"); }).join(" + ");
+}
+
 const CATEGORIES = Object.keys(EXERCISE_LIBRARY).concat("Other");
 
 const EXERCISE_CATEGORIES = {};
@@ -233,6 +312,8 @@ function bindStaticUI(){
   bind("btnGenerate",  generateWorkout);
   bind("btnSelectAll", () => toggleAllParts(true));
   bind("btnDeselectAll", () => toggleAllParts(false));
+  bind("btnEqSelectAll", () => { EQUIPMENT_TAGS.forEach(t => suggestEquip.add(t)); renderSuggest(); });
+  bind("btnEqDeselectAll", () => { suggestEquip.clear(); renderSuggest(); });
   bind("btnPause",     togglePause);
   bind("btnSkip",      skip);
   bind("btnRestart",   restartMove);
@@ -375,7 +456,9 @@ function addExercise(name, category){
   let options = CATEGORIES.map(c =>
     `<option value="${c}"${c === safeCat ? " selected" : ""}>${c}</option>`
   ).join("");
-  div.innerHTML = `<input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select><button type="button">\u2715</button>`;
+  const eqLabel = safeName ? getEquipmentLabel(safeName) : "";
+  const eqHtml = eqLabel ? `<span class="eq-label">${eqLabel}</span>` : "";
+  div.innerHTML = `<input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}<button type="button">\u2715</button>`;
   div.querySelector("button").onclick = () => div.remove();
   list.appendChild(div);
 }
@@ -436,6 +519,7 @@ function saveLS(){
 let suggestTime = 30;
 let suggestIntensity = "moderate";
 let suggestParts = new Set();
+let suggestEquip = new Set(EQUIPMENT_TAGS);
 
 const INTENSITY_PRESETS = {
   easy:     { work: 30, rest: 30, warmup: 60, cooldown: 60, water: 60 },
@@ -469,6 +553,21 @@ function renderSuggest(){
       renderSuggest();
     };
     grid.appendChild(btn);
+  });
+
+  var eqGrid = $("equipOptions");
+  if(!eqGrid) return;
+  eqGrid.innerHTML = "";
+  EQUIPMENT_TAGS.forEach(function(tag){
+    var btn = document.createElement("button");
+    btn.textContent = tag;
+    if(suggestEquip.has(tag)) btn.classList.add("selected");
+    btn.onclick = function(){
+      if(suggestEquip.has(tag)) suggestEquip.delete(tag);
+      else suggestEquip.add(tag);
+      renderSuggest();
+    };
+    eqGrid.appendChild(btn);
   });
 }
 
@@ -562,7 +661,7 @@ function orderPartsForAlternation(parts){
 function pickExercises(orderedParts, count){
   const pools = {};
   orderedParts.forEach(part => {
-    const available = [...(EXERCISE_LIBRARY[part] || [])];
+    const available = (EXERCISE_LIBRARY[part] || []).filter(name => canDoExercise(name, suggestEquip));
     for(let i = available.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
       [available[i], available[j]] = [available[j], available[i]];
@@ -979,6 +1078,9 @@ function updateUI(){
 
   const cur = $("current");
   if(cur) cur.textContent = (state === "work") ? (exercises[idx]?.name || "") : "";
+
+  const eqEl = $("currentEquip");
+  if(eqEl) eqEl.textContent = (state === "work" && exercises[idx]) ? getEquipmentLabel(exercises[idx].name) : "";
 
   if(typeof showExerciseDemo === "function"){
     if(state === "work" && exercises[idx]) showExerciseDemo(exercises[idx].name);
