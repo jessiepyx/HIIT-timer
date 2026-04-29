@@ -18,6 +18,18 @@
   </div>
 </div>
 
+<!-- DETAIL -->
+<div id="detail" class="page" style="display:none">
+  <button id="btnStartTop" class="detail-start-btn">Start Workout</button>
+  <div id="detailContent"></div>
+  <button id="btnStartBottom" class="detail-start-btn">Start Workout</button>
+  <div class="detail-actions">
+    <button id="btnDetailEdit">Edit</button>
+    <button id="btnDetailDelete" class="control-danger">Delete</button>
+    <button id="btnDetailBack">Back</button>
+  </div>
+</div>
+
 <!-- SUGGEST -->
 <div id="suggest" class="page" style="display:none">
   <h2>Smart Workout</h2>
@@ -69,8 +81,9 @@
 </div>
 
 <!-- EXERCISE PICKER MODAL -->
-<div id="pickerOverlay" class="overlay" style="display:none;">
-  <div class="picker-box">
+<div id="pickerOverlay" class="overlay" style="display:none;" onclick="closePicker()">
+  <div class="picker-box" onclick="event.stopPropagation()">
+    <div class="picker-handle"></div>
     <h3>Pick Exercises</h3>
     <p class="picker-hint">Filter by equipment, then tap to select</p>
     <div id="pickerEquip" class="picker-eq-row"></div>
@@ -122,6 +135,7 @@
   </div>
   <div class="bar"><div id="totalProgress"></div></div>
   <div id="barLabel"></div>
+  <div id="tutorialHint" class="tutorial-hint"></div>
   <div class="music-bar">
     <button id="btnMusicToggle">Music: Off</button>
     <button id="btnMusicStyle">Electronic</button>
@@ -133,16 +147,17 @@
     <button id="btnEndEarly" style="display:none">End Workout</button>
   </div>
   <div id="donePanel" style="display:none; margin-top:24px;">
+    <button id="btnHome" class="detail-start-btn">Back to Home</button>
     <p id="doneMsg">&#x1F389; Workout complete!</p>
     <div id="summary"></div>
-    <button id="btnHome" class="primary">Back to Home</button>
+    <button id="btnHome2" class="detail-start-btn" style="margin-top:12px;">Back to Home</button>
   </div>
   <div id="workoutInfo" class="workout-info" style="display:none;"></div>
   <div id="tutorialArea" class="tutorial-area" style="display:none;"></div>
 </div>
 
 <!-- TUTORIAL OVERLAY -->
-<div id="tutorialOverlay" class="overlay" style="display:none;"></div>
+<div id="tutorialOverlay" class="overlay" style="display:none;" onclick="if(typeof closeTutorialOverlay==='function')closeTutorialOverlay()"></div>
 
 <script>
 var _cb = Date.now();
