@@ -6,7 +6,6 @@ body {
 }
 
 .page { display: none; padding: 20px; }
-.active { display: block; }
 
 h1, h2 { margin-bottom: 20px; }
 
@@ -121,6 +120,14 @@ label {
   max-height: 75vh;
   overflow-y: auto;
   box-sizing: border-box;
+}
+
+.picker-handle {
+  width: 40px;
+  height: 5px;
+  background: #ccc;
+  border-radius: 3px;
+  margin: -8px auto 12px;
 }
 
 .picker-hint {
@@ -412,6 +419,14 @@ label {
   margin: 0 0 12px;
 }
 
+.tutorial-hint {
+  font-size: 0.75em;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  min-height: 1em;
+  margin: 4px 0;
+}
+
 /* controls */
 .music-bar {
   display: flex;
@@ -535,6 +550,10 @@ label {
 }
 
 /* tutorial overlay (picker/form) */
+#tutorialOverlay {
+  z-index: 200;
+}
+
 .tutorial-modal {
   background: white;
   border-radius: 20px 20px 0 0;
@@ -613,6 +632,142 @@ label {
 #donePanel button:not(.primary) {
   background: rgba(255,255,255,0.1);
   color: white;
+}
+
+.card-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.card-clickable:active {
+  background: #eef;
+}
+
+/* ── DETAIL PAGE ── */
+
+.detail-start-btn {
+  width: 100%;
+  padding: 16px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 12px;
+  background: #007aff;
+  color: white;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detail-title {
+  margin: 8px 0 4px;
+  font-size: 1.4em;
+}
+
+.detail-stats {
+  display: flex;
+  gap: 0;
+  background: #f0f0f5;
+  border-radius: 12px;
+  padding: 12px 8px;
+  margin: 12px 0;
+}
+
+.detail-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.detail-stat-val {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #333;
+  display: block;
+}
+
+.detail-stat-label {
+  font-size: 0.7em;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-extra {
+  font-size: 0.82em;
+  color: #888;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.detail-section-title {
+  font-size: 0.9em;
+  color: #555;
+  margin: 16px 0 8px;
+}
+
+.detail-exercise-list {
+  margin-bottom: 12px;
+}
+
+.detail-exercise {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-ex-num {
+  font-size: 0.85em;
+  color: #aaa;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.detail-ex-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-ex-name {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #333;
+}
+
+.detail-ex-meta {
+  font-size: 0.75em;
+  color: #999;
+  margin-top: 1px;
+}
+
+.detail-ex-tutorial {
+  font-size: 1.1em;
+  color: #007aff;
+  cursor: pointer;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 0 20px;
+}
+
+.detail-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  background: #e5e5ea;
+}
+
+.detail-actions .control-danger {
+  background: rgba(255,69,58,0.1);
+  color: #ff3b30;
+  border: 1px solid rgba(255,69,58,0.2);
 }
 
 /* ── SMART WORKOUT ── */
