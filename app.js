@@ -658,7 +658,59 @@ function initDragHandle(row){
     dragEl = null;
     dragPlaceholder = null;
   });
-  list.appendChild(div);
+
+  // Mouse support for desktop
+  handle.addEventListener("mousedown", function(e){
+    e.preventDefault();
+    dragEl = row;
+    dragStartY = e.clientY;
+    row.classList.add("dragging");
+    dragPlaceholder = document.createElement("div");
+    dragPlaceholder.className = "drag-placeholder";
+    dragPlaceholder.style.height = row.offsetHeight + "px";
+    row.parentNode.insertBefore(dragPlaceholder, row);
+    row.style.position = "fixed";
+    row.style.left = "0";
+    row.style.right = "0";
+    row.style.zIndex = "50";
+    row.style.top = row.getBoundingClientRect().top + "px";
+
+    function onMove(ev){
+      if(!dragEl) return;
+      ev.preventDefault();
+      dragEl.style.top = (ev.clientY - 20) + "px";
+      var list = $("exerciseList");
+      if(!list) return;
+      var children = Array.from(list.querySelectorAll(".exercise:not(.dragging)"));
+      for(var j = 0; j < children.length; j++){
+        var rect = children[j].getBoundingClientRect();
+        if(ev.clientY < rect.top + rect.height / 2){
+          list.insertBefore(dragPlaceholder, children[j]);
+          return;
+        }
+      }
+      list.appendChild(dragPlaceholder);
+    }
+    function onUp(){
+      if(!dragEl) return;
+      dragEl.classList.remove("dragging");
+      dragEl.style.position = "";
+      dragEl.style.left = "";
+      dragEl.style.right = "";
+      dragEl.style.zIndex = "";
+      dragEl.style.top = "";
+      if(dragPlaceholder && dragPlaceholder.parentNode){
+        dragPlaceholder.parentNode.insertBefore(dragEl, dragPlaceholder);
+        dragPlaceholder.remove();
+      }
+      dragEl = null;
+      dragPlaceholder = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    }
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
 }
 
 function clearForm(){
