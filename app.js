@@ -1232,30 +1232,27 @@ function updateUI(){
     else hideExerciseDemo();
   }
 
-  // Tutorial: show during pause for current/next exercise
+  // Tutorial area: show tutorial when paused, show hint during work
   if(typeof showWorkoutTutorial === "function"){
-    var showTut = (paused && state !== "idle");
-    if(showTut){
-      var tutName = null;
-      if(state === "rest" || state === "water"){
-        var ni = idx + 1;
-        if(ni < exercises.length) tutName = exercises[ni].name;
-        else if(round + 1 <= cfg.rounds) tutName = exercises[0].name;
-      } else if(exercises[idx]) tutName = exercises[idx].name;
-      if(tutName) showWorkoutTutorial(tutName);
-      else hideWorkoutTutorial();
-    } else { hideWorkoutTutorial(); }
-  }
-
-  // Tutorial hint (visible when not paused, if video exists)
-  var tutHint = $("tutorialHint");
-  if(tutHint){
-    if(!paused && state !== "idle" && state !== "briefing"){
-      var hintEx = (state === "work" && exercises[idx]) ? exercises[idx].name : "";
-      var hasVid = hintEx && typeof getVideoId === "function" && getVideoId(hintEx);
-      tutHint.textContent = hasVid ? "Pause to watch tutorial" : "";
-    } else {
-      tutHint.textContent = "";
+    var tutArea = $("tutorialArea");
+    if(tutArea){
+      if(paused && state !== "idle"){
+        var tutName = null;
+        if(state === "rest" || state === "water"){
+          var ni = idx + 1;
+          if(ni < exercises.length) tutName = exercises[ni].name;
+          else if(round + 1 <= cfg.rounds) tutName = exercises[0].name;
+        } else if(exercises[idx]) tutName = exercises[idx].name;
+        if(tutName) showWorkoutTutorial(tutName);
+        else { tutArea.innerHTML = ""; tutArea.style.display = "none"; }
+      } else if(state === "work"){
+        hideWorkoutTutorial();
+        tutArea.innerHTML = '<div class="tutorial-hint-box">Pause to watch tutorial</div>';
+        tutArea.style.display = "block";
+      } else {
+        tutArea.innerHTML = "";
+        tutArea.style.display = "none";
+      }
     }
   }
 
