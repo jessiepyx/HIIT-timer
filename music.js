@@ -21,6 +21,11 @@ function unlockAudio(){
   if(audioUnlocked) return;
   try {
     if(typeof getAudioCtx !== "function") return;
+    // Play silent audio to force iOS to use media volume channel
+    var a = new Audio();
+    a.src = "data:audio/mpeg;base64,/+NIxAAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+NIxDsAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+    a.play().catch(function(){});
+    // Then unlock AudioContext
     var ctx = getAudioCtx();
     if(ctx.state === "suspended") ctx.resume();
     var b = ctx.createBuffer(1, 1, 22050);
