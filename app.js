@@ -126,12 +126,76 @@ function beepGo(){
 }
 
 // =========================
-// SPEECH
+// SPEECH & VOICE
 // =========================
+var selectedVoiceName = localStorage.getItem("hiitVoice") || "";
+var voices = [];
+var isCN = false;
+
+function loadVoices(){
+  voices = speechSynthesis.getVoices().filter(function(v){
+    return v.lang.startsWith("en") || v.lang.startsWith("zh");
+  });
+  updateVoiceState();
+}
+if(speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function updateVoiceState(){
+  var v = getSelectedVoice();
+  isCN = v ? v.lang.startsWith("zh") : false;
+}
+
+function getSelectedVoice(){
+  if(!selectedVoiceName) return null;
+  for(var i = 0; i < voices.length; i++){
+    if(voices[i].name === selectedVoiceName) return voices[i];
+  }
+  return null;
+}
+
+function cycleVoice(){
+  if(voices.length === 0) loadVoices();
+  if(voices.length === 0) return;
+  var idx = -1;
+  for(var i = 0; i < voices.length; i++){
+    if(voices[i].name === selectedVoiceName){ idx = i; break; }
+  }
+  idx = (idx + 1) % voices.length;
+  selectedVoiceName = voices[idx].name;
+  localStorage.setItem("hiitVoice", selectedVoiceName);
+  updateVoiceState();
+  updateVoiceUI();
+  speak(isCN ? "你好，我是" + voices[idx].name : "Hello, I am " + voices[idx].name);
+}
+
+function updateVoiceUI(){
+  var btn = $("btnVoice");
+  if(btn){
+    var v = getSelectedVoice();
+    btn.textContent = v ? v.name : "Default Voice";
+  }
+}
+
+// Translation helper
+function tr(en, cn){ return isCN ? (cn || en) : en; }
+
+function exName(exercise){
+  if(!exercise) return "";
+  var name = typeof exercise === "string" ? exercise : exercise.name;
+  if(isCN){
+    var cn = (typeof getChineseName === "function") ? getChineseName(name) : "";
+    return cn || name;
+  }
+  return name;
+}
+
 function speak(text){
   try{
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-US";
+    var utter = new SpeechSynthesisUtterance(text);
+    var v = getSelectedVoice();
+    if(v){ utter.voice = v; utter.lang = v.lang; }
+    else { utter.lang = "en-US"; }
     utter.rate = 1.05;
     speechSynthesis.cancel();
     speechSynthesis.speak(utter);
@@ -140,8 +204,10 @@ function speak(text){
 
 function speakQueue(text, delay){
   try{
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-US";
+    var utter = new SpeechSynthesisUtterance(text);
+    var v = getSelectedVoice();
+    if(v){ utter.voice = v; utter.lang = v.lang; }
+    else { utter.lang = "en-US"; }
     utter.rate = 1.05;
     setTimeout(() => speechSynthesis.speak(utter), (delay || 0) * 1000);
   }catch(e){}
@@ -154,6 +220,7 @@ function init(){
   workouts = JSON.parse(localStorage.getItem("hiitWorkouts") || "[]");
   bindStaticUI();
   updateMusicUI();
+  updateVoiceUI();
   show("main");
 }
 
@@ -204,6 +271,7 @@ function bindStaticUI(){
   bind("btnEndEarly",  endEarly);
   bind("btnMusicToggle", toggleMusic);
   bind("btnMusicStyle",  cycleMusic);
+  bind("btnVoice",       cycleVoice);
   bind("btnPickerDone",   pickerDone);
   bind("btnPickerCancel", closePicker);
 
@@ -253,7 +321,7 @@ function endEarly(){
     clearBeeps();
     stopMusic();
     speechSynthesis.cancel();
-    speak("Workout ended");
+    speak(tr("Workout ended","训练结束"));
     const savedState = state;
     state = "idle";
     paused = false;
@@ -815,30 +883,36 @@ function pickExercises(orderedParts, count){
 // =========================
 function briefing(cfg, exercises, onDone){
   const totalMin = Math.round(totalTime / 60);
-  const exList = exercises.map(e => e.name).join(", ");
 
-  const intros = [
-    `Alright, let's get started!`,
-    `Let's do this!`,
-    `Time to work! Let's go!`,
-    `Ready to crush it? Here we go!`,
-    `Let's get after it!`,
-    `OK, game time!`,
-    `Here we go, let's make it count!`
-  ];
-  const intro = intros[Math.floor(Math.random() * intros.length)];
-
-  const msg =
-    `${intro} Today's workout is ${cfg.name}. ` +
-    `You'll do ${cfg.rounds} round${cfg.rounds > 1 ? "s" : ""} of ${exercises.length} exercise${exercises.length > 1 ? "s" : ""}. ` +
-    `Each exercise is ${cfg.work} seconds, with ${cfg.rest} seconds rest in between. ` +
-    `The total workout time is about ${totalMin} minute${totalMin !== 1 ? "s" : ""}. ` +
-    `Your exercises are: ${exList}. ` +
-    `We'll start with a ${cfg.warmup}-second warm-up. Get ready!`;
+  var msg;
+  if(isCN){
+    const cnIntros = ["好的，开始训练！","准备好了吗？开始！","加油！让我们开始吧！","来吧，开始今天的训练！","准备就绪，出发！"];
+    const cnIntro = cnIntros[Math.floor(Math.random() * cnIntros.length)];
+    const cnExList = exercises.map(e => exName(e)).join("，");
+    msg = `${cnIntro} 今天的训练是${cfg.name}。` +
+      `共${cfg.rounds}轮，每轮${exercises.length}个动作。` +
+      `每个动作${cfg.work}秒，中间休息${cfg.rest}秒。` +
+      `总时间大约${totalMin}分钟。` +
+      `动作包括：${cnExList}。` +
+      `先进行${cfg.warmup}秒热身，准备好！`;
+  } else {
+    const intros = ["Alright, let's get started!","Let's do this!","Time to work! Let's go!",
+      "Ready to crush it? Here we go!","Let's get after it!","OK, game time!","Here we go, let's make it count!"];
+    const intro = intros[Math.floor(Math.random() * intros.length)];
+    const exList = exercises.map(e => e.name).join(", ");
+    msg = `${intro} Today's workout is ${cfg.name}. ` +
+      `You'll do ${cfg.rounds} round${cfg.rounds > 1 ? "s" : ""} of ${exercises.length} exercise${exercises.length > 1 ? "s" : ""}. ` +
+      `Each exercise is ${cfg.work} seconds, with ${cfg.rest} seconds rest in between. ` +
+      `The total workout time is about ${totalMin} minute${totalMin !== 1 ? "s" : ""}. ` +
+      `Your exercises are: ${exList}. ` +
+      `We'll start with a ${cfg.warmup}-second warm-up. Get ready!`;
+  }
 
   try {
     const utter = new SpeechSynthesisUtterance(msg);
-    utter.lang = "en-US";
+    var v = getSelectedVoice();
+    if(v){ utter.voice = v; utter.lang = v.lang; }
+    else { utter.lang = "en-US"; }
     utter.rate = 1.05;
     let called = false;
     const finish = () => {
@@ -969,7 +1043,7 @@ function tick(){
   if(!announced && (state === "warmup" || state === "rest" || state === "water") && t <= announceAt && t > 0){
     announced = true;
     const upcoming = getUpcomingExercise();
-    if(upcoming) speak(`Get ready for ${upcoming.name}.`);
+    if(upcoming) speak(tr("Get ready for " + upcoming.name + ".", "准备做" + exName(upcoming) + "。"));
   }
 
   if(t === 5) beepCountdown();
@@ -981,15 +1055,12 @@ function tick(){
 function checkEncouragement(){
   if(!cfg || state !== "work") return;
 
-  const halfwayMsgs = [
-    "Halfway there!", "Half done, keep going!", "Halfway! You've got this!",
-    "Halfway point, stay strong!", "That's half! Push through!"
-  ];
-  const nearEndMsgs = [
-    "Almost done!", "Final push!", "You're almost there!",
-    "Just a few more seconds!", "Finish strong!", "Don't stop now!",
-    "Great work, keep pushing!", "Looking good, keep going!"
-  ];
+  var halfwayMsgs = isCN ?
+    ["已经一半了！","坚持住，一半了！","加油，还有一半！","继续保持！","半程完成！"] :
+    ["Halfway there!","Half done, keep going!","Halfway! You've got this!","Halfway point, stay strong!","That's half! Push through!"];
+  var nearEndMsgs = isCN ?
+    ["快完成了！","最后冲刺！","马上就好！","坚持住！","加油！再来几秒！","你太棒了！","不要停！"] :
+    ["Almost done!","Final push!","You're almost there!","Just a few more seconds!","Finish strong!","Don't stop now!","Great work, keep pushing!"];
 
   if(!halfSpoken && t <= Math.floor(duration / 2)){
     halfSpoken = true;
@@ -1007,7 +1078,7 @@ function next(){
     case "warmup":
       beepGo();
       setState("work", cfg.work, null);
-      setTimeout(() => speak(exercises[idx].name), 600);
+      setTimeout(() => speak(exName(exercises[idx])), 600);
       break;
 
     case "work":
@@ -1019,16 +1090,17 @@ function next(){
         if(isLastInRound && hasMoreRounds && hasWaterBreak){
           idx = 0;
           round++;
-          speak(`Round ${round - 1} complete! Take a water break.`);
+          speak(tr("Round " + (round - 1) + " complete! Take a water break.", "第" + (round - 1) + "轮完成！喝点水休息一下。"));
           setState("water", cfg.water, null);
         } else {
           const upcoming = exercises[idx + 1] !== undefined
             ? exercises[idx + 1]
             : (round < cfg.rounds ? exercises[0] : null);
-          let restMsg = "Rest.";
-          if(upcoming) restMsg += ` Next up: ${upcoming.name}.`;
-          else if(round >= cfg.rounds) restMsg += " Last set done! Cool down coming up.";
-          speak(restMsg);
+          var restMsg, restMsgCn;
+          restMsg = "Rest."; restMsgCn = "休息。";
+          if(upcoming){ restMsg += " Next up: " + upcoming.name + "."; restMsgCn += "下一个：" + exName(upcoming) + "。"; }
+          else if(round >= cfg.rounds){ restMsg += " Last set done! Cool down coming up."; restMsgCn += "最后一组完成！准备放松。"; }
+          speak(tr(restMsg, restMsgCn));
           setState("rest", cfg.rest, null);
         }
       }
@@ -1040,20 +1112,20 @@ function next(){
         idx = 0;
         round++;
         if(round > cfg.rounds){
-          speak("Great job! Now let's cool down.");
+          speak(tr("Great job! Now let's cool down.", "做得好！现在放松一下。"));
           setState("cooldown", cfg.cooldown, null);
           return;
         }
       }
       beepGo();
       setState("work", cfg.work, null);
-      setTimeout(() => speak(exercises[idx].name), 600);
+      setTimeout(() => speak(exName(exercises[idx])), 600);
       break;
 
     case "water":
       beepGo();
       setState("work", cfg.work, null);
-      setTimeout(() => speak(exercises[idx].name), 600);
+      setTimeout(() => speak(exName(exercises[idx])), 600);
       break;
 
     case "cooldown":
@@ -1066,7 +1138,7 @@ function next(){
 
 function showDone(){
   stopMusic();
-  speak("Congratulations! Workout complete! You crushed it!");
+  speak(tr("Congratulations! Workout complete! You crushed it!", "恭喜！训练完成！你太棒了！"));
   elapsed = totalTime;
   updateUI();
   renderSummary(false, "idle");
@@ -1157,10 +1229,10 @@ function togglePause(){
     stopMusic();
     speechSynthesis.cancel();
     if(state === "briefing") briefingDone = true;
-    speak("Paused");
+    speak(tr("Paused","已暂停"));
     updateUI();
   } else {
-    speak("Resumed");
+    speak(tr("Resumed","继续"));
     if(musicEnabled) startMusic();
     if(state === "briefing" && briefingDone) startWarmup();
     updateUI();
@@ -1174,13 +1246,13 @@ function skip(){
   speechSynthesis.cancel();
 
   if(state === "briefing"){
-    speak("Skipped");
+    speak(tr("Skipped","跳过"));
     briefingDone = true;
     setTimeout(startWarmup, 400);
     return;
   }
 
-  speak("Skipped");
+  speak(tr("Skipped","跳过"));
   progressOffset += t;
   t = 0;
   setTimeout(() => next(), 400);
@@ -1192,7 +1264,7 @@ function restartMove(){
   speechSynthesis.cancel();
   progressOffset -= (duration - t);
   paused = false;
-  speak("Restarting");
+  speak(tr("Restarting","重新开始"));
   setState(state, duration, null);
 }
 
