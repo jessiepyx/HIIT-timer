@@ -537,7 +537,9 @@ function renderPicker(){
       const item = document.createElement("div");
       item.className = "picker-item" + (pickerSelected.has(name) ? " selected" : "");
       var tutBtn = (typeof getTutorialHtml === "function") ? getTutorialHtml(name) : "";
-      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}</span><span class="picker-eq-label">${eqLabel}</span>${tutBtn}`;
+      var cnPick = (typeof getChineseName === "function") ? getChineseName(name) : "";
+      var cnPickHtml = cnPick ? ' <span class="cn-name">' + cnPick + '</span>' : '';
+      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}${cnPickHtml}</span><span class="picker-eq-label">${eqLabel}</span>${tutBtn}`;
       item.addEventListener("click", () => {
         if(pickerSelected.has(name)){
           pickerSelected.delete(name);
@@ -596,7 +598,9 @@ function addExercise(name, category){
   const eqLabel = safeName ? getEquipmentLabel(safeName) : "";
   const eqHtml = eqLabel ? `<span class="eq-label">${eqLabel}</span>` : "";
   var tutHtml = (typeof getFormTutorialHtml === "function") ? getFormTutorialHtml(safeName) : "";
-  div.innerHTML = `<span class="drag-handle">\u2261</span><input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
+  var cnForm = (safeName && typeof getChineseName === "function") ? getChineseName(safeName) : "";
+  var cnFormHtml = cnForm ? `<span class="cn-name">${cnForm}</span>` : "";
+  div.innerHTML = `<span class="drag-handle">\u2261</span><input placeholder="Exercise name" value="${safeName}">${cnFormHtml}<select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
   div.querySelector("button").onclick = () => div.remove();
   initDragHandle(div);
   list.appendChild(div);
