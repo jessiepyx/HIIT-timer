@@ -472,6 +472,128 @@ label {
   color: #ff6961;
 }
 
+/* tutorial area (run page) */
+.tutorial-area {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+}
+.tutorial-header {
+  font-size: 0.85em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+.tutorial-frame {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 10px;
+}
+.tutorial-search-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.85em;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.tutorial-save {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.tutorial-url-input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 0.85em;
+}
+.tutorial-save-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #007aff;
+  color: white;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.tutorial-change-btn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75em;
+  cursor: pointer;
+}
+
+/* tutorial overlay (picker/form) */
+.tutorial-modal {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  text-align: center;
+}
+.tutorial-modal h3 {
+  margin: 0 0 12px;
+  color: #333;
+}
+.tutorial-modal .tutorial-frame {
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.tutorial-modal .tutorial-search-btn {
+  color: #007aff;
+  background: #e8f0fe;
+  border-color: #cde;
+}
+.tutorial-modal .tutorial-save {
+  margin-top: 8px;
+}
+.tutorial-modal .tutorial-url-input {
+  background: #f5f5f7;
+  color: #333;
+  border-color: #ccc;
+}
+.tutorial-close-btn {
+  margin-top: 12px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e5ea;
+  color: #333;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+/* tutorial buttons in picker and form */
+.picker-tutorial {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 0.85em;
+  color: #007aff;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.eq-tutorial {
+  padding: 2px 6px;
+  font-size: 0.85em;
+  color: #007aff;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
 /* done panel */
 #donePanel {
   margin-top: 24px;
