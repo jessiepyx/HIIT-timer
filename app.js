@@ -295,6 +295,7 @@ function show(page){
   const target = $(page);
   if(target) target.style.display = "block";
   if(page === "main")    renderManage();
+  if(page === "detail")  renderDetail();
   if(page === "suggest") renderSuggest();
 }
 
@@ -304,10 +305,19 @@ function show(page){
 function bindStaticUI(){
   bind("btnSuggest",   () => show("suggest"));
   bind("btnNew",       newWorkout);
+  bind("btnStartTop",  () => { if(detailIndex != null) startWorkout(detailIndex); });
+  bind("btnStartBottom", () => { if(detailIndex != null) startWorkout(detailIndex); });
+  bind("btnDetailEdit", () => { if(detailIndex != null) edit(detailIndex); });
+  bind("btnDetailDelete", () => {
+    if(detailIndex != null && confirm("Delete this workout?")){
+      workouts.splice(detailIndex, 1); saveLS(); detailIndex = null; show("main");
+    }
+  });
+  bind("btnDetailBack", () => show("main"));
   bind("btnAddEx",     () => addExercise());
   bind("btnPickEx",    openPicker);
   bind("btnSave",      save);
-  bind("btnBackEdit",  () => show("main"));
+  bind("btnBackEdit",  () => { if(detailIndex != null) showDetail(detailIndex); else show("main"); });
   bind("btnBackSuggest", () => show("main"));
   bind("btnGenerate",  generateWorkout);
   bind("btnSelectAll", () => toggleAllParts(true));
@@ -318,11 +328,41 @@ function bindStaticUI(){
   bind("btnSkip",      skip);
   bind("btnRestart",   restartMove);
   bind("btnHome",      goHome);
+  bind("btnHome2",     goHome);
   bind("btnEndEarly",  endEarly);
   bind("btnMusicToggle", toggleMusic);
   bind("btnMusicStyle",  cycleMusic);
   bind("btnPickerDone",   pickerDone);
-  bind("btnPickerCancel", () => { $("pickerOverlay").style.display = "none"; });
+  bind("btnPickerCancel", closePicker);
+
+  // Pull-down-to-dismiss for picker
+  var pickerTouchStartY = 0;
+  var pickerBox = document.querySelector(".picker-box");
+  if(pickerBox){
+    pickerBox.addEventListener("touchstart", function(e){
+      if(pickerBox.scrollTop <= 0) pickerTouchStartY = e.touches[0].clientY;
+      else pickerTouchStartY = 0;
+    });
+    pickerBox.addEventListener("touchmove", function(e){
+      if(pickerTouchStartY && pickerBox.scrollTop <= 0){
+        var diff = e.touches[0].clientY - pickerTouchStartY;
+        if(diff > 0){
+          pickerBox.style.transform = "translateY(" + diff + "px)";
+          pickerBox.style.transition = "none";
+          e.preventDefault();
+        }
+      }
+    }, {passive: false});
+    pickerBox.addEventListener("touchend", function(e){
+      if(pickerTouchStartY){
+        var diff = e.changedTouches[0].clientY - pickerTouchStartY;
+        pickerBox.style.transition = "transform 0.2s";
+        pickerBox.style.transform = "";
+        if(diff > 80) closePicker();
+      }
+      pickerTouchStartY = 0;
+    });
+  }
 }
 
 function goHome(){
@@ -360,6 +400,8 @@ function endEarly(){
 // =========================
 // MAIN PAGE (workout list)
 // =========================
+var detailIndex = null;
+
 function renderManage(){
   const list = $("manageList");
   if(!list) return;
@@ -370,18 +412,70 @@ function renderManage(){
   }
   workouts.forEach((w, i) => {
     const exCount = (w.exercises || []).length;
+    const totalMin = estimateWorkoutMin(w);
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "card card-clickable";
     div.innerHTML =
-      `<div class="card-info"><b>${w.name}</b><span>${w.rounds} rounds &middot; ${exCount} exercises &middot; ${w.work}s/${w.rest}s</span></div>` +
-      `<div class="card-actions"><button class="start primary">Start</button><button class="edit">Edit</button><button class="del">Delete</button></div>`;
+      `<div class="card-info"><b>${w.name}</b><span>${w.rounds} rounds &middot; ${exCount} exercises &middot; ${w.work}s/${w.rest}s &middot; ~${totalMin}min</span></div>`;
+    div.onclick = () => showDetail(i);
     list.appendChild(div);
-    div.querySelector(".start").onclick = () => startWorkout(i);
-    div.querySelector(".edit").onclick = () => edit(i);
-    div.querySelector(".del").onclick = () => {
-      if(confirm("Delete this workout?")){ workouts.splice(i, 1); saveLS(); renderManage(); }
-    };
   });
+}
+
+function estimateWorkoutMin(w){
+  const exCount = (w.exercises || []).length;
+  const waterBreaks = w.water > 0 ? Math.max(0, w.rounds - 1) : 0;
+  const total = w.warmup + w.cooldown + w.rounds * exCount * (w.work + w.rest) + waterBreaks * (w.water - w.rest);
+  return Math.round(total / 60);
+}
+
+function showDetail(i){
+  detailIndex = i;
+  renderDetail();
+  show("detail");
+}
+
+function renderDetail(){
+  if(detailIndex == null || !workouts[detailIndex]) return;
+  const w = workouts[detailIndex];
+  const exs = normalizeExercises(w.exercises);
+  const totalMin = estimateWorkoutMin(w);
+
+  let html = '<h2 class="detail-title">' + w.name + '</h2>';
+  html += '<div class="detail-stats">';
+  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.rounds + '</span><span class="detail-stat-label">Rounds</span></div>';
+  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.work + 's</span><span class="detail-stat-label">Work</span></div>';
+  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.rest + 's</span><span class="detail-stat-label">Rest</span></div>';
+  html += '<div class="detail-stat"><span class="detail-stat-val">~' + totalMin + 'm</span><span class="detail-stat-label">Total</span></div>';
+  html += '</div>';
+
+  if(w.warmup || w.cooldown || w.water){
+    html += '<div class="detail-extra">';
+    if(w.warmup) html += 'Warmup: ' + w.warmup + 's &middot; ';
+    if(w.cooldown) html += 'Cooldown: ' + w.cooldown + 's &middot; ';
+    if(w.water) html += 'Water: ' + w.water + 's';
+    html += '</div>';
+  }
+
+  html += '<h3 class="detail-section-title">Exercises (' + exs.length + ')</h3>';
+  html += '<div class="detail-exercise-list">';
+  exs.forEach((ex, j) => {
+    const eqLabel = getEquipmentLabel(ex.name);
+    const hasVid = typeof getVideoId === "function" && getVideoId(ex.name);
+    const tutClick = typeof showTutorialOverlay === "function" ?
+      ' onclick="showTutorialOverlay(\'' + ex.name.replace(/'/g, "\\'") + '\')"' : '';
+    html += '<div class="detail-exercise">';
+    html += '<span class="detail-ex-num">' + (j + 1) + '</span>';
+    html += '<div class="detail-ex-info">';
+    html += '<div class="detail-ex-name">' + ex.name + '</div>';
+    html += '<div class="detail-ex-meta">' + ex.category + ' &middot; ' + eqLabel + '</div>';
+    html += '</div>';
+    html += '<span class="detail-ex-tutorial"' + tutClick + '>' + (hasVid ? '&#9654;' : '&#9654;') + '</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  $("detailContent").innerHTML = html;
 }
 
 // =========================
@@ -457,6 +551,10 @@ function renderPicker(){
       list.appendChild(item);
     });
   });
+}
+
+function closePicker(){
+  $("pickerOverlay").style.display = "none";
 }
 
 function pickerDone(){
@@ -544,7 +642,8 @@ function save(){
   if(editingIndex != null){ workouts[editingIndex] = w; }
   else { workouts.push(w); }
   saveLS();
-  show("main");
+  var savedIdx = (editingIndex != null) ? editingIndex : workouts.length - 1;
+  showDetail(savedIdx);
 }
 
 function saveLS(){
@@ -1133,9 +1232,9 @@ function updateUI(){
     else hideExerciseDemo();
   }
 
-  // Tutorial: show during rest/water/pause for next exercise
+  // Tutorial: show during pause for current/next exercise
   if(typeof showWorkoutTutorial === "function"){
-    var showTut = (state === "rest" || state === "water") || (paused && state !== "idle");
+    var showTut = (paused && state !== "idle");
     if(showTut){
       var tutName = null;
       if(state === "rest" || state === "water"){
@@ -1146,6 +1245,18 @@ function updateUI(){
       if(tutName) showWorkoutTutorial(tutName);
       else hideWorkoutTutorial();
     } else { hideWorkoutTutorial(); }
+  }
+
+  // Tutorial hint (visible when not paused, if video exists)
+  var tutHint = $("tutorialHint");
+  if(tutHint){
+    if(!paused && state !== "idle" && state !== "briefing"){
+      var hintEx = (state === "work" && exercises[idx]) ? exercises[idx].name : "";
+      var hasVid = hintEx && typeof getVideoId === "function" && getVideoId(hintEx);
+      tutHint.textContent = hasVid ? "Pause to watch tutorial" : "";
+    } else {
+      tutHint.textContent = "";
+    }
   }
 
   let nextName = "";
