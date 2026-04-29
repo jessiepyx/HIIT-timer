@@ -32,7 +32,7 @@ const EXERCISE_LIBRARY = {
 "Flutter Kicks", "Hanging Knee Raise", "Heel Touches",
 "Hollow Body Hold", "Leg Raises", "Mountain Climbers", "Plank",
 "Plank Jacks", "Reverse Crunch", "Russian Twists",
-"Side Plank Left", "Side Plank Right", "Sit-ups",
+"Side Plank", "Sit-ups",
 "Toe Touches", "V-ups", "Windshield Wipers"
 ],
 "Glutes": [
@@ -100,7 +100,7 @@ const EXERCISE_EQUIPMENT = {
   "Bicycle Crunches":[["Mat"]],"Crunches":[["Mat"]],"Dead Bug":[["Mat"]],"Flutter Kicks":[["Mat"]],
   "Hanging Knee Raise":[["Pull-up Bar"]],"Heel Touches":[["Mat"]],"Hollow Body Hold":[["Mat"]],
   "Leg Raises":[["Mat"]],"Plank":[["Mat"]],"Reverse Crunch":[["Mat"]],"Russian Twists":[["Mat"]],
-  "Side Plank Left":[["Mat"]],"Side Plank Right":[["Mat"]],"Sit-ups":[["Mat"]],"Toe Touches":[["Mat"]],
+  "Side Plank":[["Mat"]],"Sit-ups":[["Mat"]],"Toe Touches":[["Mat"]],
   "V-ups":[["Mat"]],"Windshield Wipers":[["Mat"]],
   "Banded Walks":[["Resistance Band"]],"Cable Kickbacks":[["Cable Machine"]],"Clamshells":[["Mat"]],
   "Donkey Kicks":[["Mat"]],"Fire Hydrants":[["Mat"]],"Frog Pumps":[["Mat"]],"Glute Bridges":[["Mat"]],
@@ -467,7 +467,8 @@ function renderDetail(){
     html += '<div class="detail-exercise">';
     html += '<span class="detail-ex-num">' + (j + 1) + '</span>';
     html += '<div class="detail-ex-info">';
-    html += '<div class="detail-ex-name">' + ex.name + '</div>';
+    var cnName = (typeof getChineseName === "function") ? getChineseName(ex.name) : "";
+    html += '<div class="detail-ex-name">' + ex.name + (cnName ? ' <span class="cn-name">' + cnName + '</span>' : '') + '</div>';
     html += '<div class="detail-ex-meta">' + ex.category + ' &middot; ' + eqLabel + '</div>';
     html += '</div>';
     html += '<span class="detail-ex-tutorial"' + tutClick + '>' + (hasVid ? '&#9654;' : '&#9654;') + '</span>';
@@ -586,6 +587,7 @@ function addExercise(name, category){
   if(!list) return;
   const div = document.createElement("div");
   div.className = "exercise";
+  div.draggable = false;
   const safeName = (typeof name === "string") ? name : "";
   const safeCat = category || "Other";
   let options = CATEGORIES.map(c =>
@@ -594,8 +596,68 @@ function addExercise(name, category){
   const eqLabel = safeName ? getEquipmentLabel(safeName) : "";
   const eqHtml = eqLabel ? `<span class="eq-label">${eqLabel}</span>` : "";
   var tutHtml = (typeof getFormTutorialHtml === "function") ? getFormTutorialHtml(safeName) : "";
-  div.innerHTML = `<input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
+  div.innerHTML = `<span class="drag-handle">\u2261</span><input placeholder="Exercise name" value="${safeName}"><select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
   div.querySelector("button").onclick = () => div.remove();
+  initDragHandle(div);
+  list.appendChild(div);
+}
+
+// Drag-to-reorder exercise rows
+var dragEl = null;
+var dragStartY = 0;
+var dragPlaceholder = null;
+
+function initDragHandle(row){
+  var handle = row.querySelector(".drag-handle");
+  if(!handle) return;
+  handle.addEventListener("touchstart", function(e){
+    e.preventDefault();
+    dragEl = row;
+    dragStartY = e.touches[0].clientY;
+    row.classList.add("dragging");
+    dragPlaceholder = document.createElement("div");
+    dragPlaceholder.className = "drag-placeholder";
+    dragPlaceholder.style.height = row.offsetHeight + "px";
+    row.parentNode.insertBefore(dragPlaceholder, row);
+    row.style.position = "fixed";
+    row.style.left = "0";
+    row.style.right = "0";
+    row.style.zIndex = "50";
+    row.style.top = (row.getBoundingClientRect().top) + "px";
+  });
+  handle.addEventListener("touchmove", function(e){
+    if(!dragEl) return;
+    e.preventDefault();
+    var y = e.touches[0].clientY;
+    dragEl.style.top = (y - 20) + "px";
+    var list = $("exerciseList");
+    if(!list) return;
+    var children = Array.from(list.querySelectorAll(".exercise:not(.dragging)"));
+    for(var i = 0; i < children.length; i++){
+      var rect = children[i].getBoundingClientRect();
+      var mid = rect.top + rect.height / 2;
+      if(y < mid){
+        list.insertBefore(dragPlaceholder, children[i]);
+        return;
+      }
+    }
+    list.appendChild(dragPlaceholder);
+  }, {passive: false});
+  handle.addEventListener("touchend", function(){
+    if(!dragEl) return;
+    dragEl.classList.remove("dragging");
+    dragEl.style.position = "";
+    dragEl.style.left = "";
+    dragEl.style.right = "";
+    dragEl.style.zIndex = "";
+    dragEl.style.top = "";
+    if(dragPlaceholder && dragPlaceholder.parentNode){
+      dragPlaceholder.parentNode.insertBefore(dragEl, dragPlaceholder);
+      dragPlaceholder.remove();
+    }
+    dragEl = null;
+    dragPlaceholder = null;
+  });
   list.appendChild(div);
 }
 
@@ -925,7 +987,10 @@ function startWarmup(){
 function renderWorkoutInfo(){
   const info = $("workoutInfo");
   if(!info) return;
-  const exLines = exercises.map((e, i) => `${i + 1}. ${e.name} <span class="info-equip">${getEquipmentLabel(e.name)}</span>`).join("<br>");
+  const exLines = exercises.map((e, i) => {
+    var cn = (typeof getChineseName === "function") ? getChineseName(e.name) : "";
+    return `${i + 1}. ${e.name}${cn ? ' <span class="cn-name">' + cn + '</span>' : ''} <span class="info-equip">${getEquipmentLabel(e.name)}</span>`;
+  }).join("<br>");
   info.innerHTML =
     `<div class="info-title">${cfg.name}</div>` +
     `<div class="info-detail">${cfg.rounds} rounds &middot; ${cfg.work}s work &middot; ${cfg.rest}s rest</div>` +
@@ -1222,7 +1287,12 @@ function updateUI(){
   }
 
   const cur = $("current");
-  if(cur) cur.textContent = (state === "work") ? (exercises[idx]?.name || "") : "";
+  if(cur){
+    if(state === "work" && exercises[idx]){
+      var cn = (typeof getChineseName === "function") ? getChineseName(exercises[idx].name) : "";
+      cur.innerHTML = exercises[idx].name + (cn ? ' <span class="cn-name-lg">' + cn + '</span>' : '');
+    } else { cur.innerHTML = ""; }
+  }
 
   const eqEl = $("currentEquip");
   if(eqEl) eqEl.textContent = (state === "work" && exercises[idx]) ? getEquipmentLabel(exercises[idx].name) : "";
@@ -1267,7 +1337,8 @@ function updateUI(){
   if(nextEl){
     if(nextName){
       const eqLabel = getEquipmentLabel(nextName);
-      nextEl.innerHTML = "Next: <strong>" + nextName + "</strong> <span class='next-equip'>" + eqLabel + "</span>";
+      var nextCn = (typeof getChineseName === "function") ? getChineseName(nextName) : "";
+      nextEl.innerHTML = "Next: <strong>" + nextName + "</strong>" + (nextCn ? ' <span class="cn-name">' + nextCn + '</span>' : '') + " <span class='next-equip'>" + eqLabel + "</span>";
     } else {
       nextEl.innerHTML = "";
     }
