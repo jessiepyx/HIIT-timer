@@ -960,13 +960,31 @@ function orderPartsForAlternation(parts){
 }
 
 function pickExercises(orderedParts, count){
+  // Filter by equipment AND difficulty based on intensity
+  var allowedDiff;
+  if(suggestIntensity === "easy") allowedDiff = [1, 2];
+  else if(suggestIntensity === "intense") allowedDiff = [2, 3];
+  else allowedDiff = [1, 2, 3];
+
+  var preferDiff;
+  if(suggestIntensity === "easy") preferDiff = 1;
+  else if(suggestIntensity === "intense") preferDiff = 3;
+  else preferDiff = 2;
+
   const pools = {};
   orderedParts.forEach(part => {
-    const available = (EXERCISE_LIBRARY[part] || []).filter(name => canDoExercise(name, suggestEquip));
-    for(let i = available.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [available[i], available[j]] = [available[j], available[i]];
-    }
+    var available = (EXERCISE_LIBRARY[part] || []).filter(function(name){
+      if(!canDoExercise(name, suggestEquip)) return false;
+      var d = (typeof EXERCISE_DIFFICULTY !== "undefined") ? (EXERCISE_DIFFICULTY[name] || 1) : 1;
+      return allowedDiff.indexOf(d) >= 0;
+    });
+    // Sort: preferred difficulty first, then random
+    available.sort(function(a, b){
+      var da = (EXERCISE_DIFFICULTY[a] || 1), db = (EXERCISE_DIFFICULTY[b] || 1);
+      var pa = Math.abs(da - preferDiff), pb = Math.abs(db - preferDiff);
+      if(pa !== pb) return pa - pb;
+      return Math.random() - 0.5;
+    });
     pools[part] = available;
   });
 
