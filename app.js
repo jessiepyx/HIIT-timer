@@ -1466,6 +1466,7 @@ function next(){
           phaseIdx = 0;
           if(cooldownExercises.length > 0){
             var firstCd = cooldownExercises[0];
+            speakQueue(tr(firstCd.name, EXERCISE_CHINESE[firstCd.name] || firstCd.name), 1.5);
             setState("cooldown", firstCd.dur, null);
           } else {
             setState("cooldown", cfg.cooldown || 30, null);
