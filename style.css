@@ -237,7 +237,10 @@ label {
   height: 5px;
   background: #ccc;
   border-radius: 3px;
-  margin: -8px auto 12px;
+  margin: -4px auto 12px;
+  padding: 10px 0;
+  background-clip: content-box;
+  cursor: grab;
 }
 
 .picker-hint {
@@ -1090,6 +1093,21 @@ label {
   color: rgba(255,255,255,0.7);
   font-size: 0.95em;
   margin: 4px 0;
+}
+
+.summary-highlight {
+  color: #5ac8fa;
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+.summary-highlight-label {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
 }
 
 .summary-heading {
