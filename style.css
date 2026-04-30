@@ -989,18 +989,18 @@ label {
 .option-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
-  margin: 8px 0 16px;
+  margin: 6px 0 14px;
 }
 
 .option-row button,
 .body-part-grid button {
-  padding: 10px 16px;
+  padding: 8px 12px;
   border: 2px solid #ddd;
   border-radius: 10px;
   background: white;
-  font-size: 0.9em;
+  font-size: 0.85em;
   cursor: pointer;
   color: #333;
 }
@@ -1016,9 +1016,9 @@ label {
 .body-part-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 /* ── EXERCISE FORM CATEGORY ── */
