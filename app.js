@@ -313,10 +313,12 @@ init();
 // =========================
 // NAV
 // =========================
+var FLEX_PAGES = {"detail":1,"form":1,"suggest":1};
+
 function show(page){
   document.querySelectorAll(".page").forEach(p => p.style.display = "none");
   const target = $(page);
-  if(target) target.style.display = "block";
+  if(target) target.style.display = FLEX_PAGES[page] ? "flex" : "block";
   if(page === "main")    renderManage();
   if(page === "detail")  renderDetail();
   if(page === "suggest") renderSuggest();
