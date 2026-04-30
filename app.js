@@ -1679,14 +1679,16 @@ function updateUI(){
     if(tutArea){
       if(paused && state !== "idle"){
         var tutName = null;
-        if(state === "rest" || state === "water"){
+        if(state === "warmup" && warmupExercises[phaseIdx]) tutName = warmupExercises[phaseIdx].name;
+        else if(state === "cooldown" && cooldownExercises[phaseIdx]) tutName = cooldownExercises[phaseIdx].name;
+        else if(state === "rest" || state === "water"){
           var ni = idx + 1;
           if(ni < exercises.length) tutName = exercises[ni].name;
           else if(round + 1 <= cfg.rounds) tutName = exercises[0].name;
-        } else if(exercises[idx]) tutName = exercises[idx].name;
+        } else if(state === "work" && exercises[idx]) tutName = exercises[idx].name;
         if(tutName) showWorkoutTutorial(tutName);
         else { tutArea.innerHTML = ""; tutArea.style.display = "none"; }
-      } else if(state === "work"){
+      } else if(state === "work" || state === "warmup" || state === "cooldown"){
         hideWorkoutTutorial();
         tutArea.innerHTML = '<div class="tutorial-hint-box">Pause to watch tutorial</div>';
         tutArea.style.display = "block";
