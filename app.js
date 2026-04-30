@@ -136,9 +136,15 @@ var VOICE_DISPLAY = {
   "Tingting":"婷婷","Meijia":"美佳","Mei-Jia":"美佳"
 };
 
+var VOICE_ALLOW = ["Samantha","Nicky","Aaron","Ava","Tom","Allison","Susan","Evan","Zoe","Joelle","Jamie","Daniel","Martha","Oliver","Kate","Karen","Lee","Rishi","Tingting","Meijia","Mei-Jia"];
+
 function loadVoices(){
+  var seen = {};
   voices = speechSynthesis.getVoices().filter(function(v){
-    return v.lang.startsWith("en") || v.lang.startsWith("zh");
+    if(VOICE_ALLOW.indexOf(v.name) < 0) return false;
+    if(seen[v.name]) return false;
+    seen[v.name] = true;
+    return true;
   });
   updateVoiceState();
 }
@@ -1177,19 +1183,41 @@ function tick(){
   if(t <= 0) next();
 }
 
+function isUnilateral(name){
+  if(!name) return false;
+  var n = name.toLowerCase();
+  return n.indexOf("side") >= 0 || n.indexOf("single") >= 0 || n.indexOf("pistol") >= 0 || n.indexOf("bulgarian") >= 0 || n.indexOf("curtsy") >= 0 || n.indexOf("one arm") >= 0 || n.indexOf("one leg") >= 0;
+}
+
 function checkEncouragement(){
   if(!cfg || state !== "work") return;
 
+  var curName = exercises[idx] ? exercises[idx].name : "";
+  var switchMsgs = isCN ?
+    ["换边！","换另一边！","切换！"] :
+    ["Switch sides!","Other side!","Switch!"];
   var halfwayMsgs = isCN ?
     ["已经一半了！","坚持住，一半了！","加油，还有一半！","继续保持！","半程完成！"] :
     ["Halfway there!","Half done, keep going!","Halfway! You've got this!","Halfway point, stay strong!","That's half! Push through!"];
   var nearEndMsgs = isCN ?
     ["快完成了！","最后冲刺！","马上就好！","坚持住！","加油！再来几秒！","你太棒了！","不要停！"] :
     ["Almost done!","Final push!","You're almost there!","Just a few more seconds!","Finish strong!","Don't stop now!","Great work, keep pushing!"];
+  var lastExMsgs = isCN ?
+    ["最后一个动作！","最后一个了，全力以赴！","冲刺！最后一个！"] :
+    ["Last exercise!","Final one! Give it all!","Last one, let's go!"];
+
+  // Last exercise announcement (at start of work phase)
+  if(!halfSpoken && !nearEndSpoken && t >= duration - 1 && idx === exercises.length - 1 && round >= cfg.rounds){
+    speakQueue(lastExMsgs[Math.floor(Math.random() * lastExMsgs.length)], 0.5);
+  }
 
   if(!halfSpoken && t <= Math.floor(duration / 2)){
     halfSpoken = true;
-    speakQueue(halfwayMsgs[Math.floor(Math.random() * halfwayMsgs.length)], 0.3);
+    if(isUnilateral(curName)){
+      speakQueue(switchMsgs[Math.floor(Math.random() * switchMsgs.length)], 0.3);
+    } else {
+      speakQueue(halfwayMsgs[Math.floor(Math.random() * halfwayMsgs.length)], 0.3);
+    }
   }
   if(!nearEndSpoken && duration >= 10 && t <= Math.floor(duration * 0.2)){
     nearEndSpoken = true;
