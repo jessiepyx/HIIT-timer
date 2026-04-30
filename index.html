@@ -70,15 +70,19 @@
       <div class="form-field"><label>Rest (sec)</label><input id="rest" type="number"></div>
       <div class="form-field"><label>Rounds</label><input id="rounds" type="number"></div>
       <div class="form-field"><label>Water (sec)</label><input id="water" type="number"></div>
-      <div class="form-field"><label>Warmup (sec)</label><input id="warmup" type="number"></div>
-      <div class="form-field"><label>Cooldown (sec)</label><input id="cooldown" type="number"></div>
     </div>
+    <h3>Warm-up <span id="warmupTotal" class="section-time"></span></h3>
+    <div id="warmupList" class="phase-exercise-list"></div>
+    <button id="btnPickWarmup" class="pick-phase-btn">+ Pick Warm-up</button>
     <h3>Exercises</h3>
     <div id="exerciseList"></div>
     <div class="form-btns">
       <button id="btnAddEx">+ Custom</button>
       <button id="btnPickEx" class="primary">+ Pick Exercise</button>
     </div>
+    <h3>Cool-down <span id="cooldownTotal" class="section-time"></span></h3>
+    <div id="cooldownList" class="phase-exercise-list"></div>
+    <button id="btnPickCooldown" class="pick-phase-btn">+ Pick Cool-down</button>
   </div>
   <div class="form-footer">
     <button id="btnSave" class="primary" style="width:100%;">Save Workout</button>
