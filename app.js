@@ -167,6 +167,10 @@ function voiceDisplayName(v){
 
 function openVoicePicker(){
   if(voices.length === 0) loadVoices();
+  // Auto-pause during workout
+  if(state !== "idle" && !paused){
+    togglePause();
+  }
   var overlay = $("voiceOverlay");
   if(!overlay) return;
   var content = '<div class="tutorial-modal" onclick="event.stopPropagation()">';
