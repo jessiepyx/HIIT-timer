@@ -66,18 +66,14 @@
     <h2 id="formTitle">Workout</h2>
     <label>Name</label>
     <input id="name">
-    <label>Work (sec)</label>
-    <input id="work" type="number">
-    <label>Rest (sec)</label>
-    <input id="rest" type="number">
-    <label>Rounds</label>
-    <input id="rounds" type="number">
-    <label>Water break (sec)</label>
-    <input id="water" type="number">
-    <label>Warmup (sec)</label>
-    <input id="warmup" type="number">
-    <label>Cooldown (sec)</label>
-    <input id="cooldown" type="number">
+    <div class="form-grid">
+      <div class="form-field"><label>Work (sec)</label><input id="work" type="number"></div>
+      <div class="form-field"><label>Rest (sec)</label><input id="rest" type="number"></div>
+      <div class="form-field"><label>Rounds</label><input id="rounds" type="number"></div>
+      <div class="form-field"><label>Water (sec)</label><input id="water" type="number"></div>
+      <div class="form-field"><label>Warmup (sec)</label><input id="warmup" type="number"></div>
+      <div class="form-field"><label>Cooldown (sec)</label><input id="cooldown" type="number"></div>
+    </div>
     <h3>Exercises</h3>
     <div id="exerciseList"></div>
     <div class="form-btns">
