@@ -899,30 +899,74 @@ function generateWorkout(){
 
   const p = INTENSITY_PRESETS[suggestIntensity];
   const totalSecs = suggestTime * 60;
-  const available = totalSecs - p.warmup - p.cooldown;
-  const cycleTime = p.work + p.rest;
+  const parts = orderPartsForAlternation([...suggestParts]);
 
-  let best = null;
-  for(let r = 2; r <= 5; r++){
-    const net = available - (r - 1) * Math.max(0, p.water - p.rest);
-    const n = Math.floor(net / (r * cycleTime));
-    if(n < 4 || n > 20) continue;
-    const dist = Math.abs(n - 10);
-    if(!best || dist < best.dist || (dist === best.dist && r > best.rounds)){
-      best = { rounds: r, numEx: n, dist };
+  // Count how many exercises are actually available after filtering
+  var maxAvailable = 0;
+  parts.forEach(function(part){
+    var allowedDiff = suggestIntensity === "easy" ? [1,2] : suggestIntensity === "intense" ? [2,3] : [1,2,3];
+    var avail = (EXERCISE_LIBRARY[part] || []).filter(function(name){
+      if(!canDoExercise(name, suggestEquip)) return false;
+      var d = (typeof EXERCISE_DIFFICULTY !== "undefined") ? (EXERCISE_DIFFICULTY[name] || 1) : 1;
+      return allowedDiff.indexOf(d) >= 0;
+    });
+    maxAvailable += avail.length;
+  });
+
+  // If too few exercises, relax difficulty filter
+  if(maxAvailable < 4){
+    parts.forEach(function(part){
+      var avail = (EXERCISE_LIBRARY[part] || []).filter(function(name){
+        return canDoExercise(name, suggestEquip);
+      });
+      maxAvailable += avail.length;
+    });
+    // Temporarily set intensity to moderate for wider selection
+    var savedIntensity = suggestIntensity;
+    suggestIntensity = "moderate";
+  }
+
+  // Find best rounds/exercises combo that fits the target time
+  // Formula: total = warmup + cooldown + rounds * numEx * (work+rest) + (rounds-1) * max(0, water-rest)
+  var overhead = p.warmup + p.cooldown;
+  var cycleTime = p.work + p.rest;
+  var best = null;
+
+  for(var r = 2; r <= 8; r++){
+    var waterTime = (r - 1) * Math.max(0, p.water - p.rest);
+    var exerciseTime = totalSecs - overhead - waterTime;
+    if(exerciseTime <= 0) continue;
+    var n = Math.floor(exerciseTime / (r * cycleTime));
+    n = Math.min(n, maxAvailable); // Can't exceed available exercises
+    if(n < 2) continue;
+    var actualTime = overhead + r * n * cycleTime + waterTime;
+    var timeDiff = Math.abs(actualTime - totalSecs);
+    var exDist = Math.abs(n - 8); // prefer ~8 exercises
+    var score = timeDiff + exDist * 30; // balance time accuracy vs exercise count
+    if(!best || score < best.score){
+      best = { rounds: r, numEx: n, score: score, actualTime: actualTime };
     }
   }
-  if(!best){
-    const net = available - Math.max(0, p.water - p.rest);
-    best = { rounds: 2, numEx: Math.max(4, Math.floor(net / (2 * cycleTime))) };
-  }
 
-  const parts = orderPartsForAlternation([...suggestParts]);
+  if(!best) best = { rounds: 2, numEx: Math.min(4, maxAvailable), score: 999 };
+
   const ex = pickExercises(parts, best.numEx);
+
+  // Restore intensity if we changed it
+  if(typeof savedIntensity !== "undefined") suggestIntensity = savedIntensity;
+
+  // If still short of target, adjust work time up
+  var actualTotal = p.warmup + p.cooldown + best.rounds * ex.length * cycleTime + (best.rounds - 1) * Math.max(0, p.water - p.rest);
+  var adjustedWork = p.work;
+  if(actualTotal < totalSecs * 0.85 && ex.length > 0){
+    var deficit = totalSecs - actualTotal;
+    var extraPerCycle = Math.floor(deficit / (best.rounds * ex.length));
+    adjustedWork = p.work + Math.min(extraPerCycle, 30); // cap at 30s extra
+  }
 
   const w = {
     name: suggestTime + "min " + suggestIntensity.charAt(0).toUpperCase() + suggestIntensity.slice(1),
-    work: p.work,
+    work: adjustedWork,
     rest: p.rest,
     rounds: best.rounds,
     water: p.water,
