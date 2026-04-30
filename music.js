@@ -95,7 +95,6 @@ var MUSIC_STYLES = [
     padWave:"triangle", synthWave:"sawtooth", openHat:[0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0]
   },
   { name: "Country", bpm: 110, type: "country",
-    // Guitar voicings: wide open chords
     chords: [
       [196,246.9,293.7,392],     // G
       [130.8,164.8,261.6,329.6], // C
@@ -107,20 +106,29 @@ var MUSIC_STYLES = [
       [146.8,220,293.7,370]      // D
     ],
     bassN: [98,65.4,98,73.4,82.4,65.4,98,73.4],
-    altBass: [146.8,98,146.8,110,123.5,98,146.8,110], // alternate bass (5th)
+    altBass: [146.8,98,146.8,110,123.5,98,146.8,110],
     scale: [196,220,246.9,261.6,293.7,329.6,370,392,440,493.9],
     drums: [
-      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],h:[1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0]},
-      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}],
-    // Fingerpick patterns: [step, chordNoteIndex] — which chord note to pluck at which step
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0]}],
     pickPatterns: [
       [[0,-1],[2,0],[4,1],[6,2],[8,-2],[10,1],[12,2],[14,0]],
       [[0,-1],[2,2],[4,1],[6,0],[8,-2],[10,0],[12,1],[14,2]],
       [[0,-1],[2,0],[3,1],[4,2],[6,1],[8,-2],[10,2],[12,1],[14,0]],
+      [[0,-1],[2,1],[4,2],[6,3],[8,-2],[10,2],[12,1],[14,0]],
     ],
-    leadSteps: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],
+    melodies: [
+      [[0,246.9],[2,220],[4,196],[6,220],[8,246.9],[10,293.7],[12,246.9],[14,220]],
+      [[0,392],[2,370],[4,329.6],[6,293.7],[8,329.6],[10,370],[12,392]],
+      [[0,293.7],[2,329.6],[4,370],[6,392],[8,370],[10,329.6],[12,293.7],[14,246.9]],
+      [[0,196],[2,220],[4,246.9],[6,293.7],[8,329.6],[12,293.7],[14,246.9]],
+      [[0,392],[4,329.6],[6,293.7],[8,246.9],[10,220],[12,196],[14,220]],
+      [[0,329.6],[2,293.7],[4,246.9],[6,220],[8,246.9],[10,293.7],[12,329.6],[14,370]],
+      [[0,246.9],[2,246.9],[4,293.7],[6,329.6],[8,329.6],[10,293.7],[12,246.9]],
+      [[0,370],[2,329.6],[4,293.7],[6,329.6],[8,370],[10,392],[12,440],[14,392]],
+    ],
     padWave:"triangle", synthWave:"triangle", openHat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
   },
   { name: "Pop", bpm: 120, type: "pop",
@@ -129,29 +137,31 @@ var MUSIC_STYLES = [
       [196,246.9,293.7],   // G
       [220,261.6,329.6],   // Am
       [174.6,220,261.6],   // F
-      [261.6,329.6,392],   // C
+      [146.8,174.6,220],   // Dm
       [196,246.9,293.7],   // G
-      [220,261.6,329.6],   // Am
+      [261.6,329.6,392],   // C
       [174.6,220,261.6]    // F
     ],
-    bassN: [65.4,98,55,87.3,65.4,98,55,87.3],
+    bassN: [65.4,98,55,87.3,73.4,98,65.4,87.3],
     scale: [261.6,293.7,329.6,349.2,392,440,493.9,523.3,587.3,659.3],
     drums: [
-      {k:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {k:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],h:[1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0]},
-      {k:[1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {k:[1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0]}],
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]},
+      {k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]}],
     arpShapes: [[0,1,2,1],[2,1,0,1],[0,2,1,0]],
-    // Pre-composed melodic motifs: [step, scaleDegreeOffset]
-    motifs: [
-      [[0,0],[2,2],[4,4],[6,2],[8,0],[10,1],[12,2],[14,4]],
-      [[0,4],[2,5],[4,4],[6,2],[8,0],[10,2],[12,4],[14,5]],
-      [[0,2],[2,2],[4,1],[6,0],[8,1],[10,2],[12,4],[14,2]],
-      [[0,0],[4,4],[6,5],[8,4],[10,2],[12,0],[14,1]],
-      [[0,4],[2,2],[4,0],[8,2],[10,4],[12,5],[14,4]],
-      [[0,0],[2,0],[4,2],[6,4],[8,4],[10,2],[12,0],[14,0]],
+    melodies: [
+      [[0,329.6],[2,329.6],[4,293.7],[6,261.6],[8,293.7],[10,329.6],[12,392],[14,329.6]],
+      [[0,392],[2,440],[4,392],[6,329.6],[8,261.6],[10,293.7],[12,329.6]],
+      [[0,523.3],[2,493.9],[4,440],[6,392],[8,440],[10,493.9],[12,523.3]],
+      [[0,329.6],[4,329.6],[6,293.7],[8,261.6],[10,293.7],[12,329.6],[14,392]],
+      [[0,392],[2,329.6],[4,261.6],[8,293.7],[10,329.6],[12,440],[14,392]],
+      [[0,261.6],[2,329.6],[4,392],[6,440],[8,392],[10,329.6],[12,261.6],[14,293.7]],
+      [[0,440],[2,392],[4,329.6],[6,293.7],[8,261.6],[12,293.7],[14,329.6]],
+      [[0,329.6],[2,392],[4,440],[6,523.3],[8,440],[10,392],[12,329.6]],
+      [[0,523.3],[4,440],[6,392],[8,329.6],[10,293.7],[12,261.6],[14,329.6]],
+      [[0,261.6],[2,261.6],[4,329.6],[6,392],[8,392],[10,329.6],[12,261.6]]
     ],
-    leadSteps: [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0],
     padWave:"sine", synthWave:"sawtooth", openHat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
   }
 ];
@@ -301,72 +311,92 @@ function scheduleMusicBeat(step,time){
 
   // --- STYLE-SPECIFIC ---
   if(sty.type==="country"){
-    // Fingerpicking guitar
+    // Softer drums for country
+    var dv = vel * 0.35 * sc.energy;
+    if(sc.drums && !isFill){
+      if(dm.k[step]) playMKick(time, dv);
+      if(dm.s[step]) playMSnare(time, dv);
+      if(dm.h[step]) playMHat(time, dv*0.7, false);
+    }
+    // Fingerpicking guitar (louder)
     if(sc.guitar){
       var pp=sty.pickPatterns[musicBar%sty.pickPatterns.length];
       for(var pi=0;pi<pp.length;pi++){
         if(pp[pi][0]===step){
           var ni=pp[pi][1];
-          if(ni===-1) playMGuitar(time,sty.bassN[ci],stepDur*3,vel*sc.energy);
-          else if(ni===-2) playMGuitar(time,sty.altBass[ci],stepDur*3,vel*sc.energy*0.8);
-          else playMGuitar(time,chord[ni%chord.length],stepDur*2,vel*sc.energy*0.7);
+          if(ni===-1) playMGuitar(time,sty.bassN[ci],stepDur*3,vel*sc.energy*1.2);
+          else if(ni===-2) playMGuitar(time,sty.altBass[ci],stepDur*3,vel*sc.energy);
+          else playMGuitar(time,chord[ni%chord.length],stepDur*2,vel*sc.energy*0.9);
         }
       }
     }
     // Strum on chorus/drop
-    if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step===0&&Math.random()<0.5){
-      playMStrum(time,chord,barDur*0.4,vel*0.5);
+    if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step===0&&Math.random()<0.6){
+      playMStrum(time,chord,barDur*0.4,vel*0.6);
     }
-    // Country lead (fiddle-like)
-    if(sc.lead && sty.leadSteps[step] && Math.random()<0.6){
-      var note=pickLeadNote(chord,sty.scale); prevLeadNote=note;
-      playMLead(time,note,stepDur*(2+Math.floor(Math.random()*2)),vel*0.6*sc.energy,sty.synthWave);
+    // Country melody (loud, prominent)
+    if(sc.lead && sty.melodies){
+      var mel = sty.melodies[(musicBar + Math.floor(musicBar/4)) % sty.melodies.length];
+      for(var mi=0;mi<mel.length;mi++){
+        if(mel[mi][0]===step){
+          var mNote = mel[mi][1];
+          playMLead(time,mNote,stepDur*3,vel*1.1*sc.energy,sty.synthWave);
+          // Echo for warmth
+          if(Math.random()<0.3) playMGuitar(time+stepDur,mNote,stepDur*2,vel*0.3);
+        }
+      }
     }
     // Bass
     if(sc.bass && step===0){
-      playMBass(time,sty.bassN[ci],stepDur*6,vel*0.6*sc.energy);
-      playMSub(time,sty.bassN[ci]/2,stepDur*8,vel*0.5);
+      playMBass(time,sty.bassN[ci],stepDur*6,vel*0.5*sc.energy);
+      playMSub(time,sty.bassN[ci]/2,stepDur*8,vel*0.4);
     }
-    // Light pad on verse/chorus
-    if(sc.pad && step===0) playMPad(time,chord.slice(0,3),barDur*0.9,vel*0.4*sc.energy,sty.padWave);
+    // Light pad
+    if(sc.pad && step===0) playMPad(time,chord.slice(0,3),barDur*0.9,vel*0.5*sc.energy,sty.padWave);
     return;
   }
 
   if(sty.type==="pop"){
-    // Bass
+    // Softer drums for pop
+    var pdv = vel * 0.35 * sc.energy;
+    if(sc.drums && !isFill){
+      if(dm.k[step]) playMKick(time, pdv);
+      if(dm.s[step]) playMSnare(time, pdv*0.8);
+      if(dm.h[step]) playMHat(time, pdv*0.6, false);
+    }
+    // Bass (softer)
     if(sc.bass){
-      if(step===0){playMBass(time,sty.bassN[ci],stepDur*3,vel*sc.energy);playMSub(time,sty.bassN[ci]/2,stepDur*4,vel*0.7);}
-      else if(step===6&&Math.random()<0.6) playMBass(time,sty.bassN[ci],stepDur*2,vel*0.6*sc.energy);
-      else if(step===10&&Math.random()<0.4) playMBass(time,sty.bassN[ci]*1.5,stepDur*1.5,vel*0.5*sc.energy);
+      if(step===0){playMBass(time,sty.bassN[ci],stepDur*4,vel*0.5*sc.energy);playMSub(time,sty.bassN[ci]/2,stepDur*6,vel*0.4);}
+      else if(step===8&&Math.random()<0.4) playMBass(time,sty.bassN[ci],stepDur*2,vel*0.3*sc.energy);
     }
-    // Pad
-    if(sc.pad && step===0) playMPad(time,chord,barDur*0.95,vel*0.8*sc.energy,sty.padWave);
-    // Arp
-    if(sc.arp){
-      var as=sty.arpShapes[currentArpPattern%sty.arpShapes.length];
-      if(step%2===0&&Math.random()<0.6){
-        var an=chord[as[step%as.length]%chord.length]*2;
-        playMArp(time,an,stepDur*0.8,vel*sc.energy,sty.synthWave);
-        if(Math.random()<0.2) playMArp(time+stepDur*1.5,an*1.001,stepDur*0.5,vel*0.25,sty.synthWave);
-      }
-    }
-    // Pop melody: use pre-composed motifs
-    if(sc.melody){
-      if(!currentMotif && sty.motifs){
-        currentMotif=sty.motifs[Math.floor(Math.random()*sty.motifs.length)];
-        motifStep=0;
-      }
-      if(currentMotif){
-        var mn=getMotifNote(sty,step,ci);
-        if(mn){
-          prevLeadNote=mn;
-          playMLead(time,mn,stepDur*2.5,vel*0.7*sc.energy,sty.synthWave);
+    // Warm pad
+    if(sc.pad && step===0) playMPad(time,chord,barDur*0.95,vel*0.7*sc.energy,sty.padWave);
+    // Pop melody (loud, prominent, pre-composed)
+    if((sc.melody || sc.lead) && sty.melodies){
+      var pMel = sty.melodies[(musicBar + Math.floor(musicBar/3)) % sty.melodies.length];
+      for(var pmi=0;pmi<pMel.length;pmi++){
+        if(pMel[pmi][0]===step){
+          var pNote = pMel[pmi][1];
+          playMLead(time,pNote,stepDur*3.5,vel*1.2*sc.energy,sty.synthWave);
+          // Harmony note (softer, 3rd above)
+          if(Math.random()<0.25){
+            var hIdx = sty.scale.indexOf(pNote);
+            if(hIdx>=0 && hIdx+2<sty.scale.length) playMLead(time,sty.scale[hIdx+2],stepDur*3,vel*0.4*sc.energy,sty.synthWave);
+          }
         }
       }
     }
-    // Pluck in chorus
-    if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step%4===0&&Math.random()<0.4){
-      playMPluck(time,chord[Math.floor(Math.random()*chord.length)]*4,stepDur*2,vel*0.4);
+    // Gentle arp in chorus
+    if(sc.arp && (sec==="chorus"||sec==="chorus2"||sec==="drop")){
+      var as=sty.arpShapes[currentArpPattern%sty.arpShapes.length];
+      if(step%4===0&&Math.random()<0.5){
+        var an=chord[as[step%as.length]%chord.length]*2;
+        playMArp(time,an,stepDur*1.5,vel*0.4*sc.energy,sty.synthWave);
+      }
+    }
+    // Pluck sparkle in chorus
+    if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step%8===0&&Math.random()<0.3){
+      playMPluck(time,chord[Math.floor(Math.random()*chord.length)]*4,stepDur*2,vel*0.3);
     }
     return;
   }
