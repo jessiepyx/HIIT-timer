@@ -482,8 +482,30 @@ function renderDetail(){
   }
   $("detailHeader").innerHTML = header;
 
-  // Scrollable: exercise list
-  var scroll = '<h3 class="detail-section-title">Exercises (' + exs.length + ')</h3>';
+  // Scrollable: warm-up, exercises, cool-down
+  var scroll = '';
+
+  // Warm-up section
+  var wuEx = w.warmupEx || [];
+  if(wuEx.length > 0){
+    var wuTotal = 0; wuEx.forEach(function(e){ wuTotal += e.dur; });
+    scroll += '<h3 class="detail-section-title">Warm-up (' + wuEx.length + ') <span class="section-time">' + wuTotal + 's</span></h3>';
+    scroll += '<div class="detail-exercise-list">';
+    wuEx.forEach(function(ex, j){
+      var cnN = (typeof getChineseName === "function") ? getChineseName(ex.name) : "";
+      var tClick = typeof showTutorialOverlay === "function" ? ' onclick="showTutorialOverlay(\'' + ex.name.replace(/'/g,"\\'") + '\')"' : '';
+      scroll += '<div class="detail-exercise">';
+      scroll += '<span class="detail-ex-num">' + (j+1) + '</span>';
+      scroll += '<div class="detail-ex-info"><div class="detail-ex-name">' + ex.name + (cnN ? ' <span class="cn-name">' + cnN + '</span>' : '') + '</div>';
+      scroll += '<div class="detail-ex-meta">' + ex.dur + 's</div></div>';
+      scroll += '<button class="picker-tutorial-btn"' + tClick + '>Tutorial</button>';
+      scroll += '</div>';
+    });
+    scroll += '</div>';
+  }
+
+  // Main exercises
+  scroll += '<h3 class="detail-section-title">Exercises (' + exs.length + ')</h3>';
   scroll += '<div class="detail-exercise-list">';
   exs.forEach((ex, j) => {
     const eqLabel = getEquipmentLabel(ex.name);
@@ -501,6 +523,26 @@ function renderDetail(){
     scroll += '</div>';
   });
   scroll += '</div>';
+
+  // Cool-down section
+  var cdEx = w.cooldownEx || [];
+  if(cdEx.length > 0){
+    var cdTotal = 0; cdEx.forEach(function(e){ cdTotal += e.dur; });
+    scroll += '<h3 class="detail-section-title">Cool-down (' + cdEx.length + ') <span class="section-time">' + cdTotal + 's</span></h3>';
+    scroll += '<div class="detail-exercise-list">';
+    cdEx.forEach(function(ex, j){
+      var cnN = (typeof getChineseName === "function") ? getChineseName(ex.name) : "";
+      var tClick = typeof showTutorialOverlay === "function" ? ' onclick="showTutorialOverlay(\'' + ex.name.replace(/'/g,"\\'") + '\')"' : '';
+      scroll += '<div class="detail-exercise">';
+      scroll += '<span class="detail-ex-num">' + (j+1) + '</span>';
+      scroll += '<div class="detail-ex-info"><div class="detail-ex-name">' + ex.name + (cnN ? ' <span class="cn-name">' + cnN + '</span>' : '') + '</div>';
+      scroll += '<div class="detail-ex-meta">' + ex.dur + 's</div></div>';
+      scroll += '<button class="picker-tutorial-btn"' + tClick + '>Tutorial</button>';
+      scroll += '</div>';
+    });
+    scroll += '</div>';
+  }
+
   $("detailScroll").innerHTML = scroll;
 }
 
@@ -1686,10 +1728,11 @@ function updateUI(){
           var ni = idx + 1;
           if(ni < exercises.length) tutName = exercises[ni].name;
           else if(round + 1 <= cfg.rounds) tutName = exercises[0].name;
+          else if(cooldownExercises.length > 0) tutName = cooldownExercises[0].name;
         } else if(state === "work" && exercises[idx]) tutName = exercises[idx].name;
         if(tutName) showWorkoutTutorial(tutName);
         else { tutArea.innerHTML = ""; tutArea.style.display = "none"; }
-      } else if(state === "work" || state === "warmup" || state === "cooldown"){
+      } else if(state === "work" || state === "warmup" || state === "cooldown" || state === "rest" || state === "water"){
         hideWorkoutTutorial();
         tutArea.innerHTML = '<div class="tutorial-hint-box">Pause to watch tutorial</div>';
         tutArea.style.display = "block";
