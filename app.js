@@ -980,26 +980,50 @@ function pickExercises(orderedParts, count){
 // =========================
 // PRE-WORKOUT BRIEFING
 // =========================
+function getGreeting(){
+  var h = new Date().getHours();
+  var day = new Date().getDay();
+  var pick = function(arr){ return arr[Math.floor(Math.random() * arr.length)]; };
+
+  var timeEN, timeCN;
+  if(h >= 5 && h < 12){ timeEN = pick(["Good morning!","Rise and shine!","Morning workout!"]); timeCN = pick(["早上好！","早安！","美好的早晨！"]); }
+  else if(h >= 12 && h < 18){ timeEN = pick(["Good afternoon!","Afternoon energy!","Let's power up!"]); timeCN = pick(["下午好！","午后时光！","下午加油！"]); }
+  else if(h >= 18 && h < 22){ timeEN = pick(["Good evening!","Evening workout!","Let's end the day strong!"]); timeCN = pick(["晚上好！","晚间训练！","今天最后的冲刺！"]); }
+  else { timeEN = pick(["Late night grind!","Night owl mode!","Burning the midnight oil!"]); timeCN = pick(["夜猫子加油！","深夜训练！","夜间充电！"]); }
+
+  var dayEN = "", dayCN = "";
+  if(Math.random() < 0.6){
+    if(day === 1){ dayEN = pick(["New week, fresh start!","Monday motivation!"]); dayCN = pick(["新的一周，加油！","周一动力满满！"]); }
+    else if(day === 3){ dayEN = pick(["Midweek push!","Hump day hustle!"]); dayCN = pick(["周三加油！","一周过半，继续！"]); }
+    else if(day === 5){ dayEN = pick(["TGIF!","Happy Friday!","Friday vibes!"]); dayCN = pick(["周五了！","快乐周五！","周五冲刺！"]); }
+    else if(day === 0 || day === 6){ dayEN = pick(["Weekend warrior!","It's the weekend!","Weekend workout!"]); dayCN = pick(["周末愉快！","周末战士！","周末动起来！"]); }
+  }
+
+  var motEN = pick(["Let's do this!","Time to work!","Let's get after it!","Let's make it count!","Here we go!","Game time!"]);
+  var motCN = pick(["开始训练！","动起来！","准备出发！","让我们开始吧！","加油！","冲！"]);
+
+  return {
+    en: timeEN + (dayEN ? " " + dayEN : "") + " " + motEN,
+    cn: timeCN + (dayCN ? " " + dayCN : "") + " " + motCN
+  };
+}
+
 function briefing(cfg, exercises, onDone){
   const totalMin = Math.round(totalTime / 60);
+  var greet = getGreeting();
 
   var msg;
   if(isCN){
-    const cnIntros = ["好的，开始训练！","准备好了吗？开始！","加油！让我们开始吧！","来吧，开始今天的训练！","准备就绪，出发！"];
-    const cnIntro = cnIntros[Math.floor(Math.random() * cnIntros.length)];
     const cnExList = exercises.map(e => exName(e)).join("，");
-    msg = `${cnIntro} 今天的训练是${cfg.name}。` +
+    msg = `${greet.cn} 今天的训练是${cfg.name}。` +
       `共${cfg.rounds}轮，每轮${exercises.length}个动作。` +
       `每个动作${cfg.work}秒，中间休息${cfg.rest}秒。` +
       `总时间大约${totalMin}分钟。` +
       `动作包括：${cnExList}。` +
       `先进行${cfg.warmup}秒热身，准备好！`;
   } else {
-    const intros = ["Alright, let's get started!","Let's do this!","Time to work! Let's go!",
-      "Ready to crush it? Here we go!","Let's get after it!","OK, game time!","Here we go, let's make it count!"];
-    const intro = intros[Math.floor(Math.random() * intros.length)];
     const exList = exercises.map(e => e.name).join(", ");
-    msg = `${intro} Today's workout is ${cfg.name}. ` +
+    msg = `${greet.en} Today's workout is ${cfg.name}. ` +
       `You'll do ${cfg.rounds} round${cfg.rounds > 1 ? "s" : ""} of ${exercises.length} exercise${exercises.length > 1 ? "s" : ""}. ` +
       `Each exercise is ${cfg.work} seconds, with ${cfg.rest} seconds rest in between. ` +
       `The total workout time is about ${totalMin} minute${totalMin !== 1 ? "s" : ""}. ` +
