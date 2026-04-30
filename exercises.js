@@ -159,51 +159,51 @@ var EXERCISE_DATA = {
 
 // Warm-up exercises: targets = which body parts they warm up, dur = default seconds
 var WARMUP_POOL = [
-  {name:"Jumping Jacks", targets:["all"], cn:"开合跳", dur:20},
-  {name:"High Knees", targets:["all","Legs","Cardio"], cn:"高抬腿", dur:20},
-  {name:"Butt Kicks", targets:["all","Legs"], cn:"后踢跑", dur:15},
-  {name:"Running in Place", targets:["all"], cn:"原地跑", dur:20},
-  {name:"Arm Circles", targets:["Chest","Shoulders","Upper Back","Arms"], cn:"手臂绕环", dur:15},
-  {name:"Shoulder Rotations", targets:["Chest","Shoulders","Upper Back"], cn:"肩部旋转", dur:15},
-  {name:"Leg Swings", targets:["Legs","Glutes","Lower Back"], cn:"腿部摆动", dur:15},
-  {name:"Hip Circles", targets:["Legs","Glutes","Lower Back","Abs"], cn:"髋关节绕环", dur:15},
-  {name:"Ankle Circles", targets:["Legs"], cn:"踝关节绕环", dur:10},
-  {name:"Torso Twists", targets:["Abs","Lower Back"], cn:"躯干扭转", dur:15},
-  {name:"Cat-Cow", targets:["Lower Back","Abs"], cn:"猫牛式", dur:15},
-  {name:"Inchworm", targets:["Chest","Shoulders","Abs","Full Body"], cn:"蠕虫式", dur:20},
-  {name:"High Plank Hold", targets:["Chest","Shoulders","Abs"], cn:"高位平板支撑", dur:15},
-  {name:"Glute Activation", targets:["Glutes","Legs"], cn:"臀部激活", dur:15},
-  {name:"Bodyweight Squats", targets:["Legs","Glutes"], cn:"徒手深蹲", dur:20},
-  {name:"Arm Swings", targets:["Chest","Shoulders","Arms"], cn:"手臂摆动", dur:10},
-  {name:"Neck Rolls", targets:["Shoulders","Upper Back"], cn:"颈部绕环", dur:10},
-  {name:"Wrist Circles", targets:["Arms"], cn:"手腕绕环", dur:10},
-  {name:"Side Lunges", targets:["Legs","Glutes"], cn:"侧弓步热身", dur:15},
-  {name:"Mountain Climbers Slow", targets:["all","Abs","Chest"], cn:"慢速登山者", dur:20},
+  {name:"Jumping Jacks", targets:["all"], cn:"开合跳",video:"", dur:20},
+  {name:"High Knees", targets:["all","Legs","Cardio"], cn:"高抬腿",video:"", dur:20},
+  {name:"Butt Kicks", targets:["all","Legs"], cn:"后踢跑",video:"", dur:15},
+  {name:"Running in Place", targets:["all"], cn:"原地跑",video:"", dur:20},
+  {name:"Arm Circles", targets:["Chest","Shoulders","Upper Back","Arms"], cn:"手臂绕环",video:"", dur:15},
+  {name:"Shoulder Rotations", targets:["Chest","Shoulders","Upper Back"], cn:"肩部旋转",video:"", dur:15},
+  {name:"Leg Swings", targets:["Legs","Glutes","Lower Back"], cn:"腿部摆动",video:"", dur:15},
+  {name:"Hip Circles", targets:["Legs","Glutes","Lower Back","Abs"], cn:"髋关节绕环",video:"", dur:15},
+  {name:"Ankle Circles", targets:["Legs"], cn:"踝关节绕环",video:"", dur:10},
+  {name:"Torso Twists", targets:["Abs","Lower Back"], cn:"躯干扭转",video:"", dur:15},
+  {name:"Cat-Cow", targets:["Lower Back","Abs"], cn:"猫牛式",video:"", dur:15},
+  {name:"Inchworm", targets:["Chest","Shoulders","Abs","Full Body"], cn:"蠕虫式",video:"", dur:20},
+  {name:"High Plank Hold", targets:["Chest","Shoulders","Abs"], cn:"高位平板支撑",video:"", dur:15},
+  {name:"Glute Activation", targets:["Glutes","Legs"], cn:"臀部激活",video:"", dur:15},
+  {name:"Bodyweight Squats", targets:["Legs","Glutes"], cn:"徒手深蹲",video:"", dur:20},
+  {name:"Arm Swings", targets:["Chest","Shoulders","Arms"], cn:"手臂摆动",video:"", dur:10},
+  {name:"Neck Rolls", targets:["Shoulders","Upper Back"], cn:"颈部绕环",video:"", dur:10},
+  {name:"Wrist Circles", targets:["Arms"], cn:"手腕绕环",video:"", dur:10},
+  {name:"Side Lunges", targets:["Legs","Glutes"], cn:"侧弓步热身",video:"", dur:15},
+  {name:"Mountain Climbers Slow", targets:["all","Abs","Chest"], cn:"慢速登山者",video:"", dur:20},
 ];
 
 // Cool-down exercises: targets = which body parts they stretch
 var COOLDOWN_POOL = [
-  {name:"Hamstring Stretch", targets:["Legs","Lower Back"], cn:"腿后拉伸", dur:20},
-  {name:"Quad Stretch", targets:["Legs"], cn:"股四头肌拉伸", dur:20},
-  {name:"Calf Stretch", targets:["Legs"], cn:"小腿拉伸", dur:15},
-  {name:"Hip Flexor Stretch", targets:["Legs","Glutes","Lower Back"], cn:"髋屈肌拉伸", dur:20},
-  {name:"Pigeon Pose", targets:["Glutes","Legs"], cn:"鸽子式", dur:25},
-  {name:"Child's Pose", targets:["Lower Back","Shoulders"], cn:"婴儿式", dur:20},
-  {name:"Cobra Stretch", targets:["Abs","Lower Back","Chest"], cn:"眼镜蛇式", dur:15},
-  {name:"Downward Dog", targets:["Legs","Shoulders","Lower Back"], cn:"下犬式", dur:20},
-  {name:"Chest Doorway Stretch", targets:["Chest","Shoulders"], cn:"扩胸拉伸", dur:15},
-  {name:"Cross-Body Shoulder Stretch", targets:["Shoulders","Upper Back"], cn:"胸前拉肩", dur:15},
-  {name:"Tricep Stretch", targets:["Arms"], cn:"三头拉伸", dur:15},
-  {name:"Bicep Wall Stretch", targets:["Arms","Chest"], cn:"二头拉伸", dur:15},
-  {name:"Seated Forward Fold", targets:["Legs","Lower Back"], cn:"坐位体前屈", dur:20},
-  {name:"Spinal Twist", targets:["Abs","Lower Back"], cn:"脊柱扭转", dur:20},
-  {name:"Figure Four Stretch", targets:["Glutes","Legs"], cn:"四字拉伸", dur:20},
-  {name:"Lizard Pose", targets:["Legs","Glutes"], cn:"蜥蜴式", dur:20},
-  {name:"Standing Side Bend", targets:["Abs"], cn:"站姿侧弯", dur:15},
-  {name:"Scorpion Stretch", targets:["Abs","Lower Back","Chest"], cn:"蝎子式拉伸", dur:15},
-  {name:"Cat-Cow Stretch", targets:["Lower Back","Abs"], cn:"猫牛式", dur:15},
-  {name:"World's Greatest Stretch", targets:["all"], cn:"世界最伟大拉伸", dur:20},
-  {name:"Deep Breathing", targets:["all"], cn:"深呼吸放松", dur:30},
+  {name:"Hamstring Stretch", targets:["Legs","Lower Back"], cn:"腿后拉伸",video:"", dur:20},
+  {name:"Quad Stretch", targets:["Legs"], cn:"股四头肌拉伸",video:"", dur:20},
+  {name:"Calf Stretch", targets:["Legs"], cn:"小腿拉伸",video:"", dur:15},
+  {name:"Hip Flexor Stretch", targets:["Legs","Glutes","Lower Back"], cn:"髋屈肌拉伸",video:"", dur:20},
+  {name:"Pigeon Pose", targets:["Glutes","Legs"], cn:"鸽子式",video:"", dur:25},
+  {name:"Child's Pose", targets:["Lower Back","Shoulders"], cn:"婴儿式",video:"", dur:20},
+  {name:"Cobra Stretch", targets:["Abs","Lower Back","Chest"], cn:"眼镜蛇式",video:"", dur:15},
+  {name:"Downward Dog", targets:["Legs","Shoulders","Lower Back"], cn:"下犬式",video:"", dur:20},
+  {name:"Chest Doorway Stretch", targets:["Chest","Shoulders"], cn:"扩胸拉伸",video:"", dur:15},
+  {name:"Cross-Body Shoulder Stretch", targets:["Shoulders","Upper Back"], cn:"胸前拉肩",video:"", dur:15},
+  {name:"Tricep Stretch", targets:["Arms"], cn:"三头拉伸",video:"", dur:15},
+  {name:"Bicep Wall Stretch", targets:["Arms","Chest"], cn:"二头拉伸",video:"", dur:15},
+  {name:"Seated Forward Fold", targets:["Legs","Lower Back"], cn:"坐位体前屈",video:"", dur:20},
+  {name:"Spinal Twist", targets:["Abs","Lower Back"], cn:"脊柱扭转",video:"", dur:20},
+  {name:"Figure Four Stretch", targets:["Glutes","Legs"], cn:"四字拉伸",video:"", dur:20},
+  {name:"Lizard Pose", targets:["Legs","Glutes"], cn:"蜥蜴式",video:"", dur:20},
+  {name:"Standing Side Bend", targets:["Abs"], cn:"站姿侧弯",video:"", dur:15},
+  {name:"Scorpion Stretch", targets:["Abs","Lower Back","Chest"], cn:"蝎子式拉伸",video:"", dur:15},
+  {name:"Cat-Cow Stretch", targets:["Lower Back","Abs"], cn:"猫牛式",video:"", dur:15},
+  {name:"World's Greatest Stretch", targets:["all"], cn:"世界最伟大拉伸",video:"", dur:20},
+  {name:"Deep Breathing", targets:["all"], cn:"深呼吸放松",video:"", dur:30},
 ];
 
 // Total: 155 exercises
@@ -233,6 +233,13 @@ var EXERCISE_DIFFICULTY = {};
     if(d.images && d.images.length >= 2) EXERCISE_ANIMATED[name] = d.images;
     else if(d.images && d.images.length === 1) EXERCISE_STATIC[name] = d.images[0];
   }
+  // Index warm-up and cool-down for tutorials/Chinese names
+  [WARMUP_POOL, COOLDOWN_POOL].forEach(function(pool){
+    pool.forEach(function(ex){
+      if(ex.cn) EXERCISE_CHINESE[ex.name] = ex.cn;
+      if(ex.video) DEFAULT_VIDEOS[ex.name] = ex.video;
+    });
+  });
 })();
 
 var CATEGORIES = Object.keys(EXERCISE_LIBRARY).concat("Other");
