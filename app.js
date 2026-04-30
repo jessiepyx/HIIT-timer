@@ -492,7 +492,7 @@ function renderDetail(){
     scroll += '<div class="detail-ex-name">' + ex.name + (cnName ? ' <span class="cn-name">' + cnName + '</span>' : '') + '</div>';
     scroll += '<div class="detail-ex-meta">' + ex.category + ' &middot; ' + eqLabel + '</div>';
     scroll += '</div>';
-    scroll += '<span class="detail-ex-tutorial"' + tutClick + '>&#9654;</span>';
+    scroll += '<button class="picker-tutorial-btn"' + tutClick + '>Tutorial</button>';
     scroll += '</div>';
   });
   scroll += '</div>';
