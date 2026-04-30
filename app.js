@@ -132,15 +132,13 @@ var selectedVoiceName = localStorage.getItem("hiitVoice") || "";
 var voices = [];
 var isCN = false;
 
-var VOICE_ALLOW = ["Samantha","Daniel","Karen","Moira","Tessa","Fiona","Aaron","Nicky","Rishi","Tingting","Meijia","Mei-Jia"];
-
 var VOICE_DISPLAY = {
-  "Tingting":"婷婷 Tingting","Meijia":"美佳 Meijia","Mei-Jia":"美佳 Mei-Jia"
+  "Tingting":"婷婷","Meijia":"美佳","Mei-Jia":"美佳"
 };
 
 function loadVoices(){
   voices = speechSynthesis.getVoices().filter(function(v){
-    return VOICE_ALLOW.indexOf(v.name) >= 0;
+    return v.lang.startsWith("en") || v.lang.startsWith("zh");
   });
   updateVoiceState();
 }
@@ -162,7 +160,9 @@ function getSelectedVoice(){
 
 function voiceDisplayName(v){
   if(!v) return "Default Voice";
-  return VOICE_DISPLAY[v.name] || v.name;
+  var cn = VOICE_DISPLAY[v.name];
+  if(cn) return cn;
+  return v.name;
 }
 
 function openVoicePicker(){
@@ -203,7 +203,11 @@ function selectVoice(name){
   closeVoicePicker();
   if(name){
     var v = getSelectedVoice();
-    speak(isCN ? "你好，我是" + voiceDisplayName(v) : "Hello, I am " + v.name);
+    if(v && v.lang.startsWith("zh")){
+      speak("你好，我是" + voiceDisplayName(v));
+    } else {
+      speak("Hello, I am " + v.name);
+    }
   }
 }
 
@@ -211,6 +215,39 @@ function closeVoicePicker(){
   var overlay = $("voiceOverlay");
   if(overlay){ overlay.style.display = "none"; overlay.innerHTML = ""; }
 }
+
+// Pull-down-to-dismiss for voice picker
+(function(){
+  var startY = 0;
+  document.addEventListener("touchstart", function(e){
+    var modal = document.querySelector("#voiceOverlay .tutorial-modal");
+    if(!modal || modal.scrollTop > 0){ startY = 0; return; }
+    if(modal.contains(e.target)) startY = e.touches[0].clientY;
+    else startY = 0;
+  });
+  document.addEventListener("touchmove", function(e){
+    if(!startY) return;
+    var modal = document.querySelector("#voiceOverlay .tutorial-modal");
+    if(!modal || modal.scrollTop > 0){ startY = 0; return; }
+    var diff = e.touches[0].clientY - startY;
+    if(diff > 0){
+      modal.style.transform = "translateY(" + diff + "px)";
+      modal.style.transition = "none";
+      e.preventDefault();
+    }
+  }, {passive: false});
+  document.addEventListener("touchend", function(e){
+    if(!startY) return;
+    var modal = document.querySelector("#voiceOverlay .tutorial-modal");
+    if(modal){
+      var diff = e.changedTouches[0].clientY - startY;
+      modal.style.transition = "transform 0.2s";
+      modal.style.transform = "";
+      if(diff > 80) closeVoicePicker();
+    }
+    startY = 0;
+  });
+})();
 
 function updateVoiceUI(){
   var btn = $("btnVoice");
@@ -284,7 +321,6 @@ function show(page){
 function bindStaticUI(){
   bind("btnSuggest",   () => show("suggest"));
   bind("btnNew",       newWorkout);
-  bind("btnStartTop",  () => { if(detailIndex != null) startWorkout(detailIndex); });
   bind("btnStartBottom", () => { if(detailIndex != null) startWorkout(detailIndex); });
   bind("btnDetailEdit", () => { if(detailIndex != null) edit(detailIndex); });
   bind("btnDetailDelete", () => {
@@ -307,7 +343,6 @@ function bindStaticUI(){
   bind("btnSkip",      skip);
   bind("btnRestart",   restartMove);
   bind("btnHome",      goHome);
-  bind("btnHome2",     goHome);
   bind("btnEndEarly",  endEarly);
   bind("btnMusicToggle", toggleMusic);
   bind("btnMusicStyle",  cycleMusic);
@@ -362,18 +397,15 @@ function endEarly(){
     stopMusic();
     speechSynthesis.cancel();
     speak(tr("Workout ended","训练结束"));
-    const savedState = state;
+    var savedState = state;
     state = "idle";
     paused = false;
     renderSummary(true, savedState);
-    updateUI();
-    const dp = $("donePanel"); if(dp) dp.style.display = "block";
-    const dm = $("doneMsg"); if(dm) dm.textContent = "Workout ended early";
-    const wi = $("workoutInfo"); if(wi) wi.style.display = "none";
-    const bp = $("btnPause");  if(bp) bp.disabled = true;
-    const bs = $("btnSkip");   if(bs) bs.disabled = true;
-    const br = $("btnRestart");if(br) br.disabled = true;
-    const be = $("btnEndEarly"); if(be) be.style.display = "none";
+    var wu = $("workoutUI"); if(wu) wu.style.display = "none";
+    var dp = $("donePanel"); if(dp) dp.style.display = "block";
+    var dm = $("doneMsg"); if(dm) dm.textContent = "Workout ended early";
+    var wi = $("workoutInfo"); if(wi) wi.style.display = "block";
+    var ta = $("tutorialArea"); if(ta) ta.style.display = "none";
   }
 }
 
@@ -421,42 +453,43 @@ function renderDetail(){
   const exs = normalizeExercises(w.exercises);
   const totalMin = estimateWorkoutMin(w);
 
-  let html = '<h2 class="detail-title">' + w.name + '</h2>';
-  html += '<div class="detail-stats">';
-  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.rounds + '</span><span class="detail-stat-label">Rounds</span></div>';
-  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.work + 's</span><span class="detail-stat-label">Work</span></div>';
-  html += '<div class="detail-stat"><span class="detail-stat-val">' + w.rest + 's</span><span class="detail-stat-label">Rest</span></div>';
-  html += '<div class="detail-stat"><span class="detail-stat-val">~' + totalMin + 'm</span><span class="detail-stat-label">Total</span></div>';
-  html += '</div>';
-
+  // Header: title + stats
+  var header = '<h2 class="detail-title">' + w.name + '</h2>';
+  header += '<div class="detail-stats">';
+  header += '<div class="detail-stat"><span class="detail-stat-val">' + w.rounds + '</span><span class="detail-stat-label">Rounds</span></div>';
+  header += '<div class="detail-stat"><span class="detail-stat-val">' + w.work + 's</span><span class="detail-stat-label">Work</span></div>';
+  header += '<div class="detail-stat"><span class="detail-stat-val">' + w.rest + 's</span><span class="detail-stat-label">Rest</span></div>';
+  header += '<div class="detail-stat"><span class="detail-stat-val">~' + totalMin + 'm</span><span class="detail-stat-label">Total</span></div>';
+  header += '</div>';
   if(w.warmup || w.cooldown || w.water){
-    html += '<div class="detail-extra">';
-    if(w.warmup) html += 'Warmup: ' + w.warmup + 's &middot; ';
-    if(w.cooldown) html += 'Cooldown: ' + w.cooldown + 's &middot; ';
-    if(w.water) html += 'Water: ' + w.water + 's';
-    html += '</div>';
+    header += '<div class="detail-extra">';
+    if(w.warmup) header += 'Warmup: ' + w.warmup + 's &middot; ';
+    if(w.cooldown) header += 'Cooldown: ' + w.cooldown + 's &middot; ';
+    if(w.water) header += 'Water: ' + w.water + 's';
+    header += '</div>';
   }
+  $("detailHeader").innerHTML = header;
 
-  html += '<h3 class="detail-section-title">Exercises (' + exs.length + ')</h3>';
-  html += '<div class="detail-exercise-list">';
+  // Scrollable: exercise list
+  var scroll = '<h3 class="detail-section-title">Exercises (' + exs.length + ')</h3>';
+  scroll += '<div class="detail-exercise-list">';
   exs.forEach((ex, j) => {
     const eqLabel = getEquipmentLabel(ex.name);
     const hasVid = typeof getVideoId === "function" && getVideoId(ex.name);
     const tutClick = typeof showTutorialOverlay === "function" ?
       ' onclick="showTutorialOverlay(\'' + ex.name.replace(/'/g, "\\'") + '\')"' : '';
-    html += '<div class="detail-exercise">';
-    html += '<span class="detail-ex-num">' + (j + 1) + '</span>';
-    html += '<div class="detail-ex-info">';
+    scroll += '<div class="detail-exercise">';
+    scroll += '<span class="detail-ex-num">' + (j + 1) + '</span>';
+    scroll += '<div class="detail-ex-info">';
     var cnName = (typeof getChineseName === "function") ? getChineseName(ex.name) : "";
-    html += '<div class="detail-ex-name">' + ex.name + (cnName ? ' <span class="cn-name">' + cnName + '</span>' : '') + '</div>';
-    html += '<div class="detail-ex-meta">' + ex.category + ' &middot; ' + eqLabel + '</div>';
-    html += '</div>';
-    html += '<span class="detail-ex-tutorial"' + tutClick + '>' + (hasVid ? '&#9654;' : '&#9654;') + '</span>';
-    html += '</div>';
+    scroll += '<div class="detail-ex-name">' + ex.name + (cnName ? ' <span class="cn-name">' + cnName + '</span>' : '') + '</div>';
+    scroll += '<div class="detail-ex-meta">' + ex.category + ' &middot; ' + eqLabel + '</div>';
+    scroll += '</div>';
+    scroll += '<span class="detail-ex-tutorial"' + tutClick + '>&#9654;</span>';
+    scroll += '</div>';
   });
-  html += '</div>';
-
-  $("detailContent").innerHTML = html;
+  scroll += '</div>';
+  $("detailScroll").innerHTML = scroll;
 }
 
 // =========================
@@ -465,6 +498,7 @@ function renderDetail(){
 let pickerSelected = new Set();
 
 let pickerEquip = new Set(EQUIPMENT_TAGS);
+let pickerParts = new Set(Object.keys(EXERCISE_LIBRARY));
 
 function openPicker(){
   pickerSelected = new Set();
@@ -473,69 +507,91 @@ function openPicker(){
 }
 
 function renderPicker(){
-  const eqRow = $("pickerEquip");
-  if(eqRow){
-    eqRow.innerHTML = "";
-    var selBtn = document.createElement("button");
-    selBtn.textContent = "Select All";
-    selBtn.className = "picker-eq-btn";
-    selBtn.onclick = () => { EQUIPMENT_TAGS.forEach(t => pickerEquip.add(t)); renderPicker(); };
-    eqRow.appendChild(selBtn);
-    var deselBtn = document.createElement("button");
-    deselBtn.textContent = "Deselect All";
-    deselBtn.className = "picker-eq-btn";
-    deselBtn.onclick = () => { pickerEquip.clear(); renderPicker(); };
-    eqRow.appendChild(deselBtn);
-    EQUIPMENT_TAGS.forEach(tag => {
-      const btn = document.createElement("button");
-      btn.textContent = tag;
-      btn.className = "picker-eq-btn" + (pickerEquip.has(tag) ? " selected" : "");
-      btn.onclick = () => {
-        if(pickerEquip.has(tag)) pickerEquip.delete(tag);
-        else pickerEquip.add(tag);
-        renderPicker();
-      };
-      eqRow.appendChild(btn);
-    });
-  }
-
-  const list = $("pickerList");
+  var list = $("pickerList");
   if(!list) return;
   list.innerHTML = "";
 
-  Object.entries(EXERCISE_LIBRARY).forEach(([category, exArr]) => {
-    const filtered = exArr.filter(name => canDoExercise(name, pickerEquip));
-    if(filtered.length === 0) return;
+  // Body part filter
+  var partSection = document.createElement("div");
+  partSection.className = "picker-filter-section";
+  partSection.innerHTML = '<label class="picker-filter-label">Body Parts</label>';
+  var partRow = document.createElement("div");
+  partRow.className = "picker-eq-row";
+  var allPBtn = document.createElement("button");
+  allPBtn.textContent = "All"; allPBtn.className = "picker-eq-btn";
+  allPBtn.onclick = function(){ Object.keys(EXERCISE_LIBRARY).forEach(function(p){ pickerParts.add(p); }); renderPicker(); };
+  partRow.appendChild(allPBtn);
+  var nonePBtn = document.createElement("button");
+  nonePBtn.textContent = "None"; nonePBtn.className = "picker-eq-btn";
+  nonePBtn.onclick = function(){ pickerParts.clear(); renderPicker(); };
+  partRow.appendChild(nonePBtn);
+  Object.keys(EXERCISE_LIBRARY).forEach(function(part){
+    var btn = document.createElement("button");
+    btn.textContent = part;
+    btn.className = "picker-eq-btn" + (pickerParts.has(part) ? " selected" : "");
+    btn.onclick = function(){ if(pickerParts.has(part)) pickerParts.delete(part); else pickerParts.add(part); renderPicker(); };
+    partRow.appendChild(btn);
+  });
+  partSection.appendChild(partRow);
+  list.appendChild(partSection);
 
-    const cat = document.createElement("div");
+  // Equipment filter
+  var eqSection = document.createElement("div");
+  eqSection.className = "picker-filter-section";
+  eqSection.innerHTML = '<label class="picker-filter-label">Equipment</label>';
+  var eqRow = document.createElement("div");
+  eqRow.className = "picker-eq-row";
+  var allEBtn = document.createElement("button");
+  allEBtn.textContent = "All"; allEBtn.className = "picker-eq-btn";
+  allEBtn.onclick = function(){ EQUIPMENT_TAGS.forEach(function(t){ pickerEquip.add(t); }); renderPicker(); };
+  eqRow.appendChild(allEBtn);
+  var noneEBtn = document.createElement("button");
+  noneEBtn.textContent = "None"; noneEBtn.className = "picker-eq-btn";
+  noneEBtn.onclick = function(){ pickerEquip.clear(); renderPicker(); };
+  eqRow.appendChild(noneEBtn);
+  EQUIPMENT_TAGS.forEach(function(tag){
+    var btn = document.createElement("button");
+    btn.textContent = tag;
+    btn.className = "picker-eq-btn" + (pickerEquip.has(tag) ? " selected" : "");
+    btn.onclick = function(){ if(pickerEquip.has(tag)) pickerEquip.delete(tag); else pickerEquip.add(tag); renderPicker(); };
+    eqRow.appendChild(btn);
+  });
+  eqSection.appendChild(eqRow);
+  list.appendChild(eqSection);
+
+  // Exercise list filtered by body part + equipment
+  Object.entries(EXERCISE_LIBRARY).forEach(function(entry){
+    var category = entry[0], exArr = entry[1];
+    if(!pickerParts.has(category)) return;
+    var filtered = exArr.filter(function(name){ return canDoExercise(name, pickerEquip); });
+    if(filtered.length === 0) return;
+    var cat = document.createElement("div");
     cat.className = "picker-category";
     cat.textContent = category + " (" + filtered.length + ")";
     list.appendChild(cat);
-
-    filtered.forEach(name => {
-      const eqLabel = getEquipmentLabel(name);
-      const item = document.createElement("div");
+    filtered.forEach(function(name){
+      var eqLabel = getEquipmentLabel(name);
+      var item = document.createElement("div");
       item.className = "picker-item" + (pickerSelected.has(name) ? " selected" : "");
       var tutBtn = (typeof getTutorialHtml === "function") ? getTutorialHtml(name) : "";
       var cnPick = (typeof getChineseName === "function") ? getChineseName(name) : "";
       var cnPickHtml = cnPick ? ' <span class="cn-name">' + cnPick + '</span>' : '';
-      item.innerHTML = `<span class="check">${pickerSelected.has(name) ? "\u2713" : "\u25CB"}</span><span>${name}${cnPickHtml}</span><span class="picker-eq-label">${eqLabel}</span>${tutBtn}`;
-      item.addEventListener("click", () => {
+      item.innerHTML = '<span class="check">' + (pickerSelected.has(name) ? "✓" : "○") + '</span><span>' + name + cnPickHtml + '</span><span class="picker-eq-label">' + eqLabel + '</span>' + tutBtn;
+      item.addEventListener("click", function(){
         if(pickerSelected.has(name)){
           pickerSelected.delete(name);
           item.classList.remove("selected");
-          item.querySelector(".check").textContent = "\u25CB";
+          item.querySelector(".check").textContent = "○";
         } else {
           pickerSelected.add(name);
           item.classList.add("selected");
-          item.querySelector(".check").textContent = "\u2713";
+          item.querySelector(".check").textContent = "✓";
         }
       });
       list.appendChild(item);
     });
   });
 }
-
 function closePicker(){
   $("pickerOverlay").style.display = "none";
 }
@@ -568,7 +624,7 @@ function addExercise(name, category){
   const list = $("exerciseList");
   if(!list) return;
   const div = document.createElement("div");
-  div.className = "exercise";
+  div.className = "exercise-card";
   div.draggable = false;
   const safeName = (typeof name === "string") ? name : "";
   const safeCat = category || "Other";
@@ -580,8 +636,10 @@ function addExercise(name, category){
   var tutHtml = (typeof getFormTutorialHtml === "function") ? getFormTutorialHtml(safeName) : "";
   var cnForm = (safeName && typeof getChineseName === "function") ? getChineseName(safeName) : "";
   var cnFormHtml = cnForm ? `<span class="cn-name">${cnForm}</span>` : "";
-  div.innerHTML = `<span class="drag-handle">\u2261</span><input placeholder="Exercise name" value="${safeName}">${cnFormHtml}<select class="ex-category">${options}</select>${eqHtml}${tutHtml}<button type="button">\u2715</button>`;
-  div.querySelector("button").onclick = () => div.remove();
+  div.innerHTML =
+    `<div class="ex-row-top"><span class="drag-handle">\u2261</span><input placeholder="Exercise name" value="${safeName}">${cnFormHtml}<button type="button" class="ex-delete">\u2715</button></div>` +
+    `<div class="ex-row-bottom"><select class="ex-category">${options}</select>${eqHtml}${tutHtml}</div>`;
+  div.querySelector(".ex-delete").onclick = () => div.remove();
   initDragHandle(div);
   list.appendChild(div);
 }
@@ -616,7 +674,7 @@ function initDragHandle(row){
     dragEl.style.top = (y - 20) + "px";
     var list = $("exerciseList");
     if(!list) return;
-    var children = Array.from(list.querySelectorAll(".exercise:not(.dragging)"));
+    var children = Array.from(list.querySelectorAll(".exercise-card:not(.dragging)"));
     for(var i = 0; i < children.length; i++){
       var rect = children[i].getBoundingClientRect();
       var mid = rect.top + rect.height / 2;
@@ -665,7 +723,7 @@ function initDragHandle(row){
       dragEl.style.top = (ev.clientY - 20) + "px";
       var list = $("exerciseList");
       if(!list) return;
-      var children = Array.from(list.querySelectorAll(".exercise:not(.dragging)"));
+      var children = Array.from(list.querySelectorAll(".exercise-card:not(.dragging)"));
       for(var j = 0; j < children.length; j++){
         var rect = children[j].getBoundingClientRect();
         if(ev.clientY < rect.top + rect.height / 2){
@@ -698,9 +756,10 @@ function initDragHandle(row){
 }
 
 function clearForm(){
+  var defaults = {name:"My Workout", work:40, rest:20, rounds:3, water:45, warmup:60, cooldown:60};
   ["name","work","rest","rounds","water","warmup","cooldown"].forEach(id => {
     const el = $(id);
-    if(el) el.value = "";
+    if(el) el.value = defaults[id];
   });
   const list = $("exerciseList");
   if(list) list.innerHTML = "";
@@ -721,7 +780,7 @@ function loadForm(w){
 function save(){
   const list = $("exerciseList");
   if(!list) return;
-  const rows = [...list.querySelectorAll(".exercise")];
+  const rows = [...list.querySelectorAll(".exercise-card")];
   const ex = rows.map(row => {
     const name = row.querySelector("input").value.trim();
     const cat = row.querySelector("select")?.value || "Other";
@@ -1011,6 +1070,8 @@ function startWorkout(i){
   const br = $("btnRestart"); if(br) br.disabled = false;
   const dp = $("donePanel"); if(dp) dp.style.display = "none";
   const be = $("btnEndEarly"); if(be) be.style.display = "none";
+  const wu = $("workoutUI"); if(wu) wu.style.display = "";
+  const dp2 = $("donePanel"); if(dp2) dp2.style.display = "none";
 
   renderWorkoutInfo();
   show("run");
@@ -1180,15 +1241,12 @@ function showDone(){
   stopMusic();
   speak(tr("Congratulations! Workout complete! You crushed it!", "恭喜！训练完成！你太棒了！"));
   elapsed = totalTime;
-  updateUI();
   renderSummary(false, "idle");
-  const dp = $("donePanel"); if(dp) dp.style.display = "block";
-  const dm = $("doneMsg"); if(dm) dm.innerHTML = "&#x1F389; Workout complete!";
-  const wi = $("workoutInfo"); if(wi) wi.style.display = "none";
-  const bp = $("btnPause");  if(bp) bp.disabled = true;
-  const bs = $("btnSkip");   if(bs) bs.disabled = true;
-  const br = $("btnRestart");if(br) br.disabled = true;
-  const be = $("btnEndEarly"); if(be) be.style.display = "none";
+  var wu = $("workoutUI"); if(wu) wu.style.display = "none";
+  var dp = $("donePanel"); if(dp) dp.style.display = "block";
+  var dm = $("doneMsg"); if(dm) dm.innerHTML = "&#x1F389; Workout complete!";
+  var wi = $("workoutInfo"); if(wi) wi.style.display = "block";
+  var ta = $("tutorialArea"); if(ta) ta.style.display = "none";
 }
 
 function renderSummary(early, prevState){
@@ -1274,7 +1332,10 @@ function togglePause(){
   } else {
     speak(tr("Resumed","继续"));
     if(musicEnabled) startMusic();
-    if(state === "briefing" && briefingDone) startWarmup();
+    if(state === "briefing"){
+      briefingDone = false;
+      briefing(cfg, exercises, startWarmup);
+    }
     updateUI();
   }
 }
