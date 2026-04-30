@@ -91,11 +91,46 @@ label {
   margin: 8px 0 20px;
 }
 
-.exercise {
+.exercise-card {
+  background: white;
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 6px 8px;
+}
+
+.ex-row-top {
   display: flex;
-  gap: 6px;
-  margin: 5px 8px;
   align-items: center;
+  gap: 6px;
+}
+
+.ex-row-top input {
+  flex: 1;
+  margin: 0;
+  width: auto;
+  padding: 6px 8px;
+  font-size: 0.95em;
+}
+
+.ex-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding-left: 28px;
+  flex-wrap: wrap;
+}
+
+.ex-delete {
+  padding: 4px 8px;
+  margin: 0;
+  font-size: 0.9em;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .drag-handle {
@@ -108,24 +143,39 @@ label {
   -webkit-user-select: none;
 }
 
-.exercise.dragging {
+.exercise-card.dragging {
   opacity: 0.8;
   background: #e8f0fe;
-  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .drag-placeholder {
   background: #d6eaff;
   border: 2px dashed #007aff;
-  border-radius: 8px;
-  margin: 5px 8px;
+  border-radius: 10px;
+  margin: 6px 8px;
 }
 
-.exercise input {
+.form-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.form-scroll {
   flex: 1;
-  margin: 0;
-  width: auto;
+  overflow-y: auto;
+  padding: 20px 20px 0;
+  min-height: 0;
+}
+
+.form-footer {
+  padding: 10px 20px 20px;
+  border-top: 1px solid #ddd;
+  background: #f5f5f7;
+  flex-shrink: 0;
 }
 
 .form-btns {
@@ -149,11 +199,37 @@ label {
 .picker-box {
   background: white;
   border-radius: 20px 20px 0 0;
-  padding: 20px;
+  padding: 20px 20px 0;
   width: 100%;
-  max-height: 75vh;
-  overflow-y: auto;
+  max-height: 88vh;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.picker-footer {
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.picker-filter-section {
+  margin-bottom: 8px;
+}
+
+.picker-filter-label {
+  display: block;
+  font-size: 0.8em;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 4px 0;
 }
 
 .picker-handle {
@@ -728,7 +804,7 @@ label {
 .detail-start-btn {
   width: 100%;
   padding: 16px;
-  margin: 8px 0;
+  margin: 0 0 8px;
   border: none;
   border-radius: 12px;
   background: #007aff;
@@ -738,27 +814,30 @@ label {
   cursor: pointer;
 }
 
-.detail-top-row {
+.detail-page {
   display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.detail-top-row button {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
-  font-size: 0.95em;
-  cursor: pointer;
+.detail-header {
+  padding: 16px 20px 0;
+  flex-shrink: 0;
 }
 
-.detail-top-row .detail-start-btn {
+.detail-scroll {
   flex: 1;
+  overflow-y: auto;
+  padding: 0 20px;
+  min-height: 0;
 }
 
-.detail-top-row #btnDetailBack {
-  background: #e5e5ea;
-  color: #333;
+.detail-footer {
+  padding: 10px 20px 20px;
+  border-top: 1px solid #ddd;
+  background: #f5f5f7;
   flex-shrink: 0;
 }
 
@@ -875,6 +954,33 @@ label {
   border: 1px solid rgba(255,69,58,0.2);
 }
 
+.suggest-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.suggest-header {
+  padding: 16px 20px 0;
+  flex-shrink: 0;
+}
+
+.suggest-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px;
+  min-height: 0;
+}
+
+.suggest-footer {
+  padding: 10px 20px 20px;
+  border-top: 1px solid #ddd;
+  background: #f5f5f7;
+  flex-shrink: 0;
+}
+
 /* ── SMART WORKOUT ── */
 
 .option-row {
@@ -914,7 +1020,7 @@ label {
 
 /* ── EXERCISE FORM CATEGORY ── */
 
-.exercise select {
+.exercise-card select {
   font-size: 0.8em;
   padding: 6px 4px;
   border: 1px solid #ccc;
