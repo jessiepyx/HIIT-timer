@@ -233,12 +233,12 @@ label {
 }
 
 .picker-handle {
-  width: 40px;
-  height: 5px;
-  background: #ccc;
+  width: 180px;
+  height: 6px;
+  background: #bbb;
   border-radius: 3px;
   margin: -4px auto 12px;
-  padding: 10px 0;
+  padding: 12px 0;
   background-clip: content-box;
   cursor: grab;
 }
@@ -989,20 +989,21 @@ label {
 .option-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin: 6px 0 14px;
+  gap: 5px;
+  justify-content: flex-start;
+  margin: 4px 0 12px;
 }
 
 .option-row button,
 .body-part-grid button {
-  padding: 8px 12px;
-  border: 2px solid #ddd;
-  border-radius: 10px;
+  padding: 7px 11px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
   background: white;
-  font-size: 0.85em;
+  font-size: 0.84em;
   cursor: pointer;
   color: #333;
+  margin: 0;
 }
 
 .option-row button.selected,
@@ -1016,9 +1017,9 @@ label {
 .body-part-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin: 6px 0;
+  gap: 5px;
+  justify-content: flex-start;
+  margin: 4px 0;
 }
 
 /* ── EXERCISE FORM CATEGORY ── */
