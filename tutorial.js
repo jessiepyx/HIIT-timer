@@ -165,19 +165,20 @@ function removeTutorialVideo(){
   showTutorialOverlay(tutorialOverlayName);
 }
 
-// Pull-down-to-dismiss for tutorial overlay
+// Pull-down-to-dismiss for tutorial overlay (handle only)
 (function(){
   var startY = 0;
   document.addEventListener("touchstart", function(e){
-    var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
-    if(!modal || modal.scrollTop > 0) { startY = 0; return; }
-    if(modal.contains(e.target)) startY = e.touches[0].clientY;
-    else startY = 0;
+    startY = 0;
+    if(e.target.classList.contains("picker-handle")){
+      var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
+      if(modal && modal.contains(e.target)) startY = e.touches[0].clientY;
+    }
   });
   document.addEventListener("touchmove", function(e){
     if(!startY) return;
     var modal = document.querySelector("#tutorialOverlay .tutorial-modal");
-    if(!modal || modal.scrollTop > 0) { startY = 0; return; }
+    if(!modal) return;
     var diff = e.touches[0].clientY - startY;
     if(diff > 0){
       modal.style.transform = "translateY(" + diff + "px)";
