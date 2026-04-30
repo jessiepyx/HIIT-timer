@@ -819,7 +819,7 @@ function saveLS(){
 // =========================
 let suggestTime = 30;
 let suggestIntensity = "moderate";
-let suggestParts = new Set();
+let suggestParts = new Set(Object.keys(EXERCISE_LIBRARY));
 let suggestEquip = new Set(EQUIPMENT_TAGS);
 
 const INTENSITY_PRESETS = {
