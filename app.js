@@ -220,15 +220,16 @@ function closeVoicePicker(){
 (function(){
   var startY = 0;
   document.addEventListener("touchstart", function(e){
-    var modal = document.querySelector("#voiceOverlay .tutorial-modal");
-    if(!modal || modal.scrollTop > 0){ startY = 0; return; }
-    if(modal.contains(e.target)) startY = e.touches[0].clientY;
-    else startY = 0;
+    startY = 0;
+    if(e.target.classList.contains("picker-handle")){
+      var modal = document.querySelector("#voiceOverlay .tutorial-modal");
+      if(modal && modal.contains(e.target)) startY = e.touches[0].clientY;
+    }
   });
   document.addEventListener("touchmove", function(e){
     if(!startY) return;
     var modal = document.querySelector("#voiceOverlay .tutorial-modal");
-    if(!modal || modal.scrollTop > 0){ startY = 0; return; }
+    if(!modal) return;
     var diff = e.touches[0].clientY - startY;
     if(diff > 0){
       modal.style.transform = "translateY(" + diff + "px)";
@@ -350,22 +351,21 @@ function bindStaticUI(){
   bind("btnPickerDone",   pickerDone);
   bind("btnPickerCancel", closePicker);
 
-  // Pull-down-to-dismiss for picker
+  // Pull-down-to-dismiss for picker (handle only)
   var pickerTouchStartY = 0;
   var pickerBox = document.querySelector(".picker-box");
   if(pickerBox){
     pickerBox.addEventListener("touchstart", function(e){
-      if(pickerBox.scrollTop <= 0) pickerTouchStartY = e.touches[0].clientY;
-      else pickerTouchStartY = 0;
+      pickerTouchStartY = 0;
+      if(e.target.classList.contains("picker-handle")) pickerTouchStartY = e.touches[0].clientY;
     });
     pickerBox.addEventListener("touchmove", function(e){
-      if(pickerTouchStartY && pickerBox.scrollTop <= 0){
-        var diff = e.touches[0].clientY - pickerTouchStartY;
-        if(diff > 0){
-          pickerBox.style.transform = "translateY(" + diff + "px)";
-          pickerBox.style.transition = "none";
-          e.preventDefault();
-        }
+      if(!pickerTouchStartY) return;
+      var diff = e.touches[0].clientY - pickerTouchStartY;
+      if(diff > 0){
+        pickerBox.style.transform = "translateY(" + diff + "px)";
+        pickerBox.style.transition = "none";
+        e.preventDefault();
       }
     }, {passive: false});
     pickerBox.addEventListener("touchend", function(e){
@@ -1300,8 +1300,10 @@ function renderSummary(early, prevState){
   }
 
   el.innerHTML =
-    `<div class="summary-stat">Duration: ${totalMin}m ${String(totalSec).padStart(2, "0")}s</div>` +
-    `<div class="summary-stat">${roundsDisplay}</div>` +
+    `<div class="summary-highlight">${totalMin}m ${String(totalSec).padStart(2, "0")}s</div>` +
+    `<div class="summary-highlight-label">Total Duration</div>` +
+    `<div class="summary-highlight">${roundsDisplay}</div>` +
+    `<div class="summary-highlight-label">Completed</div>` +
     (totalExDone > 0 ? `<div class="summary-heading">Body Parts Worked</div>` + breakdown : "");
 }
 
