@@ -185,12 +185,14 @@ var EXERCISE_CHINESE = {};
 var DEFAULT_VIDEOS = {};
 var EXERCISE_ANIMATED = {};
 var EXERCISE_STATIC = {};
+var EXERCISE_CATEGORIES = {};
 
 (function(){
   for(var name in EXERCISE_DATA){
     var d = EXERCISE_DATA[name];
     if(!EXERCISE_LIBRARY[d.cat]) EXERCISE_LIBRARY[d.cat] = [];
     EXERCISE_LIBRARY[d.cat].push(name);
+    EXERCISE_CATEGORIES[name] = d.cat;
     if(d.equip.length) EXERCISE_EQUIPMENT[name] = d.equip;
     if(d.cn) EXERCISE_CHINESE[name] = d.cn;
     if(d.video) DEFAULT_VIDEOS[name] = d.video;
