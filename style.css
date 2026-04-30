@@ -1192,3 +1192,17 @@ label {
   font-size: 0.85em;
   flex-shrink: 0;
 }
+
+.phase-exercise-list { margin: 4px 0; }
+.phase-ex-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; margin: 3px 0;
+  background: #f0f0f5; border-radius: 8px; font-size: 0.9em;
+}
+.phase-ex-item .phase-ex-name { flex: 1; }
+.phase-ex-item .phase-ex-cn { font-size: 0.82em; color: #999; }
+.phase-ex-item .phase-ex-dur { font-size: 0.82em; color: #007aff; font-weight: 600; min-width: 30px; text-align: right; }
+.phase-ex-item .phase-ex-del { padding: 2px 6px; margin: 0; font-size: 0.85em; background: none; border: none; color: #999; cursor: pointer; }
+.phase-ex-item .phase-ex-tut { padding: 2px 6px; margin: 0; font-size: 0.7em; background: #e8f0fe; color: #007aff; border: 1px solid #cde; border-radius: 5px; cursor: pointer; }
+.pick-phase-btn { display: block; width: 90%; margin: 4px auto 12px; padding: 8px; border: 1.5px dashed #ccc; border-radius: 8px; background: white; color: #888; font-size: 0.85em; cursor: pointer; }
+.section-time { font-size: 0.7em; color: #007aff; font-weight: 400; }
