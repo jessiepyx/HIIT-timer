@@ -155,24 +155,56 @@ var EXERCISE_DATA = {
   "Thrusters":{cat:"Full Body",equip:[["Dumbbells", "Barbell", "Kettlebell"]],cn:"火箭推",diff:2,video:"BV1Ts411j7Jy",images:null},
   "Turkish Get-up":{cat:"Full Body",equip:[["Dumbbell", "Kettlebell"]],cn:"土耳其起立",diff:3,video:"",images:null},
   "Walkout to Push-up":{cat:"Full Body",equip:[],cn:"手走俯卧撑",diff:1,video:"",images:null},
-  // Flexibility
-  "Cat-Cow Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"猫牛式",diff:1,video:"",images:null},
-  "Child's Pose":{cat:"Flexibility",equip:[["Mat"]],cn:"婴儿式",diff:1,video:"",images:null},
-  "Cobra Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"眼镜蛇式",diff:1,video:"",images:null},
-  "Downward Dog":{cat:"Flexibility",equip:[["Mat"]],cn:"下犬式",diff:1,video:"",images:null},
-  "Figure Four Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"四字拉伸",diff:1,video:"",images:null},
-  "Hamstring Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"腿后拉伸",diff:1,video:"",images:null},
-  "Hip Circles":{cat:"Flexibility",equip:[],cn:"髋关节绕环",diff:1,video:"",images:null},
-  "Hip Flexor Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"髋屈肌拉伸",diff:1,video:"",images:null},
-  "Lizard Pose":{cat:"Flexibility",equip:[["Mat"]],cn:"蜥蜴式",diff:1,video:"",images:null},
-  "Pigeon Pose":{cat:"Flexibility",equip:[["Mat"]],cn:"鸽子式",diff:1,video:"",images:null},
-  "Quad Stretch":{cat:"Flexibility",equip:[],cn:"股四头肌拉伸",diff:1,video:"",images:null},
-  "Scorpion Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"蝎子式拉伸",diff:1,video:"",images:null},
-  "Seated Forward Fold":{cat:"Flexibility",equip:[["Mat"]],cn:"坐位体前屈",diff:1,video:"",images:null},
-  "Spinal Twist":{cat:"Flexibility",equip:[["Mat"]],cn:"脊柱扭转",diff:1,video:"",images:null},
-  "Standing Side Bend":{cat:"Flexibility",equip:[],cn:"站姿侧弯",diff:1,video:"",images:null},
-  "World's Greatest Stretch":{cat:"Flexibility",equip:[["Mat"]],cn:"世界最伟大拉伸",diff:1,video:"",images:null},
 };
+
+// Warm-up exercises: targets = which body parts they warm up, dur = default seconds
+var WARMUP_POOL = [
+  {name:"Jumping Jacks", targets:["all"], cn:"开合跳", dur:20},
+  {name:"High Knees", targets:["all","Legs","Cardio"], cn:"高抬腿", dur:20},
+  {name:"Butt Kicks", targets:["all","Legs"], cn:"后踢跑", dur:15},
+  {name:"Running in Place", targets:["all"], cn:"原地跑", dur:20},
+  {name:"Arm Circles", targets:["Chest","Shoulders","Upper Back","Arms"], cn:"手臂绕环", dur:15},
+  {name:"Shoulder Rotations", targets:["Chest","Shoulders","Upper Back"], cn:"肩部旋转", dur:15},
+  {name:"Leg Swings", targets:["Legs","Glutes","Lower Back"], cn:"腿部摆动", dur:15},
+  {name:"Hip Circles", targets:["Legs","Glutes","Lower Back","Abs"], cn:"髋关节绕环", dur:15},
+  {name:"Ankle Circles", targets:["Legs"], cn:"踝关节绕环", dur:10},
+  {name:"Torso Twists", targets:["Abs","Lower Back"], cn:"躯干扭转", dur:15},
+  {name:"Cat-Cow", targets:["Lower Back","Abs"], cn:"猫牛式", dur:15},
+  {name:"Inchworm", targets:["Chest","Shoulders","Abs","Full Body"], cn:"蠕虫式", dur:20},
+  {name:"High Plank Hold", targets:["Chest","Shoulders","Abs"], cn:"高位平板支撑", dur:15},
+  {name:"Glute Activation", targets:["Glutes","Legs"], cn:"臀部激活", dur:15},
+  {name:"Bodyweight Squats", targets:["Legs","Glutes"], cn:"徒手深蹲", dur:20},
+  {name:"Arm Swings", targets:["Chest","Shoulders","Arms"], cn:"手臂摆动", dur:10},
+  {name:"Neck Rolls", targets:["Shoulders","Upper Back"], cn:"颈部绕环", dur:10},
+  {name:"Wrist Circles", targets:["Arms"], cn:"手腕绕环", dur:10},
+  {name:"Side Lunges", targets:["Legs","Glutes"], cn:"侧弓步热身", dur:15},
+  {name:"Mountain Climbers Slow", targets:["all","Abs","Chest"], cn:"慢速登山者", dur:20},
+];
+
+// Cool-down exercises: targets = which body parts they stretch
+var COOLDOWN_POOL = [
+  {name:"Hamstring Stretch", targets:["Legs","Lower Back"], cn:"腿后拉伸", dur:20},
+  {name:"Quad Stretch", targets:["Legs"], cn:"股四头肌拉伸", dur:20},
+  {name:"Calf Stretch", targets:["Legs"], cn:"小腿拉伸", dur:15},
+  {name:"Hip Flexor Stretch", targets:["Legs","Glutes","Lower Back"], cn:"髋屈肌拉伸", dur:20},
+  {name:"Pigeon Pose", targets:["Glutes","Legs"], cn:"鸽子式", dur:25},
+  {name:"Child's Pose", targets:["Lower Back","Shoulders"], cn:"婴儿式", dur:20},
+  {name:"Cobra Stretch", targets:["Abs","Lower Back","Chest"], cn:"眼镜蛇式", dur:15},
+  {name:"Downward Dog", targets:["Legs","Shoulders","Lower Back"], cn:"下犬式", dur:20},
+  {name:"Chest Doorway Stretch", targets:["Chest","Shoulders"], cn:"扩胸拉伸", dur:15},
+  {name:"Cross-Body Shoulder Stretch", targets:["Shoulders","Upper Back"], cn:"胸前拉肩", dur:15},
+  {name:"Tricep Stretch", targets:["Arms"], cn:"三头拉伸", dur:15},
+  {name:"Bicep Wall Stretch", targets:["Arms","Chest"], cn:"二头拉伸", dur:15},
+  {name:"Seated Forward Fold", targets:["Legs","Lower Back"], cn:"坐位体前屈", dur:20},
+  {name:"Spinal Twist", targets:["Abs","Lower Back"], cn:"脊柱扭转", dur:20},
+  {name:"Figure Four Stretch", targets:["Glutes","Legs"], cn:"四字拉伸", dur:20},
+  {name:"Lizard Pose", targets:["Legs","Glutes"], cn:"蜥蜴式", dur:20},
+  {name:"Standing Side Bend", targets:["Abs"], cn:"站姿侧弯", dur:15},
+  {name:"Scorpion Stretch", targets:["Abs","Lower Back","Chest"], cn:"蝎子式拉伸", dur:15},
+  {name:"Cat-Cow Stretch", targets:["Lower Back","Abs"], cn:"猫牛式", dur:15},
+  {name:"World's Greatest Stretch", targets:["all"], cn:"世界最伟大拉伸", dur:20},
+  {name:"Deep Breathing", targets:["all"], cn:"深呼吸放松", dur:30},
+];
 
 // Total: 155 exercises
 
@@ -204,3 +236,34 @@ var EXERCISE_DIFFICULTY = {};
 })();
 
 var CATEGORIES = Object.keys(EXERCISE_LIBRARY).concat("Other");
+
+// Pick warm-up exercises matching workout body parts
+function pickWarmup(bodyParts, totalDur){
+  return pickFromPool(WARMUP_POOL, bodyParts, totalDur);
+}
+
+// Pick cool-down exercises matching workout body parts
+function pickCooldown(bodyParts, totalDur){
+  return pickFromPool(COOLDOWN_POOL, bodyParts, totalDur);
+}
+
+function pickFromPool(pool, bodyParts, targetDur){
+  var parts = Array.isArray(bodyParts) ? bodyParts : Array.from(bodyParts);
+  // Score each exercise by relevance to body parts
+  var scored = pool.map(function(ex){
+    var relevance = 0;
+    if(ex.targets.indexOf("all") >= 0) relevance = 2;
+    else parts.forEach(function(p){ if(ex.targets.indexOf(p) >= 0) relevance += 3; });
+    return {ex:ex, relevance:relevance, random:Math.random()};
+  }).filter(function(s){ return s.relevance > 0; });
+  // Sort by relevance desc, then random
+  scored.sort(function(a,b){ return (b.relevance - a.relevance) || (a.random - b.random); });
+  // Pick exercises until we fill the target duration
+  var result = [];
+  var totalTime = 0;
+  for(var i = 0; i < scored.length && totalTime < targetDur; i++){
+    result.push({name:scored[i].ex.name, dur:scored[i].ex.dur, cn:scored[i].ex.cn});
+    totalTime += scored[i].ex.dur;
+  }
+  return result;
+}
