@@ -16,6 +16,7 @@ var currentArpPattern = 0;
 var currentMotif = null;
 var motifStep = 0;
 var motifStartBar = -1;
+var shuffledMelodies = null;
 
 function unlockAudio(){
   if(audioUnlocked) return;
@@ -38,7 +39,7 @@ document.addEventListener("touchstart", unlockAudio);
 document.addEventListener("click", unlockAudio);
 
 var MUSIC_STYLES = [
-  { name: "Electronic", bpm: 128, type: "synth",
+  { name: "Electronic", bpm: 128, type: "electronic",
     chords: [[130.8,155.6,196],[207.7,261.6,311.1],[155.6,196,233.1],[233.1,293.7,349.2],
              [174.6,207.7,261.6],[196,246.9,293.7],[207.7,261.6,311.1],[233.1,293.7,349.2]],
     bassN: [65.4,103.8,77.8,116.5,87.3,98,103.8,116.5],
@@ -49,10 +50,20 @@ var MUSIC_STYLES = [
       {k:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1]},
       {k:[1,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,1,0,0,1,0,1,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}],
     arpShapes: [[0,1,2,1],[2,1,0,1],[0,2,1,0],[0,0,2,1],[1,2,0,2]],
-    leadSteps: [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0],
+    melodies: [
+      [[0,311.1],[2,349.2],[4,392],[6,349.2],[8,311.1],[10,261.6],[12,311.1],[14,349.2]],
+      [[0,466.2],[2,415.3],[4,392],[6,349.2],[8,311.1],[10,349.2],[12,392],[14,466.2]],
+      [[0,523.3],[4,466.2],[6,415.3],[8,392],[10,415.3],[12,466.2],[14,523.3]],
+      [[0,392],[2,392],[4,349.2],[6,311.1],[8,261.6],[10,311.1],[12,349.2],[14,392]],
+      [[0,311.1],[2,261.6],[4,311.1],[6,349.2],[8,392],[10,466.2],[12,392],[14,349.2]],
+      [[0,466.2],[2,523.3],[4,466.2],[6,392],[8,349.2],[12,392],[14,466.2]],
+      [[0,261.6],[2,311.1],[4,349.2],[6,392],[8,466.2],[10,392],[12,349.2],[14,311.1]],
+      [[0,392],[2,349.2],[4,311.1],[6,349.2],[8,392],[10,466.2],[12,523.3],[14,466.2]],
+    ],
+    drumVol: 0.8, melodyVol: 0.9,
     padWave:"triangle", synthWave:"sawtooth", openHat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1]
   },
-  { name: "Hip Hop", bpm: 90, type: "synth",
+  { name: "Hip Hop", bpm: 90, type: "hiphop",
     chords: [[196,233.1,293.7],[155.6,196,233.1],[233.1,293.7,349.2],[174.6,220,261.6],
              [196,233.1,293.7],[146.8,174.6,220],[155.6,196,233.1],[174.6,220,261.6]],
     bassN: [49,77.8,58.3,87.3,49,73.4,77.8,87.3],
@@ -63,10 +74,20 @@ var MUSIC_STYLES = [
       {k:[1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],h:[1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0]},
       {k:[1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0],h:[1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0]}],
     arpShapes: [[0,1,2,1],[2,1,0,0],[0,2,0,1]],
-    leadSteps: [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    melodies: [
+      [[0,392],[4,349.2],[6,293.7],[8,261.6],[12,293.7],[14,349.2]],
+      [[0,293.7],[2,261.6],[4,233.1],[8,261.6],[10,293.7],[12,349.2],[14,293.7]],
+      [[0,440],[2,392],[4,349.2],[6,293.7],[8,261.6],[12,233.1],[14,261.6]],
+      [[0,233.1],[2,261.6],[4,293.7],[6,349.2],[8,392],[12,349.2],[14,293.7]],
+      [[0,349.2],[4,293.7],[6,261.6],[8,293.7],[10,349.2],[12,392],[14,440]],
+      [[0,261.6],[2,293.7],[4,349.2],[8,293.7],[10,261.6],[12,233.1],[14,261.6]],
+      [[0,392],[2,349.2],[4,293.7],[6,261.6],[8,233.1],[10,261.6],[12,293.7],[14,349.2]],
+      [[0,293.7],[2,293.7],[4,349.2],[6,392],[8,440],[10,392],[12,349.2],[14,293.7]],
+    ],
+    drumVol: 0.7, melodyVol: 0.85,
     padWave:"sine", synthWave:"triangle", openHat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
   },
-  { name: "Trap", bpm: 140, type: "synth",
+  { name: "Trap", bpm: 140, type: "trap",
     chords: [[185,220,277.2],[146.8,185,220],[220,277.2,329.6],[164.8,207.7,246.9],
              [123.5,155.6,185],[146.8,185,220],[185,220,277.2],[164.8,207.7,246.9]],
     bassN: [46.2,73.4,55,82.4,61.7,73.4,46.2,82.4],
@@ -77,10 +98,20 @@ var MUSIC_STYLES = [
       {k:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
       {k:[1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],h:[1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,1]}],
     arpShapes: [[0,0,2,1],[2,0,0,1],[0,2,1,2],[1,0,2,0]],
-    leadSteps: [0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0],
+    melodies: [
+      [[0,277.2],[4,246.9],[8,220],[12,246.9]],
+      [[0,370],[4,329.6],[8,277.2],[12,329.6],[14,370]],
+      [[0,220],[4,277.2],[8,329.6],[12,277.2]],
+      [[0,329.6],[2,277.2],[4,246.9],[8,220],[12,246.9],[14,277.2]],
+      [[0,370],[2,329.6],[4,277.2],[6,246.9],[8,220],[12,246.9]],
+      [[0,246.9],[4,277.2],[6,329.6],[8,370],[12,329.6],[14,277.2]],
+      [[0,440],[4,370],[6,329.6],[8,277.2],[12,246.9],[14,220]],
+      [[0,220],[2,246.9],[4,277.2],[8,329.6],[10,370],[12,440],[14,370]],
+    ],
+    drumVol: 0.9, melodyVol: 0.7,
     padWave:"sawtooth", synthWave:"square", openHat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
   },
-  { name: "Drum & Bass", bpm: 174, type: "synth",
+  { name: "Drum & Bass", bpm: 174, type: "dnb",
     chords: [[220,261.6,329.6],[174.6,220,261.6],[146.8,174.6,220],[164.8,207.7,246.9],
              [130.8,164.8,196],[174.6,220,261.6],[146.8,174.6,220],[196,246.9,293.7]],
     bassN: [55,87.3,73.4,82.4,65.4,87.3,73.4,98],
@@ -91,7 +122,17 @@ var MUSIC_STYLES = [
       {k:[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0],h:[1,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0]},
       {k:[1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,1],h:[1,0,1,1,0,1,0,1,1,0,1,1,0,1,0,1]}],
     arpShapes: [[0,1,2,1],[2,1,0,2],[0,2,0,1],[1,0,2,1],[2,0,1,0]],
-    leadSteps: [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+    melodies: [
+      [[0,329.6],[2,392],[4,440],[6,392],[8,329.6],[10,261.6],[12,329.6],[14,392]],
+      [[0,440],[2,493.9],[4,523.3],[6,493.9],[8,440],[10,392],[12,329.6],[14,392]],
+      [[0,261.6],[2,293.7],[4,329.6],[6,392],[8,440],[10,392],[12,329.6],[14,293.7]],
+      [[0,523.3],[2,440],[4,392],[6,329.6],[8,293.7],[10,329.6],[12,392],[14,440]],
+      [[0,329.6],[2,329.6],[4,392],[6,440],[8,523.3],[10,440],[12,392]],
+      [[0,440],[2,392],[4,329.6],[8,392],[10,440],[12,523.3],[14,440]],
+      [[0,293.7],[2,329.6],[4,392],[6,440],[8,493.9],[10,440],[12,392],[14,329.6]],
+      [[0,523.3],[2,493.9],[4,440],[6,392],[8,329.6],[10,293.7],[12,261.6],[14,293.7]],
+    ],
+    drumVol: 0.85, melodyVol: 0.8,
     padWave:"triangle", synthWave:"sawtooth", openHat:[0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0]
   },
   { name: "Country", bpm: 110, type: "country",
@@ -246,6 +287,47 @@ function playMStrum(t,freqs,dur,v){
   }
 }
 
+// Piano: layered harmonics with fast attack, medium decay
+function playMPiano(t,freq,dur,v){
+  var ctx=getAudioCtx(),d=getMusicDest();
+  var harmonics=[1,2,3,4],vols=[1,0.4,0.15,0.06];
+  for(var i=0;i<harmonics.length;i++){
+    var o=ctx.createOscillator(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+    o.type="sine";o.frequency.setValueAtTime(freq*harmonics[i],t);
+    f.type="lowpass";f.frequency.setValueAtTime(4000,t);f.frequency.exponentialRampToValueAtTime(800,t+dur*0.5);
+    o.connect(f);f.connect(g);g.connect(d);
+    g.gain.setValueAtTime(0.08*v*vols[i],t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.start(t);o.stop(t+dur+0.01);
+  }
+  var ns=ctx.createBufferSource();ns.buffer=getNoiseBuffer();
+  var nf=ctx.createBiquadFilter();nf.type="highpass";nf.frequency.value=6000;
+  var ng=ctx.createGain();ns.connect(nf);nf.connect(ng);ng.connect(d);
+  ng.gain.setValueAtTime(0.015*v,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.03);
+  ns.start(t);ns.stop(t+0.04);
+}
+
+// Rich lead with vibrato
+function playMRichLead(t,freq,dur,v,wave){
+  var ctx=getAudioCtx(),d=getMusicDest();
+  [-6,0,6].forEach(function(det){
+    var o=ctx.createOscillator(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+    o.type=wave||"sawtooth";o.frequency.setValueAtTime(freq,t);o.detune.setValueAtTime(det,t);
+    var lfo=ctx.createOscillator(),lfoG=ctx.createGain();
+    lfo.type="sine";lfo.frequency.value=5;lfoG.gain.value=3;
+    lfo.connect(lfoG);lfoG.connect(o.detune);lfo.start(t);lfo.stop(t+dur+0.01);
+    f.type="lowpass";f.frequency.setValueAtTime(2000+Math.random()*1500,t);
+    o.connect(f);f.connect(g);g.connect(d);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.04*v,t+0.02);
+    g.gain.setValueAtTime(0.04*v,t+dur*0.6);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.start(t);o.stop(t+dur+0.01);
+  });
+}
+
+function shuffleArray(arr){
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}
+  return arr;
+}
+
 // --- MAIN SEQUENCER ---
 function startMusic(){
   if(!musicEnabled) return;
@@ -254,6 +336,10 @@ function startMusic(){
     musicStep=0; musicBar=0; prevLeadNote=0; currentMotif=null; motifStep=0;
     currentDrumPattern=Math.floor(Math.random()*4);
     currentArpPattern=Math.floor(Math.random()*5);
+    // Shuffle melodies for variety each session
+    var sty=MUSIC_STYLES[musicStyleIdx];
+    if(sty.melodies) shuffledMelodies=shuffleArray(sty.melodies.slice());
+    else shuffledMelodies=null;
     nextMusicTime=ctx.currentTime+0.05;
     if(musicTimer) clearInterval(musicTimer);
     musicTimer=setInterval(musicScheduler,25);
@@ -291,8 +377,9 @@ function scheduleMusicBeat(step,time){
   var dm=sty.drums[currentDrumPattern%sty.drums.length];
   var isFill=(musicBar%8===7 && step>=12);
 
-  // --- DRUMS ---
-  if(sc.drums){
+  // --- DRUMS (only for styles that don't handle their own) ---
+  var hasOwnDrums = (sty.type==="country"||sty.type==="pop"||sty.type==="electronic"||sty.type==="hiphop"||sty.type==="trap"||sty.type==="dnb");
+  if(sc.drums && !hasOwnDrums){
     if(isFill){
       if(step%2===0) playMKick(time,vel*sc.energy);
       if(step%2===1){playMSnare(time,vel*0.8*sc.energy);playMClap(time,vel*0.5);}
@@ -334,15 +421,14 @@ function scheduleMusicBeat(step,time){
     if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step===0&&Math.random()<0.6){
       playMStrum(time,chord,barDur*0.4,vel*0.6);
     }
-    // Country melody (loud, prominent)
-    if(sc.lead && sty.melodies){
-      var mel = sty.melodies[(musicBar + Math.floor(musicBar/4)) % sty.melodies.length];
-      for(var mi=0;mi<mel.length;mi++){
+    // Country melody — guitar-like with shuffle
+    if(sc.lead && shuffledMelodies){
+      var mel = shuffledMelodies[musicBar % shuffledMelodies.length];
+      if(Math.random()<0.85) for(var mi=0;mi<mel.length;mi++){
         if(mel[mi][0]===step){
-          var mNote = mel[mi][1];
-          playMLead(time,mNote,stepDur*3,vel*1.1*sc.energy,sty.synthWave);
-          // Echo for warmth
-          if(Math.random()<0.3) playMGuitar(time+stepDur,mNote,stepDur*2,vel*0.3);
+          var mNote = mel[mi][1] * (Math.random()<0.1 ? 2 : 1);
+          playMGuitar(time,mNote,stepDur*3.5,vel*1.0*sc.energy);
+          playMRichLead(time,mNote,stepDur*3,vel*0.5*sc.energy,"triangle");
         }
       }
     }
@@ -372,16 +458,15 @@ function scheduleMusicBeat(step,time){
     // Warm pad
     if(sc.pad && step===0) playMPad(time,chord,barDur*0.95,vel*0.7*sc.energy,sty.padWave);
     // Pop melody (loud, prominent, pre-composed)
-    if((sc.melody || sc.lead) && sty.melodies){
-      var pMel = sty.melodies[(musicBar + Math.floor(musicBar/3)) % sty.melodies.length];
-      for(var pmi=0;pmi<pMel.length;pmi++){
+    if((sc.melody || sc.lead) && shuffledMelodies){
+      var pMel = shuffledMelodies[musicBar % shuffledMelodies.length];
+      if(Math.random()<0.9) for(var pmi=0;pmi<pMel.length;pmi++){
         if(pMel[pmi][0]===step){
-          var pNote = pMel[pmi][1];
-          playMLead(time,pNote,stepDur*3.5,vel*1.2*sc.energy,sty.synthWave);
-          // Harmony note (softer, 3rd above)
-          if(Math.random()<0.25){
+          var pNote = pMel[pmi][1] * (Math.random()<0.08 ? 2 : 1);
+          playMPiano(time,pNote,stepDur*4,vel*1.3*sc.energy);
+          if(Math.random()<0.3){
             var hIdx = sty.scale.indexOf(pNote);
-            if(hIdx>=0 && hIdx+2<sty.scale.length) playMLead(time,sty.scale[hIdx+2],stepDur*3,vel*0.4*sc.energy,sty.synthWave);
+            if(hIdx>=0 && hIdx+2<sty.scale.length) playMPiano(time,sty.scale[hIdx+2],stepDur*3.5,vel*0.4*sc.energy);
           }
         }
       }
@@ -401,37 +486,55 @@ function scheduleMusicBeat(step,time){
     return;
   }
 
-  // --- DEFAULT SYNTH STYLES (Electronic, Hip Hop, Trap, D&B) ---
+  // --- DEFAULT STYLES (Electronic, Hip Hop, Trap, D&B) ---
+  var dVol = (sty.drumVol || 0.8) * vel * sc.energy;
+  var mVol = (sty.melodyVol || 0.8) * vel * sc.energy;
+
+  // Drums (style-specific volume)
+  if(sc.drums && !isFill){
+    if(dm.k[step]) playMKick(time, dVol);
+    if(dm.s[step]){playMSnare(time, dVol);if(Math.random()<0.3) playMClap(time,dVol*0.4);}
+    if(sty.openHat && sty.openHat[step]) playMHat(time,dVol,true);
+    else if(dm.h[step]){
+      var hv=(sty.type==="trap"&&step%2!==0)?dVol*0.3:dVol;
+      playMHat(time,hv,false);
+    } else if(Math.random()<0.08) playMHat(time,dVol*0.15,false);
+  }
   // Bass
   if(sc.bass){
-    if(step===0){playMBass(time,sty.bassN[ci],stepDur*3,vel*sc.energy);playMSub(time,sty.bassN[ci]/2,stepDur*4,vel*0.8);}
-    else if(step===6&&Math.random()<0.7) playMBass(time,sty.bassN[ci],stepDur*2,vel*0.7*sc.energy);
-    else if(step===10&&Math.random()<0.5) playMBass(time,sty.bassN[ci]*1.5,stepDur*1.5,vel*0.5*sc.energy);
-    else if(step===12&&sec==="drop"&&Math.random()<0.6) playMBass(time,sty.bassN[ci]*0.75,stepDur*2,vel*0.6);
+    if(step===0){playMBass(time,sty.bassN[ci],stepDur*3,dVol*0.9);playMSub(time,sty.bassN[ci]/2,stepDur*4,dVol*0.7);}
+    else if(step===6&&Math.random()<0.6) playMBass(time,sty.bassN[ci],stepDur*2,dVol*0.6);
+    else if(step===10&&Math.random()<0.4) playMBass(time,sty.bassN[ci]*1.5,stepDur*1.5,dVol*0.4);
   }
   // Pad
-  if(sc.pad && step===0) playMPad(time,chord,barDur*0.95,vel*0.85*sc.energy,sty.padWave);
-  // Arp
-  if(sc.arp && sty.arpShapes){
-    var shape=sty.arpShapes[currentArpPattern%sty.arpShapes.length];
-    var arpActive=(step%2===0&&Math.random()<0.65)||(step%2===1&&Math.random()<0.25);
-    if(arpActive){
-      var cni=shape[step%shape.length]%chord.length;
-      var arpNote=chord[cni]*2;
-      if(Math.random()<0.15) arpNote*=0.5;
-      if(Math.random()<0.1) arpNote*=2;
-      playMArp(time,arpNote,stepDur*0.8,vel*sc.energy,sty.synthWave);
-      if(Math.random()<0.25) playMArp(time+stepDur*1.5,arpNote*1.001,stepDur*0.5,vel*0.25,sty.synthWave);
+  if(sc.pad && step===0) playMPad(time,chord,barDur*0.95,mVol*0.6,sty.padWave);
+  // Pre-composed melody
+  if((sc.lead || sc.melody) && shuffledMelodies){
+    var sMel = shuffledMelodies[musicBar % shuffledMelodies.length];
+    if(Math.random()<0.88) for(var smi=0;smi<sMel.length;smi++){
+      if(sMel[smi][0]===step){
+        var sNote = sMel[smi][1] * (Math.random()<0.08 ? 2 : 1);
+        playMRichLead(time,sNote,stepDur*3,mVol*1.1,sty.synthWave);
+        if(Math.random()<0.2){
+          var shIdx = sty.scale.indexOf(sNote);
+          if(shIdx>=0 && shIdx+2<sty.scale.length) playMRichLead(time,sty.scale[shIdx+2],stepDur*2.5,mVol*0.3,sty.synthWave);
+        }
+      }
     }
   }
-  // Lead
-  if(sc.lead && sty.leadSteps[step] && Math.random()<0.7){
-    var note=pickLeadNote(chord,sty.scale); prevLeadNote=note;
-    playMLead(time,note,stepDur*(2+Math.floor(Math.random()*3)),vel*0.75*sc.energy,sty.synthWave);
+  // Arp (chorus/drop only)
+  if(sc.arp && sty.arpShapes && (sec==="chorus"||sec==="chorus2"||sec==="drop")){
+    var shape=sty.arpShapes[currentArpPattern%sty.arpShapes.length];
+    if(step%2===0&&Math.random()<0.5){
+      var cni=shape[step%shape.length]%chord.length;
+      var arpNote=chord[cni]*2;
+      playMArp(time,arpNote,stepDur*0.8,mVol*0.5,sty.synthWave);
+      if(Math.random()<0.2) playMArp(time+stepDur*1.5,arpNote*1.001,stepDur*0.5,mVol*0.2,sty.synthWave);
+    }
   }
-  // Pluck
-  if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step%4===0&&Math.random()<0.4){
-    playMPluck(time,chord[Math.floor(Math.random()*chord.length)]*4,stepDur*2,vel*0.5);
+  // Pluck sparkle
+  if((sec==="chorus"||sec==="chorus2"||sec==="drop")&&step%4===0&&Math.random()<0.3){
+    playMPluck(time,chord[Math.floor(Math.random()*chord.length)]*4,stepDur*2,mVol*0.4);
   }
 }
 
