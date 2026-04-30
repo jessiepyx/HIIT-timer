@@ -104,13 +104,13 @@ function saveTutorialFromInput(name){
 
 // Tutorial button for picker items — opens overlay
 function getTutorialHtml(name){
-  return '<span class="picker-tutorial" onclick="event.stopPropagation();showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">&#9654;</span>';
+  return '<button class="picker-tutorial-btn" onclick="event.stopPropagation();showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">Tutorial</button>';
 }
 
 // Tutorial link for form exercise rows — opens overlay
 function getFormTutorialHtml(name){
   if(!name) return '';
-  return '<span class="eq-tutorial" onclick="showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">&#9654;</span>';
+  return '<button class="form-tutorial-btn" onclick="showTutorialOverlay(\'' + name.replace(/'/g, "\\'") + '\')">Tutorial</button>';
 }
 
 // Tutorial overlay (used in picker and form)
