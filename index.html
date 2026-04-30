@@ -20,67 +20,75 @@
 </div>
 
 <!-- DETAIL -->
-<div id="detail" class="page" style="display:none">
-  <div class="detail-top-row">
-    <button id="btnDetailBack">Back</button>
-    <button id="btnStartTop" class="detail-start-btn">Start Workout</button>
-  </div>
-  <div id="detailContent"></div>
-  <button id="btnStartBottom" class="detail-start-btn">Start Workout</button>
-  <div class="detail-actions">
-    <button id="btnDetailEdit">Edit</button>
-    <button id="btnDetailDelete" class="control-danger">Delete</button>
+<div id="detail" class="page detail-page" style="display:none">
+  <div id="detailHeader" class="detail-header"></div>
+  <div id="detailScroll" class="detail-scroll"></div>
+  <div class="detail-footer">
+    <button id="btnStartBottom" class="detail-start-btn">Start Workout</button>
+    <div class="detail-actions">
+      <button id="btnDetailEdit">Edit</button>
+      <button id="btnDetailDelete" class="control-danger">Delete</button>
+      <button id="btnDetailBack">Back</button>
+    </div>
   </div>
 </div>
 
 <!-- SUGGEST -->
-<div id="suggest" class="page" style="display:none">
-  <h2>Smart Workout</h2>
-  <label>Duration</label>
-  <div class="option-row" id="timeOptions"></div>
-  <label>Intensity</label>
-  <div class="option-row" id="intensityOptions"></div>
-  <label>Body Parts</label>
-  <div class="option-row">
-    <button id="btnSelectAll">Select All</button>
-    <button id="btnDeselectAll">Deselect All</button>
+<div id="suggest" class="page suggest-page" style="display:none">
+  <div class="suggest-header"><h2>Auto Generate</h2></div>
+  <div class="suggest-scroll">
+    <label>Duration</label>
+    <div class="option-row" id="timeOptions"></div>
+    <label>Intensity</label>
+    <div class="option-row" id="intensityOptions"></div>
+    <label>Body Parts</label>
+    <div class="option-row">
+      <button id="btnSelectAll">Select All</button>
+      <button id="btnDeselectAll">Deselect All</button>
+    </div>
+    <div class="body-part-grid" id="bodyPartOptions"></div>
+    <label>Equipment Available</label>
+    <div class="option-row">
+      <button id="btnEqSelectAll">Select All</button>
+      <button id="btnEqDeselectAll">Deselect All</button>
+    </div>
+    <div class="body-part-grid" id="equipOptions"></div>
   </div>
-  <div class="body-part-grid" id="bodyPartOptions"></div>
-  <label>Equipment Available</label>
-  <div class="option-row">
-    <button id="btnEqSelectAll">Select All</button>
-    <button id="btnEqDeselectAll">Deselect All</button>
+  <div class="suggest-footer">
+    <button id="btnGenerate" class="primary" style="width:100%;">Generate Workout</button>
+    <button id="btnBackSuggest" style="width:100%;margin-top:4px;">Back</button>
   </div>
-  <div class="body-part-grid" id="equipOptions"></div>
-  <button id="btnGenerate" class="primary" style="width:90%;margin-top:16px;">Generate Workout</button>
-  <button id="btnBackSuggest" style="width:90%;margin-top:4px;">Back</button>
 </div>
 
 <!-- FORM -->
-<div id="form" class="page" style="display:none">
-  <h2 id="formTitle">Workout</h2>
-  <label>Name</label>
-  <input id="name">
-  <label>Work (sec)</label>
-  <input id="work" type="number">
-  <label>Rest (sec)</label>
-  <input id="rest" type="number">
-  <label>Rounds</label>
-  <input id="rounds" type="number">
-  <label>Water break (sec)</label>
-  <input id="water" type="number">
-  <label>Warmup (sec)</label>
-  <input id="warmup" type="number">
-  <label>Cooldown (sec)</label>
-  <input id="cooldown" type="number">
-  <h3>Exercises</h3>
-  <div id="exerciseList"></div>
-  <div class="form-btns">
-    <button id="btnAddEx">+ Custom</button>
-    <button id="btnPickEx" class="primary">+ Pick Exercise</button>
+<div id="form" class="page form-page" style="display:none">
+  <div class="form-scroll">
+    <h2 id="formTitle">Workout</h2>
+    <label>Name</label>
+    <input id="name">
+    <label>Work (sec)</label>
+    <input id="work" type="number">
+    <label>Rest (sec)</label>
+    <input id="rest" type="number">
+    <label>Rounds</label>
+    <input id="rounds" type="number">
+    <label>Water break (sec)</label>
+    <input id="water" type="number">
+    <label>Warmup (sec)</label>
+    <input id="warmup" type="number">
+    <label>Cooldown (sec)</label>
+    <input id="cooldown" type="number">
+    <h3>Exercises</h3>
+    <div id="exerciseList"></div>
+    <div class="form-btns">
+      <button id="btnAddEx">+ Custom</button>
+      <button id="btnPickEx" class="primary">+ Pick Exercise</button>
+    </div>
   </div>
-  <button id="btnSave" class="primary" style="width:90%;margin-top:8px;">Save Workout</button>
-  <button id="btnBackEdit" style="width:90%;margin-top:4px;">Back</button>
+  <div class="form-footer">
+    <button id="btnSave" class="primary" style="width:100%;">Save Workout</button>
+    <button id="btnBackEdit" style="width:100%;margin-top:4px;">Back</button>
+  </div>
 </div>
 
 <!-- EXERCISE PICKER MODAL -->
@@ -88,10 +96,8 @@
   <div class="picker-box" onclick="event.stopPropagation()">
     <div class="picker-handle"></div>
     <h3>Pick Exercises</h3>
-    <p class="picker-hint">Filter by equipment, then tap to select</p>
-    <div id="pickerEquip" class="picker-eq-row"></div>
-    <div id="pickerList"></div>
-    <div style="margin-top:12px;">
+    <div id="pickerList" class="picker-scroll"></div>
+    <div class="picker-footer">
       <button id="btnPickerDone" class="primary">Add Selected</button>
       <button id="btnPickerCancel">Cancel</button>
     </div>
@@ -101,6 +107,7 @@
 <!-- RUN -->
 <div id="run" class="page" style="display:none">
   <div id="phase"></div>
+  <div id="workoutUI">
   <div id="exerciseDemo" style="display:none;"></div>
   <div id="current"></div>
   <div id="currentEquip"></div>
@@ -149,14 +156,14 @@
     <button id="btnRestart">Restart</button>
     <button id="btnEndEarly" style="display:none">End Workout</button>
   </div>
+  </div>
   <div id="donePanel" style="display:none; margin-top:24px;">
-    <button id="btnHome" class="detail-start-btn">Back to Home</button>
     <p id="doneMsg">&#x1F389; Workout complete!</p>
+    <div id="workoutInfo" class="workout-info" style="display:none;"></div>
     <div id="summary"></div>
-    <button id="btnHome2" class="detail-start-btn" style="margin-top:12px;">Back to Home</button>
+    <button id="btnHome" class="detail-start-btn" style="margin-top:12px;">Back to Home</button>
   </div>
   <div id="tutorialArea" class="tutorial-area"></div>
-  <div id="workoutInfo" class="workout-info" style="display:none;"></div>
 </div>
 
 <!-- TUTORIAL OVERLAY -->
