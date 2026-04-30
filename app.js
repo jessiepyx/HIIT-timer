@@ -35,6 +35,9 @@ let editingIndex = null;
 
 let cfg = null;
 let exercises = [];
+let warmupExercises = [];
+let cooldownExercises = [];
+let phaseIdx = 0; // sub-index for warmup/cooldown exercise cycling
 
 let state = "idle";
 let idx = 0;
@@ -339,6 +342,8 @@ function bindStaticUI(){
   bind("btnDetailBack", () => show("main"));
   bind("btnAddEx",     () => addExercise());
   bind("btnPickEx",    openPicker);
+  bind("btnPickWarmup", function(){ openPhasePicker("warmup"); });
+  bind("btnPickCooldown", function(){ openPhasePicker("cooldown"); });
   bind("btnSave",      save);
   bind("btnBackEdit",  () => { if(detailIndex != null) showDetail(detailIndex); else show("main"); });
   bind("btnBackSuggest", () => show("main"));
@@ -763,18 +768,22 @@ function initDragHandle(row){
 }
 
 function clearForm(){
-  var defaults = {name:"My Workout", work:40, rest:20, rounds:3, water:45, warmup:60, cooldown:60};
-  ["name","work","rest","rounds","water","warmup","cooldown"].forEach(id => {
+  var defaults = {name:"My Workout", work:40, rest:20, rounds:3, water:45};
+  ["name","work","rest","rounds","water"].forEach(id => {
     const el = $(id);
     if(el) el.value = defaults[id];
   });
   const list = $("exerciseList");
   if(list) list.innerHTML = "";
+  var wl = $("warmupList"); if(wl) wl.innerHTML = "";
+  var cl = $("cooldownList"); if(cl) cl.innerHTML = "";
+  updatePhaseTotal("warmup");
+  updatePhaseTotal("cooldown");
 }
 
 function loadForm(w){
   if(!w) return;
-  ["name","work","rest","rounds","water","warmup","cooldown"].forEach(id => {
+  ["name","work","rest","rounds","water"].forEach(id => {
     const el = $(id);
     if(el) el.value = w[id] ?? "";
   });
@@ -782,6 +791,25 @@ function loadForm(w){
   if(!list) return;
   list.innerHTML = "";
   normalizeExercises(w.exercises).forEach(ex => addExercise(ex.name, ex.category));
+  // Load warm-up exercises
+  var wl = $("warmupList"); if(wl) wl.innerHTML = "";
+  (w.warmupEx || []).forEach(function(ex){ addPhaseExercise("warmup", ex.name, ex.dur); });
+  // Load cool-down exercises
+  var cl = $("cooldownList"); if(cl) cl.innerHTML = "";
+  (w.cooldownEx || []).forEach(function(ex){ addPhaseExercise("cooldown", ex.name, ex.dur); });
+  // Backward compat: if old format with warmup/cooldown times, generate defaults
+  if(!w.warmupEx && w.warmup > 0){
+    var parts = (w.exercises||[]).map(function(e){ return typeof e==="string" ? "all" : (e.category||"all"); });
+    var wuEx = (typeof pickWarmup === "function") ? pickWarmup(parts, w.warmup) : [];
+    wuEx.forEach(function(ex){ addPhaseExercise("warmup", ex.name, ex.dur); });
+  }
+  if(!w.cooldownEx && w.cooldown > 0){
+    var parts2 = (w.exercises||[]).map(function(e){ return typeof e==="string" ? "all" : (e.category||"all"); });
+    var cdEx = (typeof pickCooldown === "function") ? pickCooldown(parts2, w.cooldown) : [];
+    cdEx.forEach(function(ex){ addPhaseExercise("cooldown", ex.name, ex.dur); });
+  }
+  updatePhaseTotal("warmup");
+  updatePhaseTotal("cooldown");
 }
 
 function save(){
@@ -799,8 +827,10 @@ function save(){
     rest:     +$("rest")?.value   || 10,
     rounds:   +$("rounds")?.value || 3,
     water:    +$("water")?.value  || 30,
-    warmup:   +$("warmup")?.value || 30,
-    cooldown: +$("cooldown")?.value || 30,
+    warmup:   getPhaseTotal("warmup"),
+    cooldown: getPhaseTotal("cooldown"),
+    warmupEx: getPhaseExercises("warmup"),
+    cooldownEx: getPhaseExercises("cooldown"),
     exercises: ex
   };
   if(editingIndex != null){ workouts[editingIndex] = w; }
@@ -812,6 +842,81 @@ function save(){
 
 function saveLS(){
   localStorage.setItem("hiitWorkouts", JSON.stringify(workouts));
+}
+
+// --- Warm-up / Cool-down form helpers ---
+function addPhaseExercise(phase, name, dur){
+  var list = $(phase + "List");
+  if(!list) return;
+  var div = document.createElement("div");
+  div.className = "phase-ex-item";
+  var cn = (typeof getChineseName === "function") ? getChineseName(name) : "";
+  var cnHtml = cn ? ' <span class="phase-ex-cn">' + cn + '</span>' : '';
+  var tutHtml = (typeof showTutorialOverlay === "function") ?
+    '<button class="phase-ex-tut" onclick="showTutorialOverlay(\'' + name.replace(/'/g,"\\'") + '\')">Tutorial</button>' : '';
+  div.innerHTML = '<span class="phase-ex-name">' + name + cnHtml + '</span>' +
+    '<input class="phase-ex-dur-input" type="number" value="' + (dur||15) + '" style="width:45px;padding:3px;font-size:0.85em;border:1px solid #ccc;border-radius:4px;text-align:center;" onchange="updatePhaseTotal(\'' + phase + '\')">' +
+    '<span style="font-size:0.75em;color:#888;">s</span>' + tutHtml +
+    '<button class="phase-ex-del" onclick="this.parentNode.remove();updatePhaseTotal(\'' + phase + '\')">✕</button>';
+  list.appendChild(div);
+  updatePhaseTotal(phase);
+}
+
+function getPhaseExercises(phase){
+  var list = $(phase + "List");
+  if(!list) return [];
+  return Array.from(list.querySelectorAll(".phase-ex-item")).map(function(item){
+    var name = item.querySelector(".phase-ex-name").childNodes[0].textContent.trim();
+    var dur = +(item.querySelector(".phase-ex-dur-input")?.value) || 15;
+    return {name:name, dur:dur};
+  });
+}
+
+function getPhaseTotal(phase){
+  var exs = getPhaseExercises(phase);
+  var total = 0;
+  exs.forEach(function(ex){ total += ex.dur; });
+  return total;
+}
+
+function updatePhaseTotal(phase){
+  var total = getPhaseTotal(phase);
+  var el = $(phase + "Total");
+  if(el) el.textContent = total > 0 ? "(" + total + "s)" : "";
+}
+
+var currentPhasePickerType = null;
+
+function openPhasePicker(type){
+  currentPhasePickerType = type;
+  var pool = (type === "warmup") ? WARMUP_POOL : COOLDOWN_POOL;
+  var overlay = $("phasePickerOverlay");
+  if(!overlay){
+    overlay = document.createElement("div");
+    overlay.id = "phasePickerOverlay";
+    overlay.className = "overlay";
+    overlay.style.display = "none";
+    overlay.onclick = function(){ overlay.style.display = "none"; };
+    document.body.appendChild(overlay);
+  }
+  var title = type === "warmup" ? "Pick Warm-up Exercises" : "Pick Cool-down Exercises";
+  var html = '<div class="picker-box" onclick="event.stopPropagation()">';
+  html += '<div class="picker-handle"></div>';
+  html += '<h3>' + title + '</h3>';
+  html += '<div class="picker-scroll">';
+  pool.forEach(function(ex){
+    var cn = ex.cn ? ' <span class="cn-name">' + ex.cn + '</span>' : '';
+    var targets = ex.targets.join(", ");
+    html += '<div class="picker-item" onclick="addPhaseExercise(\'' + currentPhasePickerType + '\',\'' + ex.name.replace(/'/g,"\\'") + '\',' + ex.dur + ');$(\'phasePickerOverlay\').style.display=\'none\';">';
+    html += '<span>' + ex.name + cn + '</span>';
+    html += '<span class="picker-eq-label">' + ex.dur + 's · ' + targets + '</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div class="picker-footer"><button onclick="$(\'phasePickerOverlay\').style.display=\'none\'">Close</button></div>';
+  html += '</div>';
+  overlay.innerHTML = html;
+  overlay.style.display = "flex";
 }
 
 // =========================
@@ -964,14 +1069,23 @@ function generateWorkout(){
     adjustedWork = p.work + Math.min(extraPerCycle, 30); // cap at 30s extra
   }
 
+  // Pick warm-up and cool-down exercises based on body parts
+  var bodyPartList = parts.slice();
+  var wuEx = (typeof pickWarmup === "function") ? pickWarmup(bodyPartList, p.warmup) : [];
+  var cdEx = (typeof pickCooldown === "function") ? pickCooldown(bodyPartList, p.cooldown) : [];
+  var wuTotal = 0; wuEx.forEach(function(e){ wuTotal += e.dur; });
+  var cdTotal = 0; cdEx.forEach(function(e){ cdTotal += e.dur; });
+
   const w = {
     name: suggestTime + "min " + suggestIntensity.charAt(0).toUpperCase() + suggestIntensity.slice(1),
     work: adjustedWork,
     rest: p.rest,
     rounds: best.rounds,
     water: p.water,
-    warmup: p.warmup,
-    cooldown: p.cooldown,
+    warmup: wuTotal,
+    cooldown: cdTotal,
+    warmupEx: wuEx,
+    cooldownEx: cdEx,
     exercises: ex
   };
 
@@ -1139,6 +1253,9 @@ function startWorkout(i){
 
   cfg = workouts[i];
   exercises = normalizeExercises(cfg.exercises);
+  warmupExercises = cfg.warmupEx || [];
+  cooldownExercises = cfg.cooldownEx || [];
+  phaseIdx = 0;
   if(exercises.length === 0){
     alert("This workout has no exercises.");
     return;
@@ -1177,7 +1294,14 @@ function startWorkout(i){
 
 function startWarmup(){
   if(state !== "briefing") return;
-  setState("warmup", cfg.warmup, null);
+  phaseIdx = 0;
+  if(warmupExercises.length > 0){
+    var firstWu = warmupExercises[0];
+    speak(tr("Warm up: " + firstWu.name, "热身：" + (EXERCISE_CHINESE[firstWu.name] || firstWu.name)));
+    setState("warmup", firstWu.dur, null);
+  } else {
+    setState("warmup", cfg.warmup || 30, null);
+  }
 }
 
 function renderWorkoutInfo(){
@@ -1292,9 +1416,19 @@ function next(){
   switch(state){
 
     case "warmup":
-      beepGo();
-      setState("work", cfg.work, null);
-      setTimeout(() => speak(exName(exercises[idx])), 600);
+      phaseIdx++;
+      if(phaseIdx < warmupExercises.length){
+        // Next warmup exercise
+        beepGo();
+        var wuEx = warmupExercises[phaseIdx];
+        speak(tr("Get ready: " + wuEx.name, "准备：" + (EXERCISE_CHINESE[wuEx.name] || wuEx.name)));
+        setState("warmup", wuEx.dur, null);
+      } else {
+        // Warmup done, start work
+        beepGo();
+        setState("work", cfg.work, null);
+        setTimeout(() => speak(exName(exercises[idx])), 600);
+      }
       break;
 
     case "work":
@@ -1329,7 +1463,13 @@ function next(){
         round++;
         if(round > cfg.rounds){
           speak(tr("Great job! Now let's cool down.", "做得好！现在放松一下。"));
-          setState("cooldown", cfg.cooldown, null);
+          phaseIdx = 0;
+          if(cooldownExercises.length > 0){
+            var firstCd = cooldownExercises[0];
+            setState("cooldown", firstCd.dur, null);
+          } else {
+            setState("cooldown", cfg.cooldown || 30, null);
+          }
           return;
         }
       }
@@ -1345,9 +1485,18 @@ function next(){
       break;
 
     case "cooldown":
-      clearInterval(timer);
-      state = "idle";
-      showDone();
+      phaseIdx++;
+      if(phaseIdx < cooldownExercises.length){
+        // Next cooldown exercise
+        var cdEx = cooldownExercises[phaseIdx];
+        speak(tr(cdEx.name, EXERCISE_CHINESE[cdEx.name] || cdEx.name));
+        setState("cooldown", cdEx.dur, null);
+      } else {
+        // Cooldown done
+        clearInterval(timer);
+        state = "idle";
+        showDone();
+      }
       break;
   }
 }
@@ -1506,9 +1655,13 @@ function updateUI(){
 
   const cur = $("current");
   if(cur){
-    if(state === "work" && exercises[idx]){
-      var cn = (typeof getChineseName === "function") ? getChineseName(exercises[idx].name) : "";
-      cur.innerHTML = exercises[idx].name + (cn ? ' <span class="cn-name-lg">' + cn + '</span>' : '');
+    var curName = "";
+    if(state === "work" && exercises[idx]) curName = exercises[idx].name;
+    else if(state === "warmup" && warmupExercises[phaseIdx]) curName = warmupExercises[phaseIdx].name;
+    else if(state === "cooldown" && cooldownExercises[phaseIdx]) curName = cooldownExercises[phaseIdx].name;
+    if(curName){
+      var cn = (typeof getChineseName === "function") ? getChineseName(curName) : "";
+      cur.innerHTML = curName + (cn ? ' <span class="cn-name-lg">' + cn + '</span>' : '');
     } else { cur.innerHTML = ""; }
   }
 
